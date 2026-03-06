@@ -22,7 +22,7 @@ services:
   cli:
     build:
       context: ..
-      dockerfile: docker/minimal_db_cli.Dockerfile
+      dockerfile: docker/Dockerfile.cli
     depends_on:
       neo4j:
         condition: service_healthy
@@ -37,7 +37,7 @@ services:
 
   # Ollama server
   ollama:
-    image: ollama/ollama:latest
+    image: ollama/ollama:0.17.7
     container_name: ollama
     restart: unless-stopped
     gpus: all
@@ -58,7 +58,7 @@ services:
   heracles_dev:
     build:
       context: ..
-      dockerfile: docker/heracles_dev.Dockerfile
+      dockerfile: docker/Dockerfile.heracles_dev
     depends_on:
       neo4j:
         condition: service_healthy
@@ -84,7 +84,7 @@ services:
   chatdsg:
     build:
       context: ..
-      dockerfile: docker/chatdsg_demo.Dockerfile
+      dockerfile: docker/Dockerfile.chatdsg
     depends_on:
       neo4j:
         condition: service_healthy
@@ -128,7 +128,7 @@ services:
   viser_visualization:
     build:
       context: ..
-      dockerfile: docker/spark_dsg_viser.Dockerfile
+      dockerfile: docker/Dockerfile.viser
     depends_on:
       neo4j:
         condition: service_healthy
