@@ -37,7 +37,7 @@ services:
 
   # Ollama server
   ollama:
-    image: ollama/ollama:0.17.7
+    image: ollama/ollama:0.20.2
     container_name: ollama
     restart: unless-stopped
     gpus: all
@@ -68,11 +68,12 @@ services:
       HERACLES_NEO4J_USERNAME: neo4j
       HERACLES_NEO4J_PASSWORD: neo4j_pw
       HERACLES_NEO4J_URI: neo4j://neo4j:7683
-      HERACLES_OPENAI_API_KEY: $HERACLES_OPENAI_API_KEY
+      HERACLES_OPENAI_API_KEY: $OPENAI_API_KEY
       HERACLES_AGENTS_PATH: /heracles_agents
       ADT4_HERACLES_IP: neo4j
       ADT4_HERACLES_PORT: 7683
-      OLLAMA_HOST: http://ollama:11434
+      OLLAMA_HOST: http://ollama:11434 #https://ollama.com
+      #OLLAMA_API_KEY: $OLLAMA_API_KEY
     volumes: [$HOME/devel/heracles_devel/heracles_agents:/heracles_agents]
     networks: [heracles_net]
     extra_hosts: [host.docker.internal:host-gateway]
@@ -94,7 +95,7 @@ services:
       HERACLES_NEO4J_USERNAME: neo4j
       HERACLES_NEO4J_PASSWORD: neo4j_pw
       HERACLES_NEO4J_URI: neo4j://neo4j:7683
-      HERACLES_OPENAI_API_KEY: $HERACLES_OPENAI_API_KEY
+      HERACLES_OPENAI_API_KEY: $OPENAI_API_KEY
       HERACLES_AGENTS_PATH: /heracles_agents
       ADT4_HERACLES_IP: neo4j
       ADT4_HERACLES_PORT: 7683
