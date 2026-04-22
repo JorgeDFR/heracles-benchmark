@@ -1,6 +1,8 @@
 [submodule "heracles"]
 	path = heracles
 	url = git@github.com:GoldenZephyr/heracles.git
+	branch = master
 [submodule "heracles_agents"]
 	path = heracles_agents
 	url = git@github.com:JorgeDFR/heracles_agents.git
+	branch = jorge_devel
