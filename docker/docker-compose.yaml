@@ -18,24 +18,7 @@ services:
     networks: [heracles_net]
     ports: [7683:7683, 7469:7469]
 
-  # Standalone python interpreter example for running queries against database
-  cli:
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile.cli
-    depends_on:
-      neo4j:
-        condition: service_healthy
-    environment:
-      HERACLES_NEO4J_USERNAME: neo4j
-      HERACLES_NEO4J_PASSWORD: neo4j_pw
-      HERACLES_NEO4J_URI: neo4j://neo4j:7683
-    networks: [heracles_net]
-    stdin_open: true
-    tty: true
-    entrypoint: [ipython, -i, /heracles/examples/load_scene_graph.py, --, --scene_graph, /heracles/examples/scene_graphs/example_dsg.json]
-
-  # Ollama server
+  # # Ollama server
   # ollama:
   #   image: ollama/ollama:0.20.2
   #   container_name: ollama
@@ -54,34 +37,22 @@ services:
   #   networks: [heracles_net]
   #   ports: [11434:11434]
 
-  # Developing container for the heracles_package scripts
-  heracles_dev:
+  # Standalone python interpreter example for running queries against database
+  cli:
     build:
       context: ..
-      dockerfile: docker/Dockerfile.heracles_dev
+      dockerfile: docker/Dockerfile.cli
     depends_on:
       neo4j:
         condition: service_healthy
-      # ollama:
-      #   condition: service_healthy
     environment:
       HERACLES_NEO4J_USERNAME: neo4j
       HERACLES_NEO4J_PASSWORD: neo4j_pw
       HERACLES_NEO4J_URI: neo4j://neo4j:7683
-      # HERACLES_OPENAI_API_KEY: $OPENAI_API_KEY
-      # HERACLES_ANTHROPIC_API_KEY: $ANTHROPIC_API_KEY
-      HERACLES_OPENROUTER_API_KEY: $OPENROUTER_API_KEY
-      HERACLES_AGENTS_PATH: /heracles_agents
-      ADT4_HERACLES_IP: neo4j
-      ADT4_HERACLES_PORT: 7683
-      # OLLAMA_HOST: http://ollama:11434 #https://ollama.com
-      # OLLAMA_API_KEY: $OLLAMA_API_KEY
-    volumes: [$HOME/devel/heracles_devel/heracles_agents:/heracles_agents]
     networks: [heracles_net]
-    extra_hosts: [host.docker.internal:host-gateway]
     stdin_open: true
     tty: true
-    entrypoint: [/bin/bash]
+    entrypoint: [ipython, -i, /heracles/examples/load_scene_graph.py, --, --scene_graph, /heracles/examples/scene_graphs/example_dsg.json]
 
   # Interactive LLM-based agent interaction with database
   chatdsg:
@@ -110,9 +81,77 @@ services:
     extra_hosts: [host.docker.internal:host-gateway]
     stdin_open: true
     tty: true
-    entrypoint: [python3, simplified_chatdsg.py, --scene-graph, /example_dsg.json]
+    #entrypoint: [python, simplified_chatdsg.py, --scene-graph, /example_dsg.json]
+    entrypoint: [python, simplified_chatdsg.py, --scene-graph, /example_dsg.json, --debug-internal]
 
-  # Visualize scene graph in RVIZ using Hydra ROS visualizer
+  # Developing container for test heracles_agents example scripts
+  heracles_dev:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.heracles_dev
+    depends_on:
+      neo4j:
+        condition: service_healthy
+      # ollama:
+      #   condition: service_healthy
+    environment:
+      HERACLES_NEO4J_USERNAME: neo4j
+      HERACLES_NEO4J_PASSWORD: neo4j_pw
+      HERACLES_NEO4J_URI: neo4j://neo4j:7683
+      # HERACLES_OPENAI_API_KEY: $OPENAI_API_KEY
+      # HERACLES_ANTHROPIC_API_KEY: $ANTHROPIC_API_KEY
+      HERACLES_OPENROUTER_API_KEY: $OPENROUTER_API_KEY
+      HERACLES_AGENTS_PATH: /heracles_agents
+      ADT4_HERACLES_IP: neo4j
+      ADT4_HERACLES_PORT: 7683
+      # OLLAMA_HOST: http://ollama:11434 #https://ollama.com
+      # OLLAMA_API_KEY: $OLLAMA_API_KEY
+    volumes: [$HOME/devel/heracles_devel/heracles_agents:/heracles_agents]
+    networks: [heracles_net]
+    extra_hosts: [host.docker.internal:host-gateway]
+    stdin_open: true
+    tty: true
+    entrypoint: [/bin/bash]
+
+  # # Developing container for test heracles_agents chat interface with ROS
+  # heracles_ros_dev:
+  #   build:
+  #     context: ..
+  #     dockerfile: docker/Dockerfile.heracles_ros_dev
+  #   depends_on:
+  #     neo4j:
+  #       condition: service_healthy
+  #     # ollama:
+  #     #   condition: service_healthy
+  #   environment:
+  #     HERACLES_NEO4J_USERNAME: neo4j
+  #     HERACLES_NEO4J_PASSWORD: neo4j_pw
+  #     HERACLES_NEO4J_URI: neo4j://neo4j:7683
+  #     # HERACLES_OPENAI_API_KEY: $OPENAI_API_KEY
+  #     # HERACLES_ANTHROPIC_API_KEY: $ANTHROPIC_API_KEY
+  #     HERACLES_OPENROUTER_API_KEY: $OPENROUTER_API_KEY
+  #     HERACLES_AGENTS_PATH: /root/ros2_ws/src/heracles_agents
+  #     ADT4_HERACLES_IP: neo4j
+  #     ADT4_HERACLES_PORT: 7683
+  #     HERACLES_IP: neo4j
+  #     HERACLES_PORT: 7683
+  #     HERACLES_VENV: ''
+  #     DISPLAY: $DISPLAY
+  #     QT_X11_NO_MITSHM: 1
+  #     # OLLAMA_HOST: http://ollama:11434 #https://ollama.com
+  #     # OLLAMA_API_KEY: $OLLAMA_API_KEY
+  #   volumes: [
+  #     $HOME/devel/heracles_devel/heracles_agents:/root/ros2_ws/src/heracles_agents,
+  #     /tmp/.X11-unix:/tmp/.X11-unix:rw
+  #   ]
+  #   devices: [/dev/dri]
+  #   networks: [heracles_net]
+  #   extra_hosts: [host.docker.internal:host-gateway]
+  #   stdin_open: true
+  #   tty: true
+  #   entrypoint: [/bin/bash]
+
+  # # Visualize scene graph in RVIZ using Hydra ROS visualizer
   # hydra_visualization:
   #   image: aaronraymit/hydra_visualizer:v0.1
   #   depends_on:
@@ -130,7 +169,7 @@ services:
   #   networks: [heracles_net]
   #   entrypoint: [/bin/bash, /run_hydra_visualization.sh]
 
-  # Visualize scene graph in Viser using spark_dsg Viser visualization
+  # # Visualize scene graph in Viser using spark_dsg Viser visualization
   # viser_visualization:
   #   build:
   #     context: ..

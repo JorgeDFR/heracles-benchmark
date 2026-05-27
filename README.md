@@ -8,6 +8,7 @@ TBC
 mkdir -p ~/devel
 cd ~/devel
 git clone git@github.com:JorgeDFR/heracles_devel.git
+cd ~/devel/heracles_devel
 git submodule update --init --recursive
 ```
 
