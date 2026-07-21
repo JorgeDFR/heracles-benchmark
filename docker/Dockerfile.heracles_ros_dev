@@ -1,4 +1,4 @@
-FROM docker.io/library/ros:jazzy-ros-core
+FROM ros:jazzy-ros-core
 
 RUN apt-get update
 RUN apt-get install -y git ros-dev-tools python3.12-venv python3-pip libgoogle-glog-dev

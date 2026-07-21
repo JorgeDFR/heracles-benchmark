@@ -18,24 +18,49 @@ services:
     networks: [heracles_net]
     ports: [7683:7683, 7469:7469]
 
-  # # Ollama server
-  # ollama:
-  #   image: ollama/ollama:0.20.2
-  #   container_name: ollama
-  #   restart: unless-stopped
-  #   gpus: all
-  #   environment:
-  #     NVIDIA_VISIBLE_DEVICES: all
-  #     NVIDIA_DRIVER_CAPABILITIES: compute,utility
-  #   volumes: [ollama_data:/root/.ollama]
-  #   healthcheck:
-  #     test: [CMD-SHELL, bash, -c, "{ printf >&3 'GET / HTTP/1.0\\r\\n\\r\\n'; cat <&3; } 3<>/dev/tcp/localhost/11434 | grep 'Ollama is' || exit 1"]
-  #     interval: 10s
-  #     timeout: 5s
-  #     retries: 3
-  #     start_period: 10s
-  #   networks: [heracles_net]
-  #   ports: [11434:11434]
+  # Ollama server
+  ollama:
+    image: ollama/ollama:0.20.2
+    container_name: ollama
+    restart: unless-stopped
+    gpus: all
+    volumes: [ollama-cache:/root/.ollama]
+    healthcheck:
+      test: [CMD-SHELL, bash, -c, "{ printf >&3 'GET / HTTP/1.0\\r\\n\\r\\n'; cat <&3; } 3<>/dev/tcp/localhost/11434 | grep 'Ollama is' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks: [heracles_net]
+    ports: [11434:11434]
+
+  # Hugging Face server
+  huggingface:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.huggingface_server
+    container_name: huggingface
+    restart: unless-stopped
+    gpus: all
+    environment:
+      HF_BASE_MODEL: google/gemma-4-E2B-it
+      HF_ADAPTER_PATH: /models/gemma-4-E2B-it-3dsg-text2cypher-lora
+      HF_SERVED_MODEL_NAME: gemma-4-E2B-it-3dsg-text2cypher-lora
+      HF_TRUST_REMOTE_CODE: "true"
+      HF_LOAD_IN_4BIT: "true"
+      HF_DTYPE: bfloat16
+    volumes: [
+      $HOME/devel/agentic_code/workspace/3dsg-text2cypher/outputs/gemma-4-E2B-it-3dsg-text2cypher-lora:/models/gemma-4-E2B-it-3dsg-text2cypher-lora:ro,
+      huggingface-cache:/root/.cache/huggingface
+    ]
+    healthcheck:
+      test: [CMD-SHELL, python, -c, "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 15m
+    networks: [heracles_net]
+    ports: [8000:8000]
 
   # Standalone python interpreter example for running queries against database
   cli:
@@ -64,6 +89,8 @@ services:
         condition: service_healthy
       # ollama:
       #   condition: service_healthy
+      # huggingface:
+      #   condition: service_healthy
     environment:
       HERACLES_NEO4J_USERNAME: neo4j
       HERACLES_NEO4J_PASSWORD: neo4j_pw
@@ -71,18 +98,17 @@ services:
       # HERACLES_OPENAI_API_KEY: $OPENAI_API_KEY
       # HERACLES_ANTHROPIC_API_KEY: $ANTHROPIC_API_KEY
       HERACLES_OPENROUTER_API_KEY: $OPENROUTER_API_KEY
+      # OLLAMA_HOST: http://ollama:11434
+      # HUGGINGFACE_HOST: http://huggingface:8000
       HERACLES_AGENTS_PATH: /heracles_agents
       ADT4_HERACLES_IP: neo4j
       ADT4_HERACLES_PORT: 7683
-      # OLLAMA_HOST: http://ollama:11434 #https://ollama.com
-      # OLLAMA_API_KEY: $OLLAMA_API_KEY
     volumes: [$HOME/devel/heracles_devel/heracles_agents:/heracles_agents]
     networks: [heracles_net]
     extra_hosts: [host.docker.internal:host-gateway]
     stdin_open: true
     tty: true
-    #entrypoint: [python, simplified_chatdsg.py, --scene-graph, /example_dsg.json]
-    entrypoint: [python, simplified_chatdsg.py, --scene-graph, /example_dsg.json, --debug-internal]
+    entrypoint: [python, simplified_chatdsg.py, --scene-graph, /example_dsg.json]
 
   # Developing container for test heracles_agents example scripts
   heracles_dev:
@@ -94,6 +120,8 @@ services:
         condition: service_healthy
       # ollama:
       #   condition: service_healthy
+      # huggingface:
+      #   condition: service_healthy
     environment:
       HERACLES_NEO4J_USERNAME: neo4j
       HERACLES_NEO4J_PASSWORD: neo4j_pw
@@ -101,11 +129,11 @@ services:
       # HERACLES_OPENAI_API_KEY: $OPENAI_API_KEY
       # HERACLES_ANTHROPIC_API_KEY: $ANTHROPIC_API_KEY
       HERACLES_OPENROUTER_API_KEY: $OPENROUTER_API_KEY
+      # OLLAMA_HOST: http://ollama:11434
+      # HUGGINGFACE_HOST: http://huggingface:8000
       HERACLES_AGENTS_PATH: /heracles_agents
       ADT4_HERACLES_IP: neo4j
       ADT4_HERACLES_PORT: 7683
-      # OLLAMA_HOST: http://ollama:11434 #https://ollama.com
-      # OLLAMA_API_KEY: $OLLAMA_API_KEY
     volumes: [$HOME/devel/heracles_devel/heracles_agents:/heracles_agents]
     networks: [heracles_net]
     extra_hosts: [host.docker.internal:host-gateway]
@@ -113,7 +141,7 @@ services:
     tty: true
     entrypoint: [/bin/bash]
 
-  # # Developing container for test heracles_agents chat interface with ROS
+  # Developing container for test heracles_agents chat interface with ROS
   # heracles_ros_dev:
   #   build:
   #     context: ..
@@ -121,14 +149,10 @@ services:
   #   depends_on:
   #     neo4j:
   #       condition: service_healthy
-  #     # ollama:
-  #     #   condition: service_healthy
   #   environment:
   #     HERACLES_NEO4J_USERNAME: neo4j
   #     HERACLES_NEO4J_PASSWORD: neo4j_pw
   #     HERACLES_NEO4J_URI: neo4j://neo4j:7683
-  #     # HERACLES_OPENAI_API_KEY: $OPENAI_API_KEY
-  #     # HERACLES_ANTHROPIC_API_KEY: $ANTHROPIC_API_KEY
   #     HERACLES_OPENROUTER_API_KEY: $OPENROUTER_API_KEY
   #     HERACLES_AGENTS_PATH: /root/ros2_ws/src/heracles_agents
   #     ADT4_HERACLES_IP: neo4j
@@ -138,8 +162,6 @@ services:
   #     HERACLES_VENV: ''
   #     DISPLAY: $DISPLAY
   #     QT_X11_NO_MITSHM: 1
-  #     # OLLAMA_HOST: http://ollama:11434 #https://ollama.com
-  #     # OLLAMA_API_KEY: $OLLAMA_API_KEY
   #   volumes: [
   #     $HOME/devel/heracles_devel/heracles_agents:/root/ros2_ws/src/heracles_agents,
   #     /tmp/.X11-unix:/tmp/.X11-unix:rw
@@ -151,7 +173,7 @@ services:
   #   tty: true
   #   entrypoint: [/bin/bash]
 
-  # # Visualize scene graph in RVIZ using Hydra ROS visualizer
+  # Visualize scene graph in RVIZ using Hydra ROS visualizer
   # hydra_visualization:
   #   image: aaronraymit/hydra_visualizer:v0.1
   #   depends_on:
@@ -169,7 +191,7 @@ services:
   #   networks: [heracles_net]
   #   entrypoint: [/bin/bash, /run_hydra_visualization.sh]
 
-  # # Visualize scene graph in Viser using spark_dsg Viser visualization
+  # Visualize scene graph in Viser using spark_dsg Viser visualization
   # viser_visualization:
   #   build:
   #     context: ..
@@ -189,5 +211,6 @@ networks:
   heracles_net:
     driver: bridge
 
-# volumes:
-#   ollama_data:
+volumes:
+  ollama-cache:
+  huggingface-cache:
