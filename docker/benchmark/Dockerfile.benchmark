@@ -1,0 +1,8 @@
+FROM python:3.12-slim
+
+RUN apt-get update
+RUN apt-get install -y git
+COPY heracles/heracles heracles
+COPY heracles_agents heracles_agents
+RUN pip install ./heracles ./heracles_agents[all]
+WORKDIR /heracles_agents/examples

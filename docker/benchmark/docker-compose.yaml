@@ -1,0 +1,150 @@
+---
+x-benchmark-environment: &benchmark-environment
+  HERACLES_NEO4J_USERNAME: neo4j
+  HERACLES_NEO4J_PASSWORD: neo4j_pw
+  HERACLES_NEO4J_URI: neo4j://neo4j:7683
+  HERACLES_AGENTS_PATH: /heracles_agents
+  ADT4_HERACLES_IP: neo4j
+  ADT4_HERACLES_PORT: 7683
+
+x-benchmark-common: &benchmark-common
+  build:
+    context: ..
+    dockerfile: docker/Dockerfile.benchmark
+  volumes:
+    - ${HOME}/devel/heracles_devel/heracles_agents/output:/heracles_agents/output
+  networks: [heracles_net]
+  extra_hosts: [host.docker.internal:host-gateway]
+  stdin_open: true
+  tty: true
+  entrypoint: ["/bin/bash"]
+
+services:
+  # ---------------------------------------------------------------------------
+  # Graph database
+  # ---------------------------------------------------------------------------
+
+  neo4j:
+    image: neo4j:5.25.1
+    healthcheck:
+      test: [CMD-SHELL, wget --no-verbose --tries=1 --spider http://localhost:7469 || exit 1]
+      interval: 1s
+      timeout: 10s
+      retries: 10
+      start_period: 2s
+    networks: [heracles_net]
+    ports: [7683:7683, 7469:7469]
+    environment:
+      NEO4J_server_bolt_listen__address: :7683
+      NEO4J_server_http_advertised__address: :7469
+      NEO4J_server_http_listen__address: :7469
+      NEO4J_AUTH: neo4j/neo4j_pw
+
+  # ---------------------------------------------------------------------------
+  # Ollama
+  #
+  # The base definition is CPU-compatible. NVIDIA GPU access is added by
+  # docker-compose.gpu.yaml when the host passes the GPU availability test.
+  # ---------------------------------------------------------------------------
+
+  ollama:
+    image: ollama/ollama:0.32.4
+    container_name: ollama
+    restart: unless-stopped
+    volumes: [ollama-cache:/root/.ollama]
+    healthcheck:
+      test: [CMD-SHELL, bash, -c, "{ printf >&3 'GET / HTTP/1.0\\r\\n\\r\\n'; cat <&3; } 3<>/dev/tcp/localhost/11434 | grep 'Ollama is' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks: [heracles_net]
+    ports: [11434:11434]
+
+  # ---------------------------------------------------------------------------
+  # Restricted Docker socket access used by local metric collection
+  # ---------------------------------------------------------------------------
+
+  docker-socket-proxy:
+    image: tecnativa/docker-socket-proxy:latest
+    container_name: docker-socket-proxy
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks: [heracles_net]
+    environment:
+      CONTAINERS: 1
+      INFO: 1
+      VERSION: 1
+      POST: 0
+      DELETE: 0
+      BUILD: 0
+      IMAGES: 0
+      NETWORKS: 0
+      VOLUMES: 0
+      EXEC: 0
+      SYSTEM: 0
+
+  # ---------------------------------------------------------------------------
+  # OpenRouter benchmark
+  # ---------------------------------------------------------------------------
+
+  benchmark-openrouter:
+    <<: *benchmark-common
+
+    depends_on:
+      neo4j:
+        condition: service_healthy
+
+    environment:
+      <<: *benchmark-environment
+      HERACLES_OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+
+  # ---------------------------------------------------------------------------
+  # Ollama benchmark
+  # ---------------------------------------------------------------------------
+
+  benchmark-ollama:
+    <<: *benchmark-common
+
+    depends_on:
+      neo4j:
+        condition: service_healthy
+      ollama:
+        condition: service_healthy
+      docker-socket-proxy:
+        condition: service_started
+
+    environment:
+      <<: *benchmark-environment
+      OLLAMA_HOST: http://ollama:11434
+      DOCKER_HOST: tcp://docker-socket-proxy:2375
+
+  # ---------------------------------------------------------------------------
+  # Combined benchmark
+  # ---------------------------------------------------------------------------
+
+  benchmark-all:
+    <<: *benchmark-common
+
+    depends_on:
+      neo4j:
+        condition: service_healthy
+      ollama:
+        condition: service_healthy
+      docker-socket-proxy:
+        condition: service_started
+
+    environment:
+      <<: *benchmark-environment
+      HERACLES_OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+      OLLAMA_HOST: http://ollama:11434
+      DOCKER_HOST: tcp://docker-socket-proxy:2375
+
+networks:
+  heracles_net:
+    driver: bridge
+
+volumes:
+  ollama-cache:
+    name: ollama-cache

@@ -1,0 +1,10 @@
+---
+services:
+  ollama:
+    gpus: all
+
+  benchmark-ollama:
+    gpus: all
+
+  benchmark-all:
+    gpus: all

@@ -1,7 +1,7 @@
 ---
 services:
 
-  # Graph database storing scene graph
+  # Graph database storing the 3d scene graph
   neo4j:
     image: neo4j:5.25.1
     environment:
@@ -20,7 +20,7 @@ services:
 
   # Ollama server
   ollama:
-    image: ollama/ollama:0.20.2
+    image: ollama/ollama:0.32.4
     container_name: ollama
     restart: unless-stopped
     gpus: all
@@ -37,8 +37,8 @@ services:
   # Hugging Face server
   huggingface:
     build:
-      context: ..
-      dockerfile: docker/Dockerfile.huggingface_server
+      context: ../..
+      dockerfile: docker/devel/Dockerfile.huggingface_server
     container_name: huggingface
     restart: unless-stopped
     gpus: all
@@ -65,8 +65,8 @@ services:
   # Standalone python interpreter example for running queries against database
   cli:
     build:
-      context: ..
-      dockerfile: docker/Dockerfile.cli
+      context: ../..
+      dockerfile: docker/main/Dockerfile.cli
     depends_on:
       neo4j:
         condition: service_healthy
@@ -79,42 +79,11 @@ services:
     tty: true
     entrypoint: [ipython, -i, /heracles/examples/load_scene_graph.py, --, --scene_graph, /heracles/examples/scene_graphs/example_dsg.json]
 
-  # Interactive LLM-based agent interaction with database
-  chatdsg:
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile.chatdsg
-    depends_on:
-      neo4j:
-        condition: service_healthy
-      # ollama:
-      #   condition: service_healthy
-      # huggingface:
-      #   condition: service_healthy
-    environment:
-      HERACLES_NEO4J_USERNAME: neo4j
-      HERACLES_NEO4J_PASSWORD: neo4j_pw
-      HERACLES_NEO4J_URI: neo4j://neo4j:7683
-      # HERACLES_OPENAI_API_KEY: $OPENAI_API_KEY
-      # HERACLES_ANTHROPIC_API_KEY: $ANTHROPIC_API_KEY
-      HERACLES_OPENROUTER_API_KEY: $OPENROUTER_API_KEY
-      # OLLAMA_HOST: http://ollama:11434
-      # HUGGINGFACE_HOST: http://huggingface:8000
-      HERACLES_AGENTS_PATH: /heracles_agents
-      ADT4_HERACLES_IP: neo4j
-      ADT4_HERACLES_PORT: 7683
-    volumes: [$HOME/devel/heracles_devel/heracles_agents:/heracles_agents]
-    networks: [heracles_net]
-    extra_hosts: [host.docker.internal:host-gateway]
-    stdin_open: true
-    tty: true
-    entrypoint: [python, simplified_chatdsg.py, --scene-graph, /example_dsg.json]
-
   # Developing container for test heracles_agents example scripts
   heracles_dev:
     build:
-      context: ..
-      dockerfile: docker/Dockerfile.heracles_dev
+      context: ../..
+      dockerfile: docker/devel/Dockerfile.heracles_dev
     depends_on:
       neo4j:
         condition: service_healthy
@@ -144,8 +113,8 @@ services:
   # Developing container for test heracles_agents chat interface with ROS
   # heracles_ros_dev:
   #   build:
-  #     context: ..
-  #     dockerfile: docker/Dockerfile.heracles_ros_dev
+  #     context: ../..
+  #     dockerfile: docker/devel/Dockerfile.heracles_ros_dev
   #   depends_on:
   #     neo4j:
   #       condition: service_healthy
@@ -173,44 +142,13 @@ services:
   #   tty: true
   #   entrypoint: [/bin/bash]
 
-  # Visualize scene graph in RVIZ using Hydra ROS visualizer
-  # hydra_visualization:
-  #   image: aaronraymit/hydra_visualizer:v0.1
-  #   depends_on:
-  #     neo4j:
-  #       condition: service_healthy
-  #   environment:
-  #     HERACLES_NEO4J_USERNAME: neo4j
-  #     HERACLES_NEO4J_PASSWORD: neo4j_pw
-  #     HERACLES_IP: neo4j
-  #     HERACLES_PORT: 7683
-  #     HERACLES_VENV: ''
-  #     DISPLAY: $DISPLAY
-  #     QT_X11_NO_MITSHM: 1
-  #   volumes: [/tmp/.X11-unix:/tmp/.X11-unix:rw]
-  #   networks: [heracles_net]
-  #   entrypoint: [/bin/bash, /run_hydra_visualization.sh]
-
-  # Visualize scene graph in Viser using spark_dsg Viser visualization
-  # viser_visualization:
-  #   build:
-  #     context: ..
-  #     dockerfile: docker/Dockerfile.viser
-  #   depends_on:
-  #     neo4j:
-  #       condition: service_healthy
-  #   environment:
-  #     HERACLES_NEO4J_USERNAME: neo4j
-  #     HERACLES_NEO4J_PASSWORD: neo4j_pw
-  #     HERACLES_NEO4J_URI: neo4j://neo4j:7683
-  #   networks: [heracles_net]
-  #   ports: [8081:8081]
-  #   entrypoint: [python, /heracles/src/heracles/heracles_viser_publisher.py, --ip, 0.0.0.0, --port, '8081', --uri, neo4j://neo4j:7683]
-
 networks:
   heracles_net:
+    name: heracles_net
     driver: bridge
 
 volumes:
   ollama-cache:
+    name: ollama-cache
   huggingface-cache:
+    name: huggingface-cache
