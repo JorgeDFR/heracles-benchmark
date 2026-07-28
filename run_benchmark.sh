@@ -33,6 +33,10 @@ COMPOSE_FILE="${SCRIPT_DIR}/docker/benchmark/docker-compose.yaml"
 GPU_COMPOSE_FILE="${SCRIPT_DIR}/docker/benchmark/docker-compose.gpu.yaml"
 ENV_FILE="${SCRIPT_DIR}/docker/benchmark/.env"
 
+OUTPUT_DIR_IN_CONTAINER="output/model_sweep"
+BENCHMARK_HOST_OUTPUT_DIR="${BENCHMARK_HOST_OUTPUT_DIR:-${SCRIPT_DIR}/output}"
+export BENCHMARK_HOST_OUTPUT_DIR
+
 # =============================================================================
 # Runtime state
 # =============================================================================
@@ -42,6 +46,9 @@ RUN_OLLAMA=0
 USE_NVIDIA_GPU=0
 
 BENCHMARK_SERVICE=""
+SERVICES_STARTED=0
+CLEANED_UP=0
+SCRIPT_INTERRUPTED=0
 
 BASE_COMPOSE=()
 GPU_COMPOSE=()
@@ -192,7 +199,8 @@ Select the experiment to run:
 
      Starts Neo4j and the OpenRouter benchmark container.
 
-     Requires OPENROUTER_API_KEY in the current environment or docker/benchmark/.env.
+     Requires OPENROUTER_API_KEY in the current environment or a local
+     docker/benchmark/.env file.
 
   3) Both Ollama and OpenRouter
 
@@ -290,7 +298,7 @@ Set it in the current shell:
 
   export OPENROUTER_API_KEY='your-key'
 
-or add it to:
+or add it to this local, ignored file:
 
   ${ENV_FILE}
 
@@ -301,6 +309,38 @@ Example:
 EOF
 
   exit 1
+}
+
+# =============================================================================
+# Cleanup and interruption handling
+# =============================================================================
+
+cleanup_services() {
+  ((CLEANED_UP == 0)) || return 0
+  CLEANED_UP=1
+
+  ((SERVICES_STARTED == 1)) || return 0
+  ((${#ACTIVE_COMPOSE[@]} > 0)) || return 0
+
+  if ((SCRIPT_INTERRUPTED == 1)); then
+    log "Cleaning up benchmark services after interruption."
+  else
+    log "Cleaning up benchmark services."
+  fi
+
+  "${ACTIVE_COMPOSE[@]}" down --remove-orphans || true
+}
+
+on_interrupt() {
+  SCRIPT_INTERRUPTED=1
+  printf '\nInterrupted, cleaning up...\n' >&2
+  cleanup_services
+  exit 130
+}
+
+install_signal_handlers() {
+  trap cleanup_services EXIT
+  trap on_interrupt INT TERM
 }
 
 # =============================================================================
@@ -536,7 +576,52 @@ validate_active_compose_configuration() {
   fi
 }
 
+prepare_output_directory() {
+  mkdir -p "${BENCHMARK_HOST_OUTPUT_DIR}"
+  info "Benchmark output will be written under ${BENCHMARK_HOST_OUTPUT_DIR}."
+}
+
+check_ollama_container_name_available() {
+  ((RUN_OLLAMA == 1)) || return 0
+
+  local owner_project
+
+  if ! docker container inspect ollama >/dev/null 2>&1; then
+    return 0
+  fi
+
+  owner_project="$(
+    docker inspect \
+      -f '{{ index .Config.Labels "com.docker.compose.project" }}' \
+      ollama 2>/dev/null || true
+  )"
+
+  if [[ "${owner_project}" == "heracles-benchmark" ]]; then
+    return 0
+  fi
+
+  cat >&2 <<EOF
+
+ERROR: A Docker container named "ollama" already exists and does not appear to
+belong to the heracles-benchmark Compose project.
+
+The Ollama local metrics configuration expects the benchmark Ollama container
+to use this name. Stop or rename the existing container before running the
+Ollama benchmark.
+
+EOF
+
+  exit 1
+}
+
+pre_start_cleanup() {
+  log "Removing stale benchmark containers, if any."
+  "${ACTIVE_COMPOSE[@]}" down --remove-orphans || true
+}
+
 start_services() {
+  SERVICES_STARTED=1
+
   log "Starting Neo4j."
   "${ACTIVE_COMPOSE[@]}" up -d --wait neo4j
 
@@ -579,129 +664,38 @@ ensure_ollama_models() {
 # =============================================================================
 
 run_benchmark() {
-  log "Starting ${BENCHMARK_SERVICE}."
+  log "Running ${BENCHMARK_SERVICE}."
 
-  # Dependencies are started and checked explicitly above. --no-deps prevents
-  # Compose from starting services that are not needed for the selected mode.
   "${ACTIVE_COMPOSE[@]}" run \
     --rm \
+    --build \
     --no-deps \
-    -T \
     "${BENCHMARK_SERVICE}" \
-    -s -- "${RUN_OPENROUTER}" "${RUN_OLLAMA}" <<'BENCHMARK_SCRIPT'
-set -uo pipefail
+    /home/benchmark/workspace/benchmark_runner.sh \
+    "${RUN_OPENROUTER}" \
+    "${RUN_OLLAMA}" \
+    "${OUTPUT_DIR_IN_CONTAINER}"
 
-RUN_OPENROUTER="$1"
-RUN_OLLAMA="$2"
-
-OVERALL_STATUS=0
-
-cd /heracles
-
-log() {
-  printf '\n==> %s\n' "$*"
+  printf '\nBenchmark report path on the host:\n'
+  printf '  %s/model_sweep/report.html\n' "${BENCHMARK_HOST_OUTPUT_DIR}"
 }
 
-record_failure() {
-  printf '\nERROR: %s\n' "$1" >&2
-  OVERALL_STATUS=1
-}
-
-# -----------------------------------------------------------------------------
-# Load Neo4j
-# -----------------------------------------------------------------------------
-
-log "Loading the 3D scene graph into Neo4j."
-
-if ! python /heracles/examples/load_scene_graph.py \
-  --scene_graph /heracles/examples/scene_graphs/example_dsg.json; then
-
-  record_failure \
-    "Failed to load the Neo4j database. Selected experiments were skipped."
-else
-  # ---------------------------------------------------------------------------
-  # OpenRouter
-  # ---------------------------------------------------------------------------
-
-  if [[ "${RUN_OPENROUTER}" == "1" ]]; then
-    log "Running the OpenRouter model sweep experiment."
-
-    if ! python examples/experiment_runner.py \
-      examples/experiments/openrouter/cypher_model_sweep.yaml \
-      examples/experiments/openrouter/pddl_model_sweep.yaml \
-      --output-dir output/model_sweep \
-      --no-display; then
-
-      record_failure "The OpenRouter experiment failed."
-    fi
+set_host_user_ids() {
+  if ! command -v id >/dev/null 2>&1; then
+    die "The id command is required to determine the host UID and GID."
   fi
 
-  # ---------------------------------------------------------------------------
-  # Ollama
-  # ---------------------------------------------------------------------------
+  export HOST_UID
+  export HOST_GID
 
-  if [[ "${RUN_OLLAMA}" == "1" ]]; then
-    log "Running the Ollama model sweep experiment."
+  HOST_UID="$(id -u)"
+  HOST_GID="$(id -g)"
 
-    if ! python examples/experiment_runner.py \
-      examples/experiments/ollama/cypher_model_sweep.yaml \
-      examples/experiments/ollama/pddl_model_sweep.yaml \
-      --output-dir output/model_sweep \
-      --no-display; then
-
-      record_failure "The Ollama experiment failed."
-    fi
+  if [[ "${HOST_UID}" == "0" || "${HOST_GID}" == "0" ]]; then
+    warn "The benchmark image is being built using root UID or GID."
   fi
-fi
 
-# -----------------------------------------------------------------------------
-# HTML report
-# -----------------------------------------------------------------------------
-# Always attempt report generation, including after a partial experiment
-# failure. Existing results from both providers are included when present.
-
-log "Generating the static HTML results page."
-
-result_directories=(
-  output/model_sweep/openrouter/cypher_model_sweep
-  output/model_sweep/openrouter/pddl_model_sweep
-  output/model_sweep/ollama/cypher_model_sweep
-  output/model_sweep/ollama/pddl_model_sweep
-)
-
-result_files=()
-
-for directory in "${result_directories[@]}"; do
-  [[ -d "${directory}" ]] || continue
-
-  while IFS= read -r -d '' result_file; do
-    result_files+=("${result_file}")
-  done < <(
-    find "${directory}" \
-      -maxdepth 1 \
-      -type f \
-      -name '*_results.yaml' \
-      -print0 |
-      sort -z
-  )
-done
-
-if ((${#result_files[@]} == 0)); then
-  record_failure \
-    "No result YAML files were found; the HTML report could not be generated."
-elif ! python examples/display_yaml_results.py \
-  "${result_files[@]}" \
-  --mode html \
-  --output output/model_sweep/report.html; then
-
-  record_failure "Failed to generate the HTML report."
-else
-  printf '\nReport generated at:\n'
-  printf '  /heracles/output/model_sweep/report.html\n'
-fi
-
-exit "${OVERALL_STATUS}"
-BENCHMARK_SCRIPT
+  info "Benchmark container UID:GID will be ${HOST_UID}:${HOST_GID}."
 }
 
 # =============================================================================
@@ -710,6 +704,7 @@ BENCHMARK_SCRIPT
 
 main() {
   check_docker
+  set_host_user_ids
   build_compose_commands
   validate_compose_files
 
@@ -717,6 +712,10 @@ main() {
   check_openrouter_key
   assess_ollama_hardware
   validate_active_compose_configuration
+  install_signal_handlers
+  prepare_output_directory
+  check_ollama_container_name_available
+  pre_start_cleanup
 
   start_services
   ensure_ollama_models

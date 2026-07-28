@@ -1,1 +1,4 @@
 .vscode/
+docker/benchmark/.env
+output/*
+!output/.gitkeep

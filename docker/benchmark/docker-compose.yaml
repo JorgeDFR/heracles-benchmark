@@ -3,16 +3,22 @@ x-benchmark-environment: &benchmark-environment
   HERACLES_NEO4J_USERNAME: neo4j
   HERACLES_NEO4J_PASSWORD: neo4j_pw
   HERACLES_NEO4J_URI: neo4j://neo4j:7683
-  HERACLES_AGENTS_PATH: /heracles_agents
+  HERACLES_AGENTS_PATH: /home/benchmark/workspace/heracles_agents
   ADT4_HERACLES_IP: neo4j
   ADT4_HERACLES_PORT: 7683
 
 x-benchmark-common: &benchmark-common
   build:
-    context: ..
-    dockerfile: docker/Dockerfile.benchmark
+    context: ../..
+    dockerfile: docker/benchmark/Dockerfile.benchmark
+    args:
+      HOST_UID: "${HOST_UID:-1000}"
+      HOST_GID: "${HOST_GID:-1000}"
+  init: true
+  stop_signal: SIGINT
+  stop_grace_period: 20s
   volumes:
-    - ${HOME}/devel/heracles_devel/heracles_agents/output:/heracles_agents/output
+    - ${BENCHMARK_HOST_OUTPUT_DIR:?}:/home/benchmark/workspace/heracles_agents/output
   networks: [heracles_net]
   extra_hosts: [host.docker.internal:host-gateway]
   stdin_open: true
