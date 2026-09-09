@@ -1,5 +1,6 @@
 FROM python:3.12-slim
 
-RUN apt update
-COPY heracles/heracles heracles
-RUN pip install ./heracles ipython
+COPY external/heracles/heracles /heracles
+COPY data/scene_graphs/example_dsg.json /data/scene_graphs/example_dsg.json
+
+RUN pip install --no-cache-dir /heracles ipython

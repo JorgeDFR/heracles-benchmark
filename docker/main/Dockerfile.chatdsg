@@ -1,8 +1,14 @@
 FROM python:3.12-slim
 
-RUN apt-get update
-RUN apt-get install -y git
-COPY heracles/heracles/examples/scene_graphs/example_dsg.json example_dsg.json
-RUN git clone https://github.com/JorgeDFR/heracles_agents.git
-RUN pip install -e ./heracles_agents[all]
+RUN apt-get update \
+    && apt-get install --yes --no-install-recommends git \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY external/heracles/heracles /heracles
+COPY external/heracles_agents /heracles_agents
+COPY data/scene_graphs/example_dsg.json /data/scene_graphs/example_dsg.json
+
+RUN pip install --no-cache-dir -e /heracles_agents[all] \
+    && pip install --no-cache-dir --force-reinstall --no-deps /heracles
+
 WORKDIR /heracles_agents/examples/custom_chatdsg

@@ -5,13 +5,9 @@ set -Eeuo pipefail
 # User-editable configuration
 # =============================================================================
 
-OLLAMA_MODELS=(
-  "gemma4:12b"
-  "gemma4:26b"
-)
-
-# Conservative host-memory recommendations for CPU execution of the largest
-# configured model. These are warnings, not strict Ollama requirements.
+# Conservative host-memory recommendations for CPU execution. These are
+# warnings, not strict Ollama requirements, and can be adjusted for the models
+# selected in configs/benchmark.yaml.
 OLLAMA_CPU_MIN_RAM_GIB=32
 OLLAMA_CPU_RECOMMENDED_RAM_GIB=48
 
@@ -28,13 +24,16 @@ NVIDIA_TEST_IMAGE="ubuntu:24.04"
 # =============================================================================
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd -- "${SCRIPT_DIR}/.." && pwd)"
 
-COMPOSE_FILE="${SCRIPT_DIR}/docker/benchmark/docker-compose.yaml"
-GPU_COMPOSE_FILE="${SCRIPT_DIR}/docker/benchmark/docker-compose.gpu.yaml"
-ENV_FILE="${SCRIPT_DIR}/docker/benchmark/.env"
+COMPOSE_FILE="${REPO_ROOT}/docker/benchmark/docker-compose.yaml"
+GPU_COMPOSE_FILE="${REPO_ROOT}/docker/benchmark/docker-compose.gpu.yaml"
+ENV_FILE="${REPO_ROOT}/docker/benchmark/.env"
+ENV_TEMPLATE="${REPO_ROOT}/docker/benchmark/.env.example"
 
-OUTPUT_DIR_IN_CONTAINER="output/model_sweep"
-BENCHMARK_HOST_OUTPUT_DIR="${BENCHMARK_HOST_OUTPUT_DIR:-${SCRIPT_DIR}/output}"
+BENCHMARK_CONFIG_RELATIVE="${BENCHMARK_CONFIG:-configs/benchmark.yaml}"
+BENCHMARK_CONFIG_IN_CONTAINER=""
+BENCHMARK_HOST_OUTPUT_DIR="${BENCHMARK_HOST_OUTPUT_DIR:-${REPO_ROOT}/output}"
 export BENCHMARK_HOST_OUTPUT_DIR
 
 # =============================================================================
@@ -73,6 +72,64 @@ warn() {
 die() {
   printf '\nERROR: %s\n' "$*" >&2
   exit 1
+}
+
+usage() {
+  cat <<EOF
+Usage: $0 [--config configs/benchmark.yaml]
+
+The config path must refer to a YAML file below this repository's configs/
+directory. It defaults to configs/benchmark.yaml and can also be set with the
+BENCHMARK_CONFIG environment variable.
+EOF
+}
+
+parse_arguments() {
+  while (($# > 0)); do
+    case "$1" in
+      --config)
+        (($# >= 2)) || die "--config requires a path."
+        BENCHMARK_CONFIG_RELATIVE="$2"
+        shift 2
+        ;;
+      -h | --help)
+        usage
+        exit 0
+        ;;
+      *)
+        die "Unknown argument: $1"
+        ;;
+    esac
+  done
+}
+
+resolve_benchmark_config() {
+  local candidate
+  local resolved
+
+  if [[ "${BENCHMARK_CONFIG_RELATIVE}" == /* ]]; then
+    die "--config must be relative to the repository root."
+  fi
+
+  candidate="${REPO_ROOT}/${BENCHMARK_CONFIG_RELATIVE}"
+  [[ -f "${candidate}" ]] || die "Benchmark config not found: ${candidate}"
+
+  resolved="$(
+    cd -- "$(dirname -- "${candidate}")"
+    printf '%s/%s\n' "$PWD" "$(basename -- "${candidate}")"
+  )"
+
+  case "${resolved}" in
+    "${REPO_ROOT}"/configs/*.yaml | "${REPO_ROOT}"/configs/*.yml)
+      ;;
+    *)
+      die "Benchmark configs must be YAML files below ${REPO_ROOT}/configs."
+      ;;
+  esac
+
+  BENCHMARK_CONFIG_RELATIVE="${resolved#"${REPO_ROOT}/"}"
+  BENCHMARK_CONFIG_IN_CONTAINER="/home/benchmark/workspace/benchmark/${BENCHMARK_CONFIG_RELATIVE}"
+  info "Benchmark manifest: ${BENCHMARK_CONFIG_RELATIVE}."
 }
 
 confirm() {
@@ -152,6 +209,8 @@ build_compose_commands() {
 
   if [[ -f "${ENV_FILE}" ]]; then
     BASE_COMPOSE+=(--env-file "${ENV_FILE}")
+  else
+    BASE_COMPOSE+=(--env-file "${ENV_TEMPLATE}")
   fi
 
   BASE_COMPOSE+=(-f "${COMPOSE_FILE}")
@@ -187,10 +246,8 @@ Select the experiment to run:
      Starts Neo4j, Ollama, docker-socket-proxy, and the Ollama benchmark
      container.
 
-     Required models are checked and pulled automatically:
-
-       - gemma4:12b
-       - gemma4:26b
+     Enabled models from the benchmark manifest are checked and pulled
+     automatically.
 
      When a usable NVIDIA GPU and NVIDIA Container Toolkit are detected, GPU
      acceleration is enabled. Otherwise, the experiment runs on CPU.
@@ -412,7 +469,7 @@ check_cpu_memory() {
 
   if ! [[ "${total_kib}" =~ ^[0-9]+$ ]]; then
     warn \
-      "Unable to verify RAM capacity. The ${OLLAMA_MODELS[-1]} model may require substantial system memory in CPU mode."
+      "Unable to verify RAM capacity. The configured Ollama models may require substantial system memory in CPU mode."
     return
   fi
 
@@ -421,7 +478,7 @@ check_cpu_memory() {
       "Only $(kib_to_gib "${total_kib}") GiB of system RAM was detected."
 
     warn \
-      "CPU execution of ${OLLAMA_MODELS[-1]} may fail or cause heavy swapping."
+      "CPU execution of the configured Ollama models may fail or cause heavy swapping."
 
     warn \
       "The configured minimum warning threshold is ${OLLAMA_CPU_MIN_RAM_GIB} GiB."
@@ -440,7 +497,7 @@ check_cpu_memory() {
     ((available_kib < minimum_kib)); then
 
     warn \
-      "Only $(kib_to_gib "${available_kib}") GiB is currently available. Close memory-intensive applications before running the 26B model."
+      "Only $(kib_to_gib "${available_kib}") GiB is currently available. Close memory-intensive applications before running the configured models."
   fi
 }
 
@@ -513,7 +570,7 @@ report_gpu_memory() {
       "The GPU has less than approximately $((OLLAMA_RECOMMENDED_VRAM_MIB / 1024)) GiB VRAM."
 
     warn \
-      "Ollama may partially offload ${OLLAMA_MODELS[-1]} to system RAM, reducing performance and increasing RAM usage."
+      "Ollama may partially offload configured models to system RAM, reducing performance and increasing RAM usage."
   fi
 }
 
@@ -638,27 +695,6 @@ start_services() {
   fi
 }
 
-ensure_ollama_models() {
-  ((RUN_OLLAMA == 1)) || return 0
-
-  log "Checking required Ollama models."
-
-  local model
-
-  for model in "${OLLAMA_MODELS[@]}"; do
-    if "${ACTIVE_COMPOSE[@]}" exec -T ollama \
-      ollama show "${model}" >/dev/null 2>&1; then
-
-      printf 'Ollama model already available: %s\n' "${model}"
-    else
-      printf 'Pulling missing Ollama model: %s\n' "${model}"
-
-      "${ACTIVE_COMPOSE[@]}" exec -T ollama \
-        ollama pull "${model}"
-    fi
-  done
-}
-
 # =============================================================================
 # Benchmark execution
 # =============================================================================
@@ -674,10 +710,12 @@ run_benchmark() {
     /home/benchmark/workspace/benchmark_runner.sh \
     "${RUN_OPENROUTER}" \
     "${RUN_OLLAMA}" \
-    "${OUTPUT_DIR_IN_CONTAINER}"
+    "${BENCHMARK_CONFIG_IN_CONTAINER}"
 
-  printf '\nBenchmark report path on the host:\n'
-  printf '  %s/model_sweep/report.html\n' "${BENCHMARK_HOST_OUTPUT_DIR}"
+  printf '\nBenchmark outputs were written below:\n'
+  printf '  %s\n' "${BENCHMARK_HOST_OUTPUT_DIR}"
+  printf 'The exact subdirectory is set by benchmark.output_dir in %s.\n' \
+    "${BENCHMARK_CONFIG_RELATIVE}"
 }
 
 set_host_user_ids() {
@@ -703,6 +741,8 @@ set_host_user_ids() {
 # =============================================================================
 
 main() {
+  parse_arguments "$@"
+  resolve_benchmark_config
   check_docker
   set_host_user_ids
   build_compose_commands
@@ -718,7 +758,6 @@ main() {
   pre_start_cleanup
 
   start_services
-  ensure_ollama_models
   run_benchmark
 }
 

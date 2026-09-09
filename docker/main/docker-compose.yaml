@@ -33,7 +33,7 @@ services:
     networks: [heracles_net]
     stdin_open: true
     tty: true
-    entrypoint: [ipython, -i, /heracles/examples/load_scene_graph.py, --, --scene_graph, /heracles/examples/scene_graphs/example_dsg.json]
+    entrypoint: [ipython, -i, /heracles/examples/load_scene_graph.py, --, --scene_graph, /data/scene_graphs/example_dsg.json]
 
   # Interactive LLM-based agent interaction with database
   chatdsg:
@@ -53,12 +53,12 @@ services:
       HERACLES_AGENTS_PATH: /heracles_agents
       ADT4_HERACLES_IP: neo4j
       ADT4_HERACLES_PORT: 7683
-    volumes: [$HOME/devel/heracles_devel/heracles_agents:/heracles_agents]
+    volumes: [../../external/heracles_agents:/heracles_agents]
     networks: [heracles_net]
     extra_hosts: [host.docker.internal:host-gateway]
     stdin_open: true
     tty: true
-    entrypoint: [python, simplified_chatdsg.py, --scene-graph, /example_dsg.json]
+    entrypoint: [python, simplified_chatdsg.py, --scene-graph, /data/scene_graphs/example_dsg.json]
 
   # Visualize scene graph in RVIZ using Hydra ROS visualizer
   # hydra_visualization:

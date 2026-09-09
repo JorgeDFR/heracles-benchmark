@@ -1,0 +1,407 @@
+---
+# One generated benchmark item is produced for every entry in each section.
+# The IDs are intentionally semantic: they describe the reasoning operation,
+# not the wording variant or a particular scene entity.
+qa:
+  - id: qa_object_class_inventory
+    name: Object class inventory
+    description: List the distinct semantic classes represented by objects.
+    tags: [inventory, class]
+  - id: qa_object_total
+    name: Object total
+    description: Count all object nodes in the graph.
+    tags: [count, object]
+  - id: qa_room_total
+    name: Room total
+    description: Count all room nodes in the graph.
+    tags: [count, room]
+  - id: qa_place_total
+    name: Navigable place total
+    description: Count all 2D and 3D navigable place nodes.
+    tags: [count, place]
+  - id: qa_room_class_inventory
+    name: Room class inventory
+    description: List the distinct semantic classes represented by rooms.
+    tags: [inventory, class, room]
+  - id: qa_object_ids_for_class
+    name: Objects of a class
+    description: Return every object symbol belonging to a sampled class.
+    tags: [filter, class, object]
+  - id: qa_object_count_for_class
+    name: Object class frequency
+    description: Count the objects belonging to a sampled semantic class.
+    tags: [count, class, object]
+  - id: qa_object_centers_for_class
+    name: Object class centers
+    description: Return the 3D centers of all objects in a sampled class.
+    tags: [position, class, object]
+  - id: qa_object_class_lookup
+    name: Object class lookup
+    description: Identify the semantic class of an object symbol.
+    tags: [attribute, class, object]
+  - id: qa_object_center_lookup
+    name: Object center lookup
+    description: Return the 3D center of an object symbol.
+    tags: [position, object]
+  - id: qa_rooms_for_class
+    name: Rooms of a class
+    description: Return every room symbol belonging to a sampled class.
+    tags: [filter, class, room]
+  - id: qa_room_center_lookup
+    name: Room center lookup
+    description: Return the 3D center of a room symbol.
+    tags: [position, room]
+  - id: qa_parent_place_of_object
+    name: Object parent place
+    description: Find every immediate place containing an object.
+    tags: [hierarchy, object, place]
+  - id: qa_parent_room_of_object
+    name: Object parent room
+    description: Traverse all object-to-place-to-room containment paths.
+    tags: [hierarchy, object, room]
+  - id: qa_parent_room_of_place
+    name: Place parent room
+    description: Find every room that immediately contains a place.
+    tags: [hierarchy, place, room]
+  - id: qa_objects_in_room
+    name: Objects in a room
+    description: List object descendants of a room through its places.
+    tags: [hierarchy, object, room]
+  - id: qa_object_classes_in_room
+    name: Object classes in a room
+    description: List distinct object classes found below a room.
+    tags: [hierarchy, class, room]
+  - id: qa_object_count_in_room
+    name: Object count in a room
+    description: Count all object descendants of a room.
+    tags: [hierarchy, count, room]
+  - id: qa_class_objects_in_room
+    name: Class-filtered room objects
+    description: List objects of one class inside a room.
+    tags: [hierarchy, filter, class]
+  - id: qa_class_count_in_room
+    name: Class frequency in a room
+    description: Count objects of one class inside a room.
+    tags: [hierarchy, count, class]
+  - id: qa_places_in_room
+    name: Places in a room
+    description: List the immediate place children of a room.
+    tags: [hierarchy, place, room]
+  - id: qa_place_count_in_room
+    name: Place count in a room
+    description: Count the immediate place children of a room.
+    tags: [hierarchy, count, place]
+  - id: qa_objects_in_place
+    name: Objects in a place
+    description: List the immediate object children of a place.
+    tags: [hierarchy, object, place]
+  - id: qa_object_classes_in_place
+    name: Object classes in a place
+    description: List distinct classes among a place's object children.
+    tags: [hierarchy, class, place]
+  - id: qa_object_count_in_place
+    name: Object count in a place
+    description: Count a place's immediate object children.
+    tags: [hierarchy, count, place]
+  - id: qa_rooms_containing_class
+    name: Rooms containing a class
+    description: List rooms that contain at least one object of a class.
+    tags: [hierarchy, class, room]
+  - id: qa_room_count_containing_class
+    name: Room count containing a class
+    description: Count rooms that contain at least one object of a class.
+    tags: [hierarchy, count, class]
+  - id: qa_room_neighbors
+    name: Adjacent rooms
+    description: List rooms connected directly to a sampled room.
+    tags: [connectivity, room]
+  - id: qa_room_degree
+    name: Room connectivity degree
+    description: Count the direct room neighbors of a sampled room.
+    tags: [connectivity, count, room]
+  - id: qa_most_connected_rooms
+    name: Most connected rooms
+    description: Return every room tied for maximum connectivity degree.
+    tags: [connectivity, extrema, room]
+  - id: qa_least_connected_rooms
+    name: Least connected rooms
+    description: Return every room tied for minimum connectivity degree.
+    tags: [connectivity, extrema, room]
+  - id: qa_room_shortest_path
+    name: Shortest room route
+    description: Return an ordered shortest path between two rooms.
+    tags: [connectivity, path, room]
+  - id: qa_room_hop_distance
+    name: Room hop distance
+    description: Count edges on a shortest route between two rooms.
+    tags: [connectivity, count, path]
+  - id: qa_place_neighbors
+    name: Adjacent places
+    description: List places connected directly to a sampled place.
+    tags: [connectivity, place]
+  - id: qa_place_degree
+    name: Place connectivity degree
+    description: Count the direct place neighbors of a sampled place.
+    tags: [connectivity, count, place]
+  - id: qa_places_within_hops
+    name: Places within hop budget
+    description: List places reachable within a sampled small hop budget.
+    tags: [connectivity, reachability, place]
+  - id: qa_place_shortest_path
+    name: Shortest place route
+    description: Return an ordered shortest path between two places.
+    tags: [connectivity, path, place]
+  - id: qa_objects_in_neighbor_places
+    name: Objects in neighboring places
+    description: List objects attached to direct neighbors of a place.
+    tags: [connectivity, hierarchy, object]
+  - id: qa_nearest_object
+    name: Nearest object
+    description: Find the nearest other object by Euclidean center distance.
+    tags: [spatial, distance, object]
+  - id: qa_farthest_object
+    name: Farthest object
+    description: Find the farthest other object by Euclidean center distance.
+    tags: [spatial, distance, object]
+  - id: qa_nearest_different_class_object
+    name: Nearest different-class object
+    description: Find the closest object whose class differs from a reference.
+    tags: [spatial, distance, class]
+  - id: qa_closest_cross_class_pair
+    name: Closest cross-class pairs
+    description: Find all closest object pairs drawn from two sampled classes.
+    tags: [spatial, distance, class]
+  - id: qa_nearest_place_to_object
+    name: Nearest place to an object
+    description: Find the nearest navigable place center to an object.
+    tags: [spatial, distance, place]
+  - id: qa_nearest_room_to_object
+    name: Nearest room to an object
+    description: Find the nearest room center to an object.
+    tags: [spatial, distance, room]
+  - id: qa_closest_room_pair
+    name: Closest room pairs
+    description: Find all room pairs tied for minimum center separation.
+    tags: [spatial, distance, room]
+  - id: qa_highest_object_of_class
+    name: Highest object of a class
+    description: Find class members with maximum z coordinate.
+    tags: [spatial, extrema, class]
+  - id: qa_lowest_object_of_class
+    name: Lowest object of a class
+    description: Find class members with minimum z coordinate.
+    tags: [spatial, extrema, class]
+  - id: qa_nearest_object_to_room
+    name: Nearest object to a room center
+    description: Find the object closest to a sampled room center.
+    tags: [spatial, distance, room]
+  - id: qa_farthest_object_from_room
+    name: Farthest object from a room center
+    description: Find the object farthest from a sampled room center.
+    tags: [spatial, distance, room]
+  - id: qa_objects_within_radius
+    name: Objects inside a radius
+    description: List other objects within a data-derived radius of a reference.
+    tags: [spatial, radius, object]
+
+pddl:
+  - id: pddl_visit_object_symbol
+    name: Visit a named object
+    description: Require visiting one explicit object symbol.
+    tags: [direct-symbol, object, visit]
+  - id: pddl_end_at_object_symbol
+    name: End at a named object
+    description: Require finishing at one explicit object symbol.
+    tags: [direct-symbol, object, final-location]
+  - id: pddl_inspect_object_symbol
+    name: Inspect a named object
+    description: Require inspecting one explicit object symbol.
+    tags: [direct-symbol, object, inspect]
+  - id: pddl_hold_object_symbol
+    name: Pick up a named object
+    description: Require holding one explicit object symbol.
+    tags: [direct-symbol, object, manipulation]
+  - id: pddl_visit_room_symbol
+    name: Visit a named room
+    description: Require visiting one explicit room symbol.
+    tags: [direct-symbol, room, visit]
+  - id: pddl_end_in_room_symbol
+    name: End in a named room
+    description: Require finishing inside one explicit room symbol.
+    tags: [direct-symbol, room, final-location]
+  - id: pddl_visit_place_symbol
+    name: Visit a named place
+    description: Require visiting one explicit 2D or 3D place symbol.
+    tags: [direct-symbol, place, visit]
+  - id: pddl_end_at_place_symbol
+    name: End at a named place
+    description: Require finishing at one explicit 2D or 3D place symbol.
+    tags: [direct-symbol, place, final-location]
+  - id: pddl_hold_object_class
+    name: Pick up an object by class
+    description: Permit holding any object belonging to a referenced class.
+    tags: [class-reference, object, manipulation]
+  - id: pddl_visit_object_class
+    name: Visit an object by class
+    description: Permit visiting any object belonging to a referenced class.
+    tags: [class-reference, object, visit]
+  - id: pddl_end_at_object_class
+    name: End at an object by class
+    description: Permit finishing at any object belonging to a referenced class.
+    tags: [class-reference, object, final-location]
+  - id: pddl_inspect_object_class
+    name: Inspect an object by class
+    description: Permit inspecting any object belonging to a referenced class.
+    tags: [class-reference, object, inspect]
+  - id: pddl_visit_room_class
+    name: Visit a room by class
+    description: Permit visiting any room belonging to a referenced class.
+    tags: [class-reference, room, visit]
+  - id: pddl_end_in_room_class
+    name: End in a room by class
+    description: Permit finishing in any room belonging to a referenced class.
+    tags: [class-reference, room, final-location]
+  - id: pddl_visit_room_containing_object
+    name: Visit the room containing an object
+    description: Resolve an explicit object through the containment hierarchy.
+    tags: [hierarchy-reference, room, visit]
+  - id: pddl_end_in_room_containing_object
+    name: End in the room containing an object
+    description: Finish in the room resolved from an explicit object.
+    tags: [hierarchy-reference, room, final-location]
+  - id: pddl_visit_parent_place
+    name: Visit an object's parent place
+    description: Visit the immediate place containing an explicit object.
+    tags: [hierarchy-reference, place, visit]
+  - id: pddl_end_at_parent_place
+    name: End at an object's parent place
+    description: Finish at the immediate place containing an explicit object.
+    tags: [hierarchy-reference, place, final-location]
+  - id: pddl_visit_nearest_object
+    name: Visit a nearest object
+    description: Resolve the nearest other object to an explicit reference.
+    tags: [spatial-reference, object, visit]
+  - id: pddl_inspect_nearest_object
+    name: Inspect a nearest object
+    description: Inspect the nearest other object to an explicit reference.
+    tags: [spatial-reference, object, inspect]
+  - id: pddl_hold_nearest_class_object
+    name: Pick up the nearest class member
+    description: Hold the nearest member of a class to a reference object.
+    tags: [spatial-reference, class-reference, manipulation]
+  - id: pddl_visit_farthest_object
+    name: Visit a farthest object
+    description: Visit the farthest other object from an explicit reference.
+    tags: [spatial-reference, object, visit]
+  - id: pddl_end_at_farthest_object
+    name: End at a farthest object
+    description: Finish at the farthest other object from a reference.
+    tags: [spatial-reference, object, final-location]
+  - id: pddl_inspect_highest_class_object
+    name: Inspect the highest class member
+    description: Inspect a maximum-z member of a referenced class.
+    tags: [spatial-reference, extrema, inspect]
+  - id: pddl_visit_lowest_class_object
+    name: Visit the lowest class member
+    description: Visit a minimum-z member of a referenced class.
+    tags: [spatial-reference, extrema, visit]
+  - id: pddl_visit_nearest_room
+    name: Visit the nearest room
+    description: Visit the room center nearest to an explicit object.
+    tags: [spatial-reference, room, visit]
+  - id: pddl_end_in_nearest_room
+    name: End in the nearest room
+    description: Finish in the room center nearest to an explicit object.
+    tags: [spatial-reference, room, final-location]
+  - id: pddl_visit_most_connected_room
+    name: Visit a most-connected room
+    description: Visit any room tied for maximum room degree.
+    tags: [connectivity-reference, extrema, visit]
+  - id: pddl_end_in_least_connected_room
+    name: End in a least-connected room
+    description: Finish in any room tied for minimum room degree.
+    tags: [connectivity-reference, extrema, final-location]
+  - id: pddl_visit_adjacent_rooms
+    name: Visit every adjacent room
+    description: Require visits to all direct neighbors of a room.
+    tags: [connectivity-reference, conjunction, room]
+  - id: pddl_visit_either_object
+    name: Visit either named object
+    description: Offer an explicit disjunction between two object visits.
+    tags: [direct-symbol, disjunction, object]
+  - id: pddl_visit_object_or_room
+    name: Visit an object or a room
+    description: Offer a cross-layer disjunction of visit goals.
+    tags: [direct-symbol, disjunction, combination]
+  - id: pddl_visit_object_and_room
+    name: Visit an object and a room
+    description: Conjoin explicit object and room visit goals.
+    tags: [direct-symbol, conjunction, combination]
+  - id: pddl_inspect_and_hold_object
+    name: Inspect and hold an object
+    description: Conjoin inspection and holding for the same object.
+    tags: [direct-symbol, conjunction, manipulation]
+  - id: pddl_visit_then_end_at_object
+    name: Visit then end at objects
+    description: Encode an ordered two-object instruction using visited and at.
+    tags: [ordering, object, final-location]
+  - id: pddl_visit_room_then_end_at_object
+    name: Visit room then end at object
+    description: Encode an ordered room-to-object instruction.
+    tags: [ordering, combination, final-location]
+  - id: pddl_visit_object_then_end_in_room
+    name: Visit object then end in room
+    description: Encode an ordered object-to-room instruction.
+    tags: [ordering, combination, final-location]
+  - id: pddl_visit_place_then_end_in_room
+    name: Visit place then end in room
+    description: Encode an ordered place-to-room instruction.
+    tags: [ordering, combination, final-location]
+  - id: pddl_visit_room_then_end_at_place
+    name: Visit room then end at place
+    description: Encode an ordered room-to-place instruction.
+    tags: [ordering, combination, final-location]
+  - id: pddl_visit_then_end_at_place
+    name: Visit then end at places
+    description: Encode an ordered two-place instruction.
+    tags: [ordering, place, final-location]
+  - id: pddl_inspect_then_end_at_place
+    name: Inspect then end at place
+    description: Conjoin an inspection with a final place location.
+    tags: [combination, inspect, final-location]
+  - id: pddl_hold_then_end_in_room
+    name: Hold then end in room
+    description: Conjoin a holding goal with a final room location.
+    tags: [combination, manipulation, final-location]
+  - id: pddl_move_object_to_place
+    name: Move an object to a place
+    description: Relocate an explicit object to an explicit place.
+    tags: [direct-symbol, manipulation, place]
+  - id: pddl_move_class_object_to_place
+    name: Move a class member to a place
+    description: Permit relocating any member of a class to a place.
+    tags: [class-reference, disjunction, manipulation]
+  - id: pddl_move_object_to_neighbor_place
+    name: Move an object to a neighboring place
+    description: Resolve a destination adjacent to the object's current place.
+    tags: [connectivity-reference, hierarchy-reference, manipulation]
+  - id: pddl_do_not_hold_object
+    name: Do not hold an object
+    description: Negate holding for an explicit object.
+    tags: [direct-symbol, negation, manipulation]
+  - id: pddl_visit_without_holding
+    name: Visit without holding
+    description: Visit an explicit object while negating its holding predicate.
+    tags: [conjunction, negation, object]
+  - id: pddl_visit_room_avoid_neighbor
+    name: Visit a room while avoiding a neighbor
+    description: Require one room visit and negate a neighboring room visit.
+    tags: [connectivity-reference, negation, conjunction]
+  - id: pddl_hold_class_or_inspect_object
+    name: Hold a class or inspect an object
+    description: Combine class grounding and an explicit inspection in a disjunction.
+    tags: [class-reference, disjunction, combination]
+  - id: pddl_visit_class_and_end_in_room
+    name: Visit a class and end in a room
+    description: Visit any member of an object class and finish in a named room.
+    tags: [class-reference, conjunction, final-location]

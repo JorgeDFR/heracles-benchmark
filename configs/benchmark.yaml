@@ -1,0 +1,57 @@
+---
+schema_version: 1
+
+benchmark:
+  name: example-dsg-model-sweep
+  scene_id: example_dsg
+  scene_graph: data/scene_graphs/example_dsg.json
+  questions:
+    qa: data/questions/example_dsg/qa_questions.yaml
+    pddl: data/questions/example_dsg/pddl_questions.yaml
+    metadata: data/questions/example_dsg/metadata.yaml
+  output_dir: output/example_dsg/model_sweep
+
+agent:
+  temperature: 0.2
+  seed: 123
+  max_iterations: 5
+
+providers:
+  ollama:
+    enabled: true
+    models:
+      - alias: gemma-4-12b
+        model: gemma4:12b
+        enabled: true
+      - alias: gemma-4-26b
+        model: gemma4:26b
+        enabled: true
+    local_metrics:
+      enabled: true
+      target_provider: ollama
+      ollama_container_name: ollama
+      docker_host: tcp://docker-socket-proxy:2375
+      ollama_host: http://ollama:11434
+      sample_interval_seconds: 0.025
+      gpu_baseline_seconds: 5
+      unload_models_before_baseline: true
+      baseline_adjust_gpu: true
+
+  openrouter:
+    enabled: true
+    models:
+      - alias: gpt-oss-120b
+        model: openai/gpt-oss-120b
+        enabled: true
+      - alias: gemma-4-31b-it
+        model: google/gemma-4-31b-it
+        enabled: true
+      - alias: gemma-4-26b-a4b-it
+        model: google/gemma-4-26b-a4b-it
+        enabled: true
+      - alias: deepseek-v4-pro
+        model: deepseek/deepseek-v4-pro
+        enabled: true
+      - alias: deepseek-v4-flash
+        model: deepseek/deepseek-v4-flash
+        enabled: true

@@ -13,13 +13,13 @@ RUN apt-get update \
 ENV CC=/usr/bin/gcc
 ENV CXX=/usr/bin/g++
 
-COPY heracles_agents/examples/huggingface_server/requirements.txt \
+COPY external/heracles_agents/examples/huggingface_server/requirements.txt \
      /server/requirements.txt
 
 RUN python -m pip install --no-cache-dir --upgrade pip \
     && python -m pip install --no-cache-dir -r /server/requirements.txt
 
-COPY heracles_agents/examples/huggingface_server/server.py \
+COPY external/heracles_agents/examples/huggingface_server/server.py \
      /server/server.py
 
 EXPOSE 8000

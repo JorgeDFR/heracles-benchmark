@@ -1,4 +1,25 @@
 .vscode/
-docker/benchmark/.env
+# Local environment and secret overrides. Commit only `.env.example` templates.
+**/.env
+**/.env.local
+
+# Python environments and generated tooling state.
+.venv*/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.coverage*
+htmlcov/
+build/
+dist/
+
+# Editor and operating-system artifacts.
+.DS_Store
+*.swp
+
+# Benchmark output is reproducible and can be large.
 output/*
 !output/.gitkeep

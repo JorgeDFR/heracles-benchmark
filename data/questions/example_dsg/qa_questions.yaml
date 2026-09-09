@@ -1,0 +1,575 @@
+---
+metadata:
+  schema_version: 1
+  scene_id: example_dsg
+  scene_graph:
+    path: data/scene_graphs/example_dsg.json
+    sha256: 8caa134540fcf27d94e9d3d31a50886fe4d84bdd9b7eccdaa5897d124285e656
+  question_catalog:
+    path: data/questions/question_types.yaml
+    sha256: 04fba84f5bcecc7e85bfba7c6867f1424cacac9d9004a200c3737d214118b77e
+  generator:
+    path: scripts/generate_questions.py
+    version: 1
+    sha256: 02ca2198b6b542533e202b309721fcf2ccfb0190d7ef97ea897da008ca13d6f0
+    spark_dsg_version: 1.1.3
+    pyyaml_version: 6.0.3
+  parameters:
+    seed: 7
+    qa_seed: 7
+    pddl_seed: 8
+    qa_question_count: 50
+    pddl_question_count: 50
+    avoid_question_files:
+    - path: external/heracles_agents/examples/questions/qa_questions.yaml
+      sha256: 4d545d319a799b71b84f632eaf0330a6640b95d43b1c252f8f911e7113ad1e09
+    - path: external/heracles_agents/examples/questions/pddl_questions.yaml
+      sha256: 4de9de91e4b27a50793a4724b985ebaf0991ed8feb6e95f962127882506bb5cc
+  task: qa
+questions:
+- uid: QA001
+  name: Object class inventory
+  question: Give the complete set of object categories represented in this map.
+  solution: <appliance, bag, bed, bicycle, box, decor, food, light, seating, sign, storage, trash>
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - inventory
+  - class
+- uid: QA002
+  name: Object total
+  question: How many object nodes does the scene contain?
+  solution: '65'
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - count
+  - object
+- uid: QA003
+  name: Room total
+  question: What is the total number of mapped rooms?
+  solution: '5'
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - count
+  - room
+- uid: QA004
+  name: Navigable place total
+  question: Count all navigable place nodes, combining the 2D and 3D place layers.
+  solution: '96'
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - count
+  - place
+- uid: QA005
+  name: Room class inventory
+  question: Which distinct room categories occur in the scene?
+  solution: <hallway, lounge>
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - inventory
+  - class
+  - room
+- uid: QA006
+  name: Objects of a class
+  question: Return the IDs of every object categorized as food in the map.
+  solution: <O8>
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - filter
+  - class
+  - object
+- uid: QA007
+  name: Object class frequency
+  question: How many seat objects are represented?
+  solution: '22'
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - count
+  - class
+  - object
+- uid: QA008
+  name: Object class centers
+  question: Report all 3D center points for the ornament objects.
+  solution: <POINT(-19.03 -3.96 0.58), POINT(-19.09 -4.18 0.56), POINT(-21.19 -21.22 0.62), POINT(3.66
+    -1.63 0.85), POINT(6.39 -4.99 -0.49)>
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - position
+  - class
+  - object
+- uid: QA009
+  name: Object class lookup
+  question: What semantic category is assigned to O251?
+  solution: seating
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - attribute
+  - class
+  - object
+- uid: QA010
+  name: Object center lookup
+  question: Where is the center of object O17?
+  solution: POINT(-18.86 -4.15 0.05)
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - position
+  - object
+- uid: QA011
+  name: Rooms of a class
+  question: List the room IDs categorized as passage.
+  solution: <R2, R3, R4, R5>
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - filter
+  - class
+  - room
+- uid: QA012
+  name: Room center lookup
+  question: Give the center point recorded for room R2.
+  solution: POINT(-14.76 -4.98 -0.53)
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - position
+  - room
+- uid: QA013
+  name: Object parent place
+  question: Which place nodes directly contain O36?
+  solution: <P8638>
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - hierarchy
+  - object
+  - place
+- uid: QA014
+  name: Object parent room
+  question: Following containment through places, which rooms contain O3?
+  solution: <R1>
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - hierarchy
+  - object
+  - room
+- uid: QA015
+  name: Place parent room
+  question: Name every room that is a parent of place P3167.
+  solution: <R2>
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - hierarchy
+  - place
+  - room
+- uid: QA016
+  name: Objects in a room
+  question: Which object IDs descend from room R4?
+  solution: <O95, O300>
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - hierarchy
+  - object
+  - room
+- uid: QA017
+  name: Object classes in a room
+  question: What kinds of objects can be found inside R4?
+  solution: <light, sign>
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - hierarchy
+  - class
+  - room
+- uid: QA018
+  name: Object count in a room
+  question: Count the objects contained under room R1.
+  solution: '27'
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - hierarchy
+  - count
+  - room
+- uid: QA019
+  name: Class-filtered room objects
+  question: Identify each signage located in R1.
+  solution: <O3, O255, O264, O283>
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - hierarchy
+  - filter
+  - class
+- uid: QA020
+  name: Class frequency in a room
+  question: How many sign objects belong to R4?
+  solution: '1'
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - hierarchy
+  - count
+  - class
+- uid: QA021
+  name: Places in a room
+  question: Enumerate the place nodes immediately below R2.
+  solution: <P2541, P3095, P3105, P3166, P3167, P3195, P4389, P6219, P6255, P6397, P6567, P6665, P6726,
+    P7279, P7281, P7488, P9420, P9421, P67045, P67046, P67673, P67676>
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - hierarchy
+  - place
+  - room
+- uid: QA022
+  name: Place count in a room
+  question: How many direct place children does R1 have?
+  solution: '22'
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - hierarchy
+  - count
+  - place
+- uid: QA023
+  name: Objects in a place
+  question: List the objects attached directly to place P6219.
+  solution: <O17, O19>
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - hierarchy
+  - object
+  - place
+- uid: QA024
+  name: Object classes in a place
+  question: Which object categories are directly contained by P21172?
+  solution: <decor, trash>
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - hierarchy
+  - class
+  - place
+- uid: QA025
+  name: Object count in a place
+  question: How many object children are assigned to P59110?
+  solution: '12'
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - hierarchy
+  - count
+  - place
+- uid: QA026
+  name: Rooms containing a class
+  question: Which rooms contain at least one storage fixture?
+  solution: <R1, R2, R5>
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - hierarchy
+  - class
+  - room
+- uid: QA027
+  name: Room count containing a class
+  question: In how many rooms does a device appear?
+  solution: '1'
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - hierarchy
+  - count
+  - class
+- uid: QA028
+  name: Adjacent rooms
+  question: Which rooms share a direct connectivity edge with R5?
+  solution: <R3, R4>
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - connectivity
+  - room
+- uid: QA029
+  name: Room connectivity degree
+  question: What is the connectivity degree of room R4?
+  solution: '2'
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - connectivity
+  - count
+  - room
+- uid: QA030
+  name: Most connected rooms
+  question: Return every room tied for the greatest number of direct room connections.
+  solution: <R2>
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - connectivity
+  - extrema
+  - room
+- uid: QA031
+  name: Least connected rooms
+  question: Which rooms are tied at the minimum room-connectivity degree?
+  solution: <R1>
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - connectivity
+  - extrema
+  - room
+- uid: QA032
+  name: Shortest room route
+  question: Give one shortest room-by-room route from R1 to R3, including both ends.
+  solution: '[R1, R2, R3]'
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - connectivity
+  - path
+  - room
+- uid: QA033
+  name: Room hop distance
+  question: How many room edges separate R1 from R3 along a shortest route?
+  solution: '2'
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - connectivity
+  - count
+  - path
+- uid: QA034
+  name: Adjacent places
+  question: Return the immediate navigation neighbors of place P2410.
+  solution: <P754, P1568, P1833, P2441, P2541>
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - connectivity
+  - place
+- uid: QA035
+  name: Place connectivity degree
+  question: How many same-layer place edges touch P9420?
+  solution: '6'
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - connectivity
+  - count
+  - place
+- uid: QA036
+  name: Places within hop budget
+  question: Which other places are reachable from P1833 in at most 2 place edges?
+  solution: <P754, P1350, P1396, P1568, P2410, P2441, P2541, P56525, P56710, P57510, P58431, P58432, P59110,
+    P60843, P75035, P75286>
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - connectivity
+  - reachability
+  - place
+- uid: QA037
+  name: Shortest place route
+  question: Trace one minimum-hop place route from P6726 to P29521.
+  solution: '[P6726, P6397, P6219, P3095, P3167, P3166, P3105, P3107, P68067, P68306, P26753, P27669,
+    P27795, P29521]'
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - connectivity
+  - path
+  - place
+- uid: QA038
+  name: Objects in neighboring places
+  question: Which objects belong to places directly adjacent to P22515?
+  solution: <O55, O58>
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - connectivity
+  - hierarchy
+  - object
+- uid: QA039
+  name: Nearest object
+  question: Using center-to-center distance, which object is nearest to O282?
+  solution: <O269>
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - spatial
+  - distance
+  - object
+- uid: QA040
+  name: Farthest object
+  question: Which object center lies farthest from O55?
+  solution: <O237>
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - spatial
+  - distance
+  - object
+- uid: QA041
+  name: Nearest different-class object
+  question: What is the closest object to O43 that has a different semantic class?
+  solution: <O36>
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - spatial
+  - distance
+  - class
+- uid: QA042
+  name: Closest cross-class pairs
+  question: Which pairs consisting of a notice and a carton are tied for the smallest center distance?
+  solution: <[O59, O63]>
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - spatial
+  - distance
+  - class
+- uid: QA043
+  name: Nearest place to an object
+  question: Which navigable place center is closest to object O66?
+  solution: <P22249>
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - spatial
+  - distance
+  - place
+- uid: QA044
+  name: Nearest room to an object
+  question: Which room center is geometrically closest to O36?
+  solution: <R3>
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - spatial
+  - distance
+  - room
+- uid: QA045
+  name: Closest room pairs
+  question: Which room pairs are tied for the smallest distance between recorded centers?
+  solution: <[R4, R5]>
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - spatial
+  - distance
+  - room
+- uid: QA046
+  name: Highest object of a class
+  question: Which notice reaches the greatest center height?
+  solution: <O95>
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - spatial
+  - extrema
+  - class
+- uid: QA047
+  name: Lowest object of a class
+  question: Which storage unit has the lowest center z-coordinate?
+  solution: <O66>
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - spatial
+  - extrema
+  - class
+- uid: QA048
+  name: Nearest object to a room center
+  question: Which object center is nearest to the center of R3?
+  solution: <O43>
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - spatial
+  - distance
+  - room
+- uid: QA049
+  name: Farthest object from a room center
+  question: Find the object farthest from room center R1.
+  solution: <O79>
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - spatial
+  - distance
+  - room
+- uid: QA050
+  name: Objects inside a radius
+  question: Which other objects have centers no more than 0.76 meters from O18?
+  solution: <O17, O19, O29, O30>
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - spatial
+  - radius
+  - object
