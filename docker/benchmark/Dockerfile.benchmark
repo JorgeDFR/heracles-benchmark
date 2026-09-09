@@ -31,12 +31,15 @@ COPY external/heracles/heracles /home/benchmark/workspace/heracles
 COPY external/heracles_agents /home/benchmark/workspace/heracles_agents
 COPY configs /home/benchmark/workspace/benchmark/configs
 COPY data /home/benchmark/workspace/benchmark/data
-COPY scripts/benchmark_manifest.py \
-     /home/benchmark/workspace/benchmark/scripts/benchmark_manifest.py
+COPY requirements.txt /home/benchmark/workspace/benchmark/requirements.txt
+COPY scripts/benchmark_manifest.py scripts/benchmark_console.py \
+     /home/benchmark/workspace/benchmark/scripts/
 
 RUN pip install --no-cache-dir "${WORKSPACE_DIR}/heracles_agents[all]" \
     && pip install --no-cache-dir --force-reinstall --no-deps \
-        "${WORKSPACE_DIR}/heracles"
+        "${WORKSPACE_DIR}/heracles" \
+    && pip install --no-cache-dir \
+        --requirement "${HERACLES_BENCHMARK_PATH}/requirements.txt"
 
 # Copy the container benchmark entry point into the image.
 COPY docker/benchmark/benchmark_runner.sh \
@@ -44,6 +47,7 @@ COPY docker/benchmark/benchmark_runner.sh \
 
 RUN chmod 0755 /home/benchmark/workspace/benchmark_runner.sh \
         /home/benchmark/workspace/benchmark/scripts/benchmark_manifest.py \
+        /home/benchmark/workspace/benchmark/scripts/benchmark_console.py \
     && chown -R benchmark:benchmark \
         /home/benchmark
 

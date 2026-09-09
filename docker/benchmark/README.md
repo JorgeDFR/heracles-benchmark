@@ -100,6 +100,18 @@ The `BENCHMARK_CONFIG` environment variable provides the same override. The
 launcher presents an interactive choice of Ollama, OpenRouter, both, or quit.
 The selected provider must also be enabled in the manifest.
 
+The benchmark container displays Rich progress bars for long-running model
+sweeps, followed by a normalized table containing the model, task, question
+count, valid answers, correct answers, and accuracy. Request-level HTTP logs,
+Neo4j notifications, answer-parser warnings, and raw tool errors are suppressed
+from the live console and written to `benchmark.log`. A diagnostics table shows
+how many messages of each category were captured, so the cleaner output does not
+hide their existence.
+
+Docker Compose build and service progress defaults to quiet mode. Set
+`COMPOSE_PROGRESS=auto` before launching if the full Docker progress display is
+useful for troubleshooting.
+
 For Ollama runs, enabled model names are read from the manifest and missing
 models are pulled into the persistent `ollama-cache` volume. If an unrelated
 container named `ollama` already exists, stop or rename it because local metric
@@ -111,11 +123,12 @@ For the default manifest, outputs are stored under:
 <repo>/output/example_dsg/model_sweep/
 ```
 
-That directory contains provider results, `report.html`, and
-`benchmark_manifest.resolved.yaml`. The resolved file captures the source
-manifest and its checksum, selected providers, all input checksums, question
-generation metadata (including seeds and dependency versions), and the full
-configuration used for the run.
+That directory contains provider results, `report.html`,
+`benchmark_manifest.resolved.yaml`, and a private-permission `benchmark.log`
+with complete subprocess diagnostics. The resolved manifest captures the
+source manifest and its checksum, selected providers, all input checksums,
+question generation metadata (including seeds and dependency versions), and
+the full configuration used for the run.
 
 ## Stop and clean up
 
@@ -147,6 +160,7 @@ docker compose \
   config --quiet
 
 bash -n scripts/run_benchmark.sh docker/benchmark/benchmark_runner.sh
+python -m unittest discover -s tests -v
 ```
 
 ## Troubleshooting

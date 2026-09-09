@@ -1,4 +1,3 @@
-.vscode/
 # Local environment and secret overrides. Commit only `.env.example` templates.
 **/.env
 **/.env.local
@@ -19,7 +18,12 @@ dist/
 # Editor and operating-system artifacts.
 .DS_Store
 *.swp
+*.temp.txt
 
 # Benchmark output is reproducible and can be large.
 output/*
 !output/.gitkeep
+
+# Other files and folders
+.vscode/
+TODO.md

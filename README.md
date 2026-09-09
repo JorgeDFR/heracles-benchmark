@@ -137,6 +137,9 @@ The launcher builds the selected repository inputs into the image, resolves
 provider experiment files from the manifest, pulls enabled Ollama models when
 needed, loads the configured graph, and writes results to the manifest's
 `benchmark.output_dir`. A resolved manifest is saved beside the results.
+The console uses Rich progress bars and compact per-model result tables. Noisy
+HTTP, database-notification, validation, and tool diagnostics are retained in
+`benchmark.log` beside the report instead of being streamed to the terminal.
 
 See [docker/benchmark/README.md](docker/benchmark/README.md) for GPU detection,
 memory guidance, output mounts, cleanup behavior, and troubleshooting.

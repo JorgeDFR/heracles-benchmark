@@ -58,15 +58,15 @@ ACTIVE_COMPOSE=()
 # =============================================================================
 
 log() {
-  printf '\n==> %s\n' "$*"
+  printf '\n[benchmark] %s\n' "$*"
 }
 
 info() {
-  printf 'INFO: %s\n' "$*"
+  printf '  - %s\n' "$*"
 }
 
 warn() {
-  printf 'WARNING: %s\n' "$*" >&2
+  printf '  ! %s\n' "$*" >&2
 }
 
 die() {
@@ -205,7 +205,7 @@ EOF
 }
 
 build_compose_commands() {
-  BASE_COMPOSE=(docker compose)
+  BASE_COMPOSE=(docker compose --progress "${COMPOSE_PROGRESS:-quiet}")
 
   if [[ -f "${ENV_FILE}" ]]; then
     BASE_COMPOSE+=(--env-file "${ENV_FILE}")
@@ -239,28 +239,11 @@ validate_compose_files() {
 select_experiments() {
   cat <<'MENU'
 
-Select the experiment to run:
+Provider selection
 
-  1) Ollama only
-
-     Starts Neo4j, Ollama, docker-socket-proxy, and the Ollama benchmark
-     container.
-
-     Enabled models from the benchmark manifest are checked and pulled
-     automatically.
-
-     When a usable NVIDIA GPU and NVIDIA Container Toolkit are detected, GPU
-     acceleration is enabled. Otherwise, the experiment runs on CPU.
-
-  2) OpenRouter only
-
-     Starts Neo4j and the OpenRouter benchmark container.
-
-     Requires OPENROUTER_API_KEY in the current environment or a local
-     docker/benchmark/.env file.
-
-  3) Both Ollama and OpenRouter
-
+  1) Ollama       Local models; GPU acceleration when available
+  2) OpenRouter   Requires OPENROUTER_API_KEY
+  3) Both
   q) Quit
 
 MENU
@@ -712,9 +695,9 @@ run_benchmark() {
     "${RUN_OLLAMA}" \
     "${BENCHMARK_CONFIG_IN_CONTAINER}"
 
-  printf '\nBenchmark outputs were written below:\n'
-  printf '  %s\n' "${BENCHMARK_HOST_OUTPUT_DIR}"
-  printf 'The exact subdirectory is set by benchmark.output_dir in %s.\n' \
+  printf '\n[benchmark] Container run complete.\n'
+  printf '  - Host output root: %s\n' "${BENCHMARK_HOST_OUTPUT_DIR}"
+  printf '  - Output subdirectory: benchmark.output_dir in %s\n' \
     "${BENCHMARK_CONFIG_RELATIVE}"
 }
 

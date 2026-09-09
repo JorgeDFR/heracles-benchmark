@@ -23,6 +23,8 @@ htmlcov
 **/.env
 output
 external/heracles_agents/output
+tests
 
 *.log
+*.temp.txt
 .DS_Store

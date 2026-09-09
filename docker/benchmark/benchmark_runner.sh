@@ -9,13 +9,10 @@ OVERALL_STATUS=0
 WORKSPACE_DIR="/home/benchmark/workspace"
 BENCHMARK_ROOT="${WORKSPACE_DIR}/benchmark"
 MANIFEST_TOOL="${BENCHMARK_ROOT}/scripts/benchmark_manifest.py"
+CONSOLE_TOOL="${BENCHMARK_ROOT}/scripts/benchmark_console.py"
 RUNTIME_DIR="$(mktemp -d /tmp/heracles-benchmark-runtime.XXXXXX)"
 
 cd "${WORKSPACE_DIR}/heracles_agents"
-
-log() {
-  printf '\n==> %s\n' "$*"
-}
 
 die() {
   printf '\nERROR: %s\n' "$*" >&2
@@ -63,12 +60,6 @@ for provider in "${providers[@]}"; do
   prepare_args+=(--provider "${provider}")
 done
 
-log "Validating and resolving the benchmark manifest."
-
-if ! python "${MANIFEST_TOOL}" "${prepare_args[@]}"; then
-  die "The benchmark manifest is invalid."
-fi
-
 SCENE_GRAPH="$(
   python "${MANIFEST_TOOL}" \
     --config "${BENCHMARK_CONFIG}" \
@@ -81,6 +72,18 @@ OUTPUT_DIR="$(
 )"
 
 mkdir -p "${OUTPUT_DIR}"
+RUN_LOG="${OUTPUT_DIR}/benchmark.log"
+
+if ! python "${CONSOLE_TOOL}" run \
+  --label "Preparing benchmark configuration" \
+  --log-file "${RUN_LOG}" \
+  --reset-log \
+  -- \
+  python "${MANIFEST_TOOL}" "${prepare_args[@]}"; then
+
+  die "The benchmark manifest is invalid."
+fi
+
 cp \
   "${RUNTIME_DIR}/benchmark_manifest.resolved.yaml" \
   "${OUTPUT_DIR}/benchmark_manifest.resolved.yaml"
@@ -88,21 +91,26 @@ RUN_MARKER="${RUNTIME_DIR}/run-started"
 touch "${RUN_MARKER}"
 
 if [[ "${RUN_OLLAMA}" == "1" ]]; then
-  log "Checking Ollama models declared in the benchmark manifest."
-
-  if ! python "${MANIFEST_TOOL}" \
-    --config "${BENCHMARK_CONFIG}" \
-    pull-ollama \
-    --host "${OLLAMA_HOST:-http://ollama:11434}"; then
+  if ! python "${CONSOLE_TOOL}" run \
+    --label "Preparing configured Ollama models" \
+    --log-file "${RUN_LOG}" \
+    -- \
+    python "${MANIFEST_TOOL}" \
+      --config "${BENCHMARK_CONFIG}" \
+      pull-ollama \
+      --host "${OLLAMA_HOST:-http://ollama:11434}"; then
 
     die "The configured Ollama models could not be prepared."
   fi
 fi
 
-log "Loading the configured 3D scene graph into Neo4j."
-
-if ! python "${WORKSPACE_DIR}/heracles/examples/load_scene_graph.py" \
-  --scene_graph "${SCENE_GRAPH}"; then
+if ! python "${CONSOLE_TOOL}" run \
+  --label "Loading scene graph into Neo4j" \
+  --kind scene \
+  --log-file "${RUN_LOG}" \
+  -- \
+  python "${WORKSPACE_DIR}/heracles/examples/load_scene_graph.py" \
+    --scene_graph "${SCENE_GRAPH}"; then
 
   record_failure \
     "Failed to load the Neo4j database. Selected experiments were skipped."
@@ -113,19 +121,18 @@ else
       "${RUNTIME_DIR}/${provider}/pddl_model_sweep.yaml"
     )
 
-    log "Running the ${provider} model sweep experiment."
-
-    if ! python examples/experiment_runner.py \
-      "${experiment_paths[@]}" \
+    if ! python "${CONSOLE_TOOL}" experiments \
+      --provider "${provider}" \
+      --runner "${WORKSPACE_DIR}/heracles_agents/examples/experiment_runner.py" \
       --output-dir "${OUTPUT_DIR}" \
-      --no-display; then
+      --log-file "${RUN_LOG}" \
+      --experiment "${experiment_paths[0]}" \
+      --experiment "${experiment_paths[1]}"; then
 
       record_failure "The ${provider} experiment failed."
     fi
   done
 fi
-
-log "Generating the static HTML results page."
 
 result_files=()
 
@@ -140,18 +147,34 @@ done < <(
     sort -z
 )
 
+REPORT_PATH="${OUTPUT_DIR}/report.html"
+
 if ((${#result_files[@]} == 0)); then
   record_failure \
     "No result YAML files were found; the HTML report could not be generated."
-elif ! python examples/display_yaml_results.py \
-  "${result_files[@]}" \
-  --mode html \
-  --output "${OUTPUT_DIR}/report.html"; then
+elif ! python "${CONSOLE_TOOL}" run \
+  --label "Generating HTML report" \
+  --success-detail "${REPORT_PATH}" \
+  --log-file "${RUN_LOG}" \
+  -- \
+  python examples/display_yaml_results.py \
+    "${result_files[@]}" \
+    --mode html \
+    --output "${REPORT_PATH}"; then
 
   record_failure "Failed to generate the HTML report."
-else
-  printf '\nReport generated at:\n'
-  printf '  %s/report.html\n' "${OUTPUT_DIR}"
 fi
+
+SUMMARY_TITLE="Benchmark complete"
+if ((OVERALL_STATUS != 0)); then
+  SUMMARY_TITLE="Benchmark finished with errors"
+fi
+
+python "${CONSOLE_TOOL}" summary \
+  --title "${SUMMARY_TITLE}" \
+  --field "Manifest=${BENCHMARK_CONFIG}" \
+  --field "Output=${OUTPUT_DIR}" \
+  --field "Report=${REPORT_PATH}" \
+  --field "Detailed log=${RUN_LOG}"
 
 exit "${OVERALL_STATUS}"
