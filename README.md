@@ -70,10 +70,11 @@ the following files under `data/questions/example_dsg/`:
 
 The metadata records scene, catalog, generator, avoidance-input, and output
 checksums; generator and dependency versions; random seeds; and question
-counts. Each question file also embeds task and scene metadata. If two graphs
-have the same filename stem, assign a stable identifier with `--scene-id`; the
-default output folder will use that identifier. An explicit `--output-dir` must
-have the same final directory name as the scene ID.
+counts. The QA and PDDL files contain only their `questions` lists; all metadata
+is centralized in `metadata.yaml`. If two graphs have the same filename stem,
+assign a stable identifier with `--scene-id`; the default output folder will use
+that identifier. An explicit `--output-dir` must have the same final directory
+name as the scene ID.
 
 The generator produces one grounded item per entry in
 `data/questions/question_types.yaml`: 50 QA types and 50 PDDL types. Generation

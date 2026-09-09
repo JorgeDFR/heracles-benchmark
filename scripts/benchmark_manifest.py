@@ -274,22 +274,9 @@ class BenchmarkManifest:
                 question_data = required_mapping(
                     yaml.safe_load(stream), f"{task} question file"
                 )
-            file_metadata = required_mapping(
-                question_data.get("metadata"), f"{task} question metadata"
-            )
-            if file_metadata.get("scene_id") != self.scene_id:
-                raise ManifestError(f"Question file `{task}` has the wrong scene ID")
-            if file_metadata.get("task") != task:
+            if "metadata" in question_data:
                 raise ManifestError(
-                    f"Question file `{task}` has the wrong task metadata"
-                )
-            embedded_scene = required_mapping(
-                file_metadata.get("scene_graph"),
-                f"{task} question metadata scene_graph",
-            )
-            if embedded_scene != metadata_scene:
-                raise ManifestError(
-                    f"Question file `{task}` has inconsistent scene metadata"
+                    f"Question file `{task}` must keep metadata only in metadata.yaml"
                 )
             questions = question_data.get("questions")
             if not isinstance(questions, list) or not questions:

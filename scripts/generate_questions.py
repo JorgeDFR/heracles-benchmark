@@ -37,7 +37,7 @@ ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_SCENE = ROOT / "data" / "scene_graphs" / "example_dsg.json"
 DEFAULT_CATALOG = ROOT / "data" / "questions" / "question_types.yaml"
 DEFAULT_QUESTION_ROOT = ROOT / "data" / "questions"
-GENERATOR_VERSION = 1
+GENERATOR_VERSION = 2
 LOCAL_ID_MASK = (1 << 56) - 1
 
 LAYER_NAMES = {
@@ -1470,12 +1470,11 @@ def validate_questions(
 def write_yaml(
     path: Path,
     records: list[dict[str, Any]],
-    metadata: dict[str, Any],
 ) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8") as stream:
         yaml.dump(
-            {"metadata": metadata, "questions": records},
+            {"questions": records},
             stream,
             Dumper=NoAliasDumper,
             allow_unicode=True,
@@ -1665,8 +1664,8 @@ def main(argv: Sequence[str] | None = None) -> int:
 
         qa_path = output_dir / "qa_questions.yaml"
         pddl_path = output_dir / "pddl_questions.yaml"
-        write_yaml(qa_path, qa, {**shared_metadata, "task": "qa"})
-        write_yaml(pddl_path, pddl, {**shared_metadata, "task": "pddl"})
+        write_yaml(qa_path, qa)
+        write_yaml(pddl_path, pddl)
 
         metadata_path = output_dir / "metadata.yaml"
         write_metadata(

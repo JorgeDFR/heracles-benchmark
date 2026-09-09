@@ -18,14 +18,14 @@ agent:
 
 providers:
   ollama:
-    enabled: false
+    enabled: true
     models:
       - alias: gemma-4-12b
         model: gemma4:12b
         enabled: true
       - alias: gemma-4-26b
         model: gemma4:26b
-        enabled: true
+        enabled: false
     local_metrics:
       enabled: true
       target_provider: ollama

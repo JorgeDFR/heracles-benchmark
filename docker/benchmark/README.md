@@ -50,7 +50,9 @@ data/questions/<scene-id>/
 
 `metadata.yaml` records the scene and question checksums, seeds, dependency
 versions, generator version, and question counts. The Docker workflow verifies
-these values before loading the graph or running a model.
+these values before loading the graph or running a model. It is the sole
+metadata file; `qa_questions.yaml` and `pddl_questions.yaml` contain only their
+question lists.
 
 ## Environment setup
 
