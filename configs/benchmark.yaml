@@ -36,6 +36,10 @@ providers:
       gpu_baseline_seconds: 5
       unload_models_before_baseline: true
       baseline_adjust_gpu: true
+      # Baseline is collected first; warmup then loads the model before measured work.
+      warmup_enabled: true
+      warmup_requests: 1
+      warmup_prompt: Reply with OK.
 
   openrouter:
     enabled: true

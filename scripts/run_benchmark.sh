@@ -338,7 +338,7 @@ Set it in the current shell:
 
   export OPENROUTER_API_KEY='your-key'
 
-or add it to this local, ignored file:
+or add it to this local enviroment file:
 
   ${ENV_FILE}
 

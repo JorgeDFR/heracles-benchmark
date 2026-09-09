@@ -323,6 +323,32 @@ class BenchmarkManifest:
             if not isinstance(config.get("enabled"), bool):
                 raise ManifestError(f"`providers.{provider}.enabled` must be boolean")
             self.enabled_models(provider)
+            local_metrics = config.get("local_metrics")
+            if local_metrics is not None:
+                local_metrics = required_mapping(
+                    local_metrics, f"providers.{provider}.local_metrics"
+                )
+                warmup_enabled = local_metrics.get("warmup_enabled", True)
+                if not isinstance(warmup_enabled, bool):
+                    raise ManifestError(
+                        f"`providers.{provider}.local_metrics.warmup_enabled` "
+                        "must be boolean"
+                    )
+                warmup_requests = local_metrics.get("warmup_requests", 1)
+                if (
+                    isinstance(warmup_requests, bool)
+                    or not isinstance(warmup_requests, int)
+                    or warmup_requests < 1
+                ):
+                    raise ManifestError(
+                        f"`providers.{provider}.local_metrics.warmup_requests` "
+                        "must be a positive integer"
+                    )
+                if warmup_enabled:
+                    required_string(
+                        local_metrics.get("warmup_prompt", "Reply with OK."),
+                        f"providers.{provider}.local_metrics.warmup_prompt",
+                    )
         for provider in selected_providers:
             config = self.provider(provider)
             if not config["enabled"]:

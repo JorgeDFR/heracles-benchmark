@@ -96,9 +96,12 @@ class ExperimentParsingTest(unittest.TestCase):
                             "qa": {
                                 "analysis_summary": {
                                     "questions": 50,
-                                    "valid_answer_count": 48,
-                                    "correct_count": 42,
-                                    "accuracy": 0.84,
+                                    "final_answer_match_count": 42,
+                                    "cypher_solution_match_count": 40,
+                                    "cypher_solution_match_evaluated": 45,
+                                    "tool_executable_count": 44,
+                                    "tool_executable_evaluated": 45,
+                                    "output_tokens_per_second": 19.25,
                                 }
                             }
                         },
@@ -114,9 +117,12 @@ class ExperimentParsingTest(unittest.TestCase):
                     task="QA",
                     model="provider/model",
                     questions=50,
-                    valid=48,
-                    correct=42,
-                    accuracy=0.84,
+                    final_answer_match=42,
+                    cypher_solution_match=40,
+                    cypher_solution_evaluated=45,
+                    tool_executable=44,
+                    tool_executable_evaluated=45,
+                    throughput=19.25,
                 ),
             )
 
@@ -155,6 +161,9 @@ class ExperimentParsingTest(unittest.TestCase):
             def fake_run_streamed(*_args, on_line, **_kwargs):
                 on_line(f"INFO:runner:Running experiment: {experiment}\n")
                 on_line("INFO:runner:Running configuration: config-model\n")
+                on_line("INFO:runner:Question sweep size: 2\n")
+                on_line("INFO:pipeline:Question progress: 1/2 | qa-001\n")
+                on_line("INFO:pipeline:Question progress: 2/2 | qa-002\n")
                 return 0, 1.25, []
 
             with (

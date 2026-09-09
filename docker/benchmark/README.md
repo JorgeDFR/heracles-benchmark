@@ -102,9 +102,12 @@ The `BENCHMARK_CONFIG` environment variable provides the same override. The
 launcher presents an interactive choice of Ollama, OpenRouter, both, or quit.
 The selected provider must also be enabled in the manifest.
 
-The benchmark container displays Rich progress bars for long-running model
-sweeps, followed by a normalized table containing the model, task, question
-count, valid answers, correct answers, and accuracy. Request-level HTTP logs,
+The benchmark container displays nested Rich progress bars for model sweeps and
+the questions in each configuration, followed by a normalized table containing
+the model, task, question count, tool executability, Cypher
+solution/grounding matches, final-answer matches, token totals, and throughput.
+Reports separate new conversation input from all processed prompt tokens and
+provider-reported cache usage. Request-level HTTP logs,
 Neo4j notifications, answer-parser warnings, and raw tool errors are suppressed
 from the live console and written to `benchmark.log`. A diagnostics table shows
 how many messages of each category were captured, so the cleaner output does not
@@ -118,6 +121,9 @@ For Ollama runs, enabled model names are read from the manifest and missing
 models are pulled into the persistent `ollama-cache` volume. If an unrelated
 container named `ollama` already exists, stop or rename it because local metric
 collection expects the benchmark container to use that name.
+After collecting the unloaded GPU baseline, each model is warmed before its
+measured questions. Configure this with `warmup_enabled`, `warmup_requests`,
+and `warmup_prompt` under `providers.ollama.local_metrics`.
 
 For the default manifest, outputs are stored under:
 

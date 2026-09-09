@@ -142,6 +142,20 @@ The console uses Rich progress bars and compact per-model result tables. Noisy
 HTTP, database-notification, validation, and tool diagnostics are retained in
 `benchmark.log` beside the report instead of being streamed to the terminal.
 
+For Ollama, the launcher-generated configuration collects the unloaded GPU
+baseline, performs the configured model warmup, and only then starts measured
+questions. Set `warmup_enabled`, `warmup_requests`, and `warmup_prompt` under
+`providers.ollama.local_metrics` in the benchmark manifest.
+
+Quality reports score the final answer, the solution/grounding recovered from
+the final Cypher tool result, and whether that final query was executable as
+separate metrics. Reports distinguish new conversation input (the initial
+prompt plus newly appended messages) from all prompt tokens processed across
+requests and retries. Provider-reported cache reads and writes are shown
+separately when available. Throughput is reported in tokens per second using
+the measured successful LLM-call duration; OpenRouter usage and cost come from
+the chat response without a second per-generation API request.
+
 See [docker/benchmark/README.md](docker/benchmark/README.md) for GPU detection,
 memory guidance, output mounts, cleanup behavior, and troubleshooting.
 

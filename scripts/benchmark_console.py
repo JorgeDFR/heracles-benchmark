@@ -35,6 +35,11 @@ PROVIDER_LABELS = {"ollama": "Ollama", "openrouter": "OpenRouter"}
 CONFIGURATION_RE = re.compile(r"Running configuration: (.+?)\s*$")
 EXPERIMENT_RE = re.compile(r"Running experiment: (.+?)\s*$")
 RESULT_RE = re.compile(r"Saved results: (.+?)\s*$")
+WARMUP_RE = re.compile(r"Warming Ollama model: (.+?) \(\d+/\d+\)\s*$")
+QUESTION_SWEEP_RE = re.compile(r"Question sweep size: (\d+)\s*$")
+QUESTION_PROGRESS_RE = re.compile(
+    r"Question progress: (?P<completed>\d+)/(?P<total>\d+) \| (?P<label>.+?)\s*$"
+)
 SCENE_COUNT_RE = re.compile(
     r"^# (?P<label>Objects|Places|2D Places|Rooms):\s+(?P<count>\d+)\s*$"
 )
@@ -89,9 +94,12 @@ class ResultRow:
     task: str
     model: str
     questions: int
-    valid: int
-    correct: int
-    accuracy: float | None
+    final_answer_match: int
+    cypher_solution_match: int
+    cypher_solution_evaluated: int
+    tool_executable: int
+    tool_executable_evaluated: int
+    throughput: float | None
 
 
 def display_path(path: Path) -> str:
@@ -304,10 +312,17 @@ def result_row(path: Path) -> ResultRow | None:
         task=task,
         model=model,
         questions=int(summary.get("questions", 0)),
-        valid=int(summary.get("valid_answer_count", 0)),
-        correct=int(summary.get("correct_count", 0)),
-        accuracy=summary.get("accuracy")
-        if isinstance(summary.get("accuracy"), int | float)
+        final_answer_match=int(
+            summary.get("final_answer_match_count", summary.get("correct_count", 0))
+        ),
+        cypher_solution_match=int(summary.get("cypher_solution_match_count", 0)),
+        cypher_solution_evaluated=int(
+            summary.get("cypher_solution_match_evaluated", 0)
+        ),
+        tool_executable=int(summary.get("tool_executable_count", 0)),
+        tool_executable_evaluated=int(summary.get("tool_executable_evaluated", 0)),
+        throughput=summary.get("output_tokens_per_second")
+        if isinstance(summary.get("output_tokens_per_second"), int | float)
         else None,
     )
 
@@ -331,18 +346,20 @@ def print_result_rows(provider: str, paths: Sequence[Path]) -> None:
     table.add_column("Task")
     table.add_column("Model", overflow="fold")
     table.add_column("Questions", justify="right")
-    table.add_column("Valid", justify="right")
-    table.add_column("Correct", justify="right")
-    table.add_column("Accuracy", justify="right")
+    table.add_column("Tool Executable", justify="right")
+    table.add_column("Cypher / Grounding", justify="right")
+    table.add_column("Final Answer", justify="right")
+    table.add_column("Throughput", justify="right")
     for row in sorted(rows, key=lambda item: (item.task, item.model)):
-        accuracy = "-" if row.accuracy is None else f"{100 * row.accuracy:.1f}%"
+        throughput = "-" if row.throughput is None else f"{row.throughput:.2f} tok/s"
         table.add_row(
             row.task,
             row.model,
             str(row.questions),
-            str(row.valid),
-            str(row.correct),
-            accuracy,
+            f"{row.tool_executable}/{row.tool_executable_evaluated}",
+            f"{row.cypher_solution_match}/{row.cypher_solution_evaluated}",
+            f"{row.final_answer_match}/{row.questions}",
+            throughput,
         )
     console.print(table)
 
@@ -367,6 +384,7 @@ def run_experiments(args: argparse.Namespace) -> int:
     result_paths: list[Path] = []
     current_name: str | None = None
     current_task = "Preparing"
+    question_progress_id: int | None = None
     completed: set[tuple[str, str]] = set()
 
     command = [
@@ -397,7 +415,7 @@ def run_experiments(args: argparse.Namespace) -> int:
         )
 
         def complete_current() -> None:
-            nonlocal current_name
+            nonlocal current_name, question_progress_id
             if current_name is None:
                 return
             key = (current_task, current_name)
@@ -405,9 +423,12 @@ def run_experiments(args: argparse.Namespace) -> int:
                 completed.add(key)
                 progress.advance(progress_id)
             current_name = None
+            if question_progress_id is not None:
+                progress.remove_task(question_progress_id)
+                question_progress_id = None
 
         def observe(line: str) -> None:
-            nonlocal current_name, current_task
+            nonlocal current_name, current_task, question_progress_id
             diagnostics.observe(line)
             experiment_match = EXPERIMENT_RE.search(line)
             if experiment_match:
@@ -425,6 +446,38 @@ def run_experiments(args: argparse.Namespace) -> int:
                 progress.update(
                     progress_id,
                     current=f"{current_task} · {model}",
+                )
+            question_sweep_match = QUESTION_SWEEP_RE.search(line)
+            if question_sweep_match:
+                if question_progress_id is not None:
+                    progress.remove_task(question_progress_id)
+                question_progress_id = progress.add_task(
+                    f"↳ {current_task} questions",
+                    total=int(question_sweep_match.group(1)),
+                    completed=0,
+                    current="Starting",
+                )
+            question_match = QUESTION_PROGRESS_RE.search(line)
+            if question_match:
+                total = int(question_match.group("total"))
+                if question_progress_id is None:
+                    question_progress_id = progress.add_task(
+                        f"↳ {current_task} questions",
+                        total=total,
+                        completed=0,
+                        current="Starting",
+                    )
+                progress.update(
+                    question_progress_id,
+                    total=total,
+                    completed=int(question_match.group("completed")),
+                    current=question_match.group("label"),
+                )
+            warmup_match = WARMUP_RE.search(line)
+            if warmup_match:
+                progress.update(
+                    progress_id,
+                    current=f"{current_task} · {warmup_match.group(1)} · warmup",
                 )
             result_match = RESULT_RE.search(line)
             if result_match:
