@@ -21,6 +21,9 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 SUPPORTED_PROVIDERS = ("ollama", "openrouter")
+INFERENCE_PARAMETER_NAMES = {"temperature", "seed", "reasoning"}
+REASONING_MODES = {"enabled", "disabled", "unsupported", "provider_default"}
+REASONING_SUPPORT = {"required", "optional", "unsupported"}
 TASK_SPECS = {
     "qa": {
         "filename": "cypher_model_sweep.yaml",
@@ -65,6 +68,174 @@ def required_string(value: Any, field: str) -> str:
     if not isinstance(value, str) or not value.strip():
         raise ManifestError(f"`{field}` must be a non-empty string")
     return value.strip()
+
+
+def validate_inference_parameters(
+    parameters: Any,
+    field: str,
+    *,
+    partial: bool = False,
+) -> dict[str, Any]:
+    parameters = required_mapping(parameters, field)
+    unknown = set(parameters) - INFERENCE_PARAMETER_NAMES
+    if unknown:
+        raise ManifestError(
+            f"`{field}` contains unsupported parameter(s): "
+            + ", ".join(sorted(unknown))
+        )
+
+    if not partial:
+        missing = INFERENCE_PARAMETER_NAMES - set(parameters)
+        if missing:
+            raise ManifestError(
+                f"`{field}` must define: " + ", ".join(sorted(missing))
+            )
+
+    if "temperature" in parameters:
+        temperature = parameters["temperature"]
+        if temperature is not None and (
+            isinstance(temperature, bool)
+            or not isinstance(temperature, int | float)
+        ):
+            raise ManifestError(f"`{field}.temperature` must be a number or null")
+
+    if "seed" in parameters:
+        seed = parameters["seed"]
+        if seed is not None and (
+            isinstance(seed, bool) or not isinstance(seed, int)
+        ):
+            raise ManifestError(f"`{field}.seed` must be an integer or null")
+
+    if "reasoning" in parameters:
+        reasoning = required_mapping(
+            parameters["reasoning"], f"{field}.reasoning"
+        )
+        unknown_reasoning = set(reasoning) - {"mode", "effort"}
+        if unknown_reasoning:
+            raise ManifestError(
+                f"`{field}.reasoning` contains unsupported field(s): "
+                + ", ".join(sorted(unknown_reasoning))
+            )
+        mode = reasoning.get("mode")
+        if mode not in REASONING_MODES:
+            raise ManifestError(
+                f"`{field}.reasoning.mode` must be one of: "
+                + ", ".join(sorted(REASONING_MODES))
+            )
+        effort = reasoning.get("effort")
+        if effort is not None and (
+            not isinstance(effort, str) or not effort.strip()
+        ):
+            raise ManifestError(
+                f"`{field}.reasoning.effort` must be a non-empty string or null"
+            )
+        if mode != "enabled" and effort is not None:
+            raise ManifestError(
+                f"`{field}.reasoning.effort` may only be set when reasoning "
+                "mode is `enabled`"
+            )
+
+    return parameters
+
+
+def validate_parameter_capabilities(
+    capabilities: Any,
+    parameters: dict[str, Any],
+    field: str,
+) -> dict[str, Any]:
+    capabilities = required_mapping(capabilities, field)
+    expected = {"reasoning", "reasoning_efforts", "temperature", "seed"}
+    unknown = set(capabilities) - expected
+    missing = expected - set(capabilities)
+    if unknown:
+        raise ManifestError(
+            f"`{field}` contains unsupported capability field(s): "
+            + ", ".join(sorted(unknown))
+        )
+    if missing:
+        raise ManifestError(
+            f"`{field}` must define: " + ", ".join(sorted(missing))
+        )
+
+    reasoning_support = capabilities["reasoning"]
+    if reasoning_support not in REASONING_SUPPORT:
+        raise ManifestError(
+            f"`{field}.reasoning` must be one of: "
+            + ", ".join(sorted(REASONING_SUPPORT))
+        )
+    efforts = capabilities["reasoning_efforts"]
+    if efforts is not None:
+        if not isinstance(efforts, list) or not efforts or any(
+            not isinstance(effort, str) or not effort.strip() for effort in efforts
+        ):
+            raise ManifestError(
+                f"`{field}.reasoning_efforts` must be a list of non-empty "
+                "strings or null"
+            )
+        if len(set(efforts)) != len(efforts):
+            raise ManifestError(
+                f"`{field}.reasoning_efforts` must not contain duplicates"
+            )
+    if reasoning_support == "unsupported" and efforts is not None:
+        raise ManifestError(
+            f"`{field}.reasoning_efforts` must be null when reasoning is unsupported"
+        )
+    for parameter in ("temperature", "seed"):
+        if not isinstance(capabilities[parameter], bool):
+            raise ManifestError(f"`{field}.{parameter}` must be boolean")
+
+    reasoning = parameters["reasoning"]
+    mode = reasoning["mode"]
+    effort = reasoning.get("effort")
+    if reasoning_support == "required" and mode != "enabled":
+        raise ManifestError(
+            f"`{field}` declares mandatory reasoning; effective mode must be "
+            "`enabled`"
+        )
+    if reasoning_support == "unsupported" and mode != "unsupported":
+        raise ManifestError(
+            f"`{field}` declares reasoning unsupported; effective mode must be "
+            "`unsupported`"
+        )
+    if reasoning_support == "optional" and mode == "unsupported":
+        raise ManifestError(
+            f"`{field}` declares reasoning supported; effective mode cannot be "
+            "`unsupported`"
+        )
+    if mode == "enabled" and effort is not None:
+        if efforts is None:
+            raise ManifestError(
+                f"`{field}` does not expose reasoning effort selection"
+            )
+        if effort not in efforts:
+            raise ManifestError(
+                f"Reasoning effort `{effort}` is not declared by `{field}`; "
+                f"supported values are: {', '.join(efforts)}"
+            )
+    if mode == "enabled" and efforts is not None and effort is None:
+        raise ManifestError(
+            f"`{field}` exposes reasoning effort selection; set an explicit "
+            "effective effort"
+        )
+    if not capabilities["temperature"] and parameters["temperature"] is not None:
+        raise ManifestError(
+            f"`{field}` declares temperature unsupported; set the effective "
+            "temperature to null"
+        )
+    if not capabilities["seed"] and parameters["seed"] is not None:
+        raise ManifestError(
+            f"`{field}` declares seed unsupported; set the effective seed to null"
+        )
+    if capabilities["temperature"] and parameters["temperature"] is None:
+        raise ManifestError(
+            f"`{field}` declares temperature supported; set an explicit effective "
+            "temperature"
+        )
+    if capabilities["seed"] and parameters["seed"] is None:
+        raise ManifestError(
+            f"`{field}` declares seed supported; set an explicit effective seed"
+        )
+    return capabilities
 
 
 @dataclass
@@ -176,10 +347,47 @@ class BenchmarkManifest:
             ) from error
         return output
 
+    @property
+    def expected_question_count(self) -> int:
+        value = self.benchmark.get("expected_question_count", 50)
+        if isinstance(value, bool) or not isinstance(value, int) or value < 1:
+            raise ManifestError(
+                "`benchmark.expected_question_count` must be a positive integer"
+            )
+        return value
+
     def provider(self, name: str) -> dict[str, Any]:
         if name not in SUPPORTED_PROVIDERS:
             raise ManifestError(f"Unsupported provider: {name}")
         return required_mapping(self.providers.get(name), f"providers.{name}")
+
+    @property
+    def inference_parameters(self) -> dict[str, Any]:
+        return validate_inference_parameters(
+            {
+                "temperature": self.agent.get("temperature"),
+                "seed": self.agent.get("seed"),
+                "reasoning": self.agent.get("reasoning"),
+            },
+            "agent inference parameters",
+        )
+
+    def effective_model_parameters(
+        self, provider: str, model: dict[str, Any]
+    ) -> dict[str, Any]:
+        parameters = deepcopy(self.inference_parameters)
+        overrides = model.get("parameters")
+        if overrides is not None:
+            overrides = validate_inference_parameters(
+                overrides,
+                f"providers.{provider}.models[{model.get('alias')}].parameters",
+                partial=True,
+            )
+            parameters.update(deepcopy(overrides))
+        return validate_inference_parameters(
+            parameters,
+            f"effective parameters for {provider}/{model.get('alias')}",
+        )
 
     def enabled_models(self, provider: str) -> list[dict[str, Any]]:
         config = self.provider(provider)
@@ -211,8 +419,20 @@ class BenchmarkManifest:
                     f"Duplicate model alias `{alias}` for provider `{provider}`"
                 )
             aliases.add(alias)
+            if model.get("parameters") is not None:
+                validate_inference_parameters(
+                    model["parameters"],
+                    f"providers.{provider}.models[{index}].parameters",
+                    partial=True,
+                )
             if enabled_value:
-                enabled.append(deepcopy(model))
+                resolved_model = deepcopy(model)
+                validate_parameter_capabilities(
+                    resolved_model.get("capabilities"),
+                    self.effective_model_parameters(provider, resolved_model),
+                    f"providers.{provider}.models[{index}].capabilities",
+                )
+                enabled.append(resolved_model)
         return enabled
 
     def validate_question_metadata(self) -> None:
@@ -286,9 +506,10 @@ class BenchmarkManifest:
                 raise ManifestError(
                     f"Question count does not match metadata for `{task}`"
                 )
-            if len(questions) != 50:
+            if len(questions) != self.expected_question_count:
                 raise ManifestError(
-                    f"Benchmark question file `{task}` must contain exactly 50 questions"
+                    f"Benchmark question file `{task}` must contain exactly "
+                    f"{self.expected_question_count} questions"
                 )
 
     def validate(self, selected_providers: Sequence[str] = ()) -> None:
@@ -303,15 +524,11 @@ class BenchmarkManifest:
             self.question_paths,
             self.question_metadata,
             self.output_dir,
+            self.expected_question_count,
         )
         self.validate_question_metadata()
 
-        temperature = self.agent.get("temperature")
-        if isinstance(temperature, bool) or not isinstance(temperature, int | float):
-            raise ManifestError("`agent.temperature` must be a number")
-        seed = self.agent.get("seed")
-        if isinstance(seed, bool) or not isinstance(seed, int):
-            raise ManifestError("`agent.seed` must be an integer")
+        _ = self.inference_parameters
         max_iterations = self.agent.get("max_iterations")
         if isinstance(max_iterations, bool) or not isinstance(max_iterations, int):
             raise ManifestError("`agent.max_iterations` must be an integer")
@@ -323,6 +540,12 @@ class BenchmarkManifest:
             if not isinstance(config.get("enabled"), bool):
                 raise ManifestError(f"`providers.{provider}.enabled` must be boolean")
             self.enabled_models(provider)
+            if provider == "openrouter" and not isinstance(
+                config.get("require_parameters", True), bool
+            ):
+                raise ManifestError(
+                    "`providers.openrouter.require_parameters` must be boolean"
+                )
             local_metrics = config.get("local_metrics")
             if local_metrics is not None:
                 local_metrics = required_mapping(
@@ -349,6 +572,22 @@ class BenchmarkManifest:
                         local_metrics.get("warmup_prompt", "Reply with OK."),
                         f"providers.{provider}.local_metrics.warmup_prompt",
                     )
+                    keep_alive = local_metrics.get("warmup_keep_alive", -1)
+                    if isinstance(keep_alive, bool) or not isinstance(
+                        keep_alive, int | str
+                    ):
+                        raise ManifestError(
+                            f"`providers.{provider}.local_metrics."
+                            "warmup_keep_alive` must be an integer or duration string"
+                        )
+                    verify_resident = local_metrics.get(
+                        "warmup_verify_resident", True
+                    )
+                    if not isinstance(verify_resident, bool):
+                        raise ManifestError(
+                            f"`providers.{provider}.local_metrics."
+                            "warmup_verify_resident` must be boolean"
+                        )
         for provider in selected_providers:
             config = self.provider(provider)
             if not config["enabled"]:
@@ -384,6 +623,23 @@ class BenchmarkManifest:
             metadata["local_metrics"] = required_mapping(
                 local_metrics, f"providers.{provider}.local_metrics"
             )
+        client_config: dict[str, Any] = {"client_type": provider}
+        if provider == "ollama" and isinstance(local_metrics, dict):
+            client_config["keep_alive"] = local_metrics.get(
+                "warmup_keep_alive", -1
+            )
+        if provider == "openrouter":
+            client_config["require_parameters"] = provider_config.get(
+                "require_parameters", True
+            )
+
+        models = []
+        for model in self.enabled_models(provider):
+            resolved_model = deepcopy(model)
+            resolved_model["parameters"] = self.effective_model_parameters(
+                provider, model
+            )
+            models.append(resolved_model)
 
         return {
             "metadata": metadata,
@@ -393,16 +649,15 @@ class BenchmarkManifest:
                     "phase": "main",
                     "configuration_name_template": spec["configuration"],
                     "result_configuration_name": spec["result_configuration"],
-                    "models": deepcopy(provider_config["models"]),
+                    "models": models,
                     "template": {
                         "dsg_interface": {"dsg_interface_type": "none"},
                         "pipeline": "agentic",
                         "phases": {
                             "main": {
-                                "client": {"client_type": provider},
+                                "client": client_config,
                                 "model_info": {
-                                    "temperature": self.agent["temperature"],
-                                    "seed": self.agent["seed"],
+                                    **deepcopy(self.inference_parameters),
                                 },
                                 "agent_info": {
                                     "prompt_settings": prompt_settings,

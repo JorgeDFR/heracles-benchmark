@@ -58,6 +58,8 @@ services:
     image: ollama/ollama:0.33.3
     container_name: ollama
     restart: unless-stopped
+    environment:
+      OLLAMA_KEEP_ALIVE: "-1"
     volumes: [ollama-cache:/root/.ollama]
     healthcheck:
       test: [CMD-SHELL, bash, -c, "{ printf >&3 'GET / HTTP/1.0\\r\\n\\r\\n'; cat <&3; } 3<>/dev/tcp/localhost/11434 | grep 'Ollama is' || exit 1"]

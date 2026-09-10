@@ -1,0 +1,35 @@
+---
+questions:
+- uid: QA-SMOKE-001
+  name: Object class inventory
+  question: Give the complete set of object categories represented in this map.
+  solution: <appliance, bag, bed, bicycle, box, decor, food, light, seating, sign, storage, trash>
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - smoke
+  - inventory
+  - class
+- uid: QA-SMOKE-002
+  name: Object total
+  question: How many object nodes does the scene contain?
+  solution: '65'
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - smoke
+  - count
+  - object
+- uid: QA-SMOKE-003
+  name: Room total
+  question: What is the total number of mapped rooms?
+  solution: '5'
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - smoke
+  - count
+  - room

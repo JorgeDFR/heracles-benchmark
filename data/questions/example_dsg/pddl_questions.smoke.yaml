@@ -1,0 +1,38 @@
+---
+questions:
+- uid: PDDL-SMOKE-001
+  name: Visit a named object
+  question: Pass by object O84 before the task is complete.
+  solution: (visited-object O84)
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - smoke
+  - direct-symbol
+  - object
+  - visit
+- uid: PDDL-SMOKE-002
+  name: End at a named object
+  question: Finish the mission at O266.
+  solution: (at-object O266)
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - smoke
+  - direct-symbol
+  - object
+  - final-location
+- uid: PDDL-SMOKE-003
+  name: Inspect a named object
+  question: Examine object O70 closely.
+  solution: (safe O70)
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - smoke
+  - direct-symbol
+  - object
+  - inspect

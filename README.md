@@ -68,6 +68,9 @@ the following files under `data/questions/example_dsg/`:
 - `pddl_questions.yaml`
 - `metadata.yaml`
 
+<details>
+<summary>Question-generation details and scene requirements</summary>
+
 The metadata records scene, catalog, generator, avoidance-input, and output
 checksums; generator and dependency versions; random seeds; and question
 counts. The QA and PDDL files contain only their `questions` lists; all metadata
@@ -90,6 +93,8 @@ rooms, 2D or 3D navigable places, containment edges, and connected room and
 place pairs. Unsupported scene graphs fail with an explanation instead of
 producing ungrounded answers.
 
+</details>
+
 ## Benchmark configuration
 
 [`configs/benchmark.yaml`](configs/benchmark.yaml) is the single source of
@@ -98,7 +103,7 @@ truth for a Docker benchmark run. It declares:
 - the scene ID and repository-owned scene graph;
 - the QA, PDDL, and question-metadata files;
 - the output directory;
-- agent temperature, seed, and iteration limit;
+- normalized reasoning, temperature, seed, and iteration settings;
 - enabled providers and each provider's model sweep;
 - Ollama local-metric settings.
 
@@ -115,6 +120,76 @@ python scripts/benchmark_manifest.py \
 Copy the manifest to create another benchmark configuration. Keep manifests
 under `configs/`, scene graphs under `data/scene_graphs/`, and each generated
 question set under `data/questions/<scene-id>/`.
+
+<details>
+<summary>Inference controls and model-capability inspection</summary>
+
+Inference controls are defined once under `agent` and may be replaced for an
+individual model with a `parameters` mapping:
+
+```yaml
+agent:
+  temperature: 0.2
+  seed: 123
+  reasoning:
+    mode: enabled
+    effort: provider_default
+
+providers:
+  openrouter:
+    require_parameters: true
+    models:
+      - alias: example
+        model: provider/model
+        capabilities:               # Declared and validated for every enabled model.
+          reasoning: unsupported    # required, optional, or unsupported
+          reasoning_efforts: null   # Provider effort names, or null if unavailable.
+          temperature: false
+          seed: false
+        parameters:                 # Optional model-specific replacement.
+          temperature: null         # Omit when unsupported.
+          seed: null                # Omit when unsupported.
+          reasoning:
+            mode: unsupported
+            effort: null
+```
+
+Reasoning mode is `enabled`, `disabled`, `unsupported`, or
+`provider_default`. Use `unsupported` for a model with no reasoning control and
+`provider_default` only when deliberately accepting an uncontrolled provider
+default. An enabled model may use any non-empty provider effort name; leave
+`effort` null when it supports reasoning but no effort selector. Models with
+mandatory reasoning must use `enabled` and one of their supported efforts. For
+example, Ollama GPT-OSS cannot disable thinking and accepts only `low`,
+`medium`, or `high`. OpenRouter's `require_parameters: true` prevents routing
+to an endpoint that would silently ignore supplied controls. The requested
+effective settings and declared capabilities are saved in result metadata and
+shown in the report's Provider Models tab. Capabilities are kept explicitly in
+the manifest rather than fetched during a run, so validation does not add a
+network request or change when a provider updates its model catalog.
+When a capability exposes an effort, temperature, or seed control, validation
+requires an explicit value so a benchmark cannot silently inherit a provider
+default.
+
+Inspect an exact provider model and generate a suggested capability block with:
+
+```bash
+python scripts/inspect_model_capabilities.py openrouter openai/gpt-oss-120b
+python scripts/inspect_model_capabilities.py ollama gemma4:26b
+```
+
+The command retrieves OpenRouter catalog metadata or the local Ollama
+`/api/show` response. It also lists fields that the API cannot establish and
+links to the model-specific documentation where they should be confirmed. Use
+`--format yaml` or `--format json` for machine-readable output, and
+`--ollama-host` when Ollama is not available at `http://localhost:11434`.
+When the default local Ollama address is offline, the command automatically
+starts the repository's `ollama` Compose service and waits for its API. Pass
+`--no-start-ollama` to disable this behavior. The requested model must already
+exist in the persistent `ollama-cache` volume; otherwise install it with
+`docker exec ollama ollama pull <model>` and run the inspection again.
+
+</details>
 
 ## Run the Docker benchmark
 
@@ -134,6 +209,9 @@ Choose Ollama, OpenRouter, or both from the menu. For OpenRouter, set
 ./scripts/run_benchmark.sh --config configs/my-benchmark.yaml
 ```
 
+<details>
+<summary>Benchmark execution, logging, and Ollama warmup details</summary>
+
 The launcher builds the selected repository inputs into the image, resolves
 provider experiment files from the manifest, pulls enabled Ollama models when
 needed, loads the configured graph, and writes results to the manifest's
@@ -144,17 +222,14 @@ HTTP, database-notification, validation, and tool diagnostics are retained in
 
 For Ollama, the launcher-generated configuration collects the unloaded GPU
 baseline, performs the configured model warmup, and only then starts measured
-questions. Set `warmup_enabled`, `warmup_requests`, and `warmup_prompt` under
-`providers.ollama.local_metrics` in the benchmark manifest.
+questions. The cold warmup request is recorded separately, `keep_alive` keeps
+the model resident, and `/api/ps` verifies residency before measurement. Set
+`warmup_enabled`, `warmup_requests`, `warmup_prompt`, `warmup_keep_alive`, and
+`warmup_verify_resident` under `providers.ollama.local_metrics`.
 
-Quality reports score the final answer, the solution/grounding recovered from
-the final Cypher tool result, and whether that final query was executable as
-separate metrics. Reports distinguish new conversation input (the initial
-prompt plus newly appended messages) from all prompt tokens processed across
-requests and retries. Provider-reported cache reads and writes are shown
-separately when available. Throughput is reported in tokens per second using
-the measured successful LLM-call duration; OpenRouter usage and cost come from
-the chat response without a second per-generation API request.
+</details>
+
+<p></p>
 
 See [docker/benchmark/README.md](docker/benchmark/README.md) for GPU detection,
 memory guidance, output mounts, cleanup behavior, and troubleshooting.

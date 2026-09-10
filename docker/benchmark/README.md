@@ -25,6 +25,17 @@ files, question metadata, output directory, agent settings, provider switches,
 model lists, and metric settings. Set `enabled: true` only for the models that
 should run.
 
+The `agent.reasoning` mapping normalizes thinking across Ollama and OpenRouter:
+choose `enabled`, `disabled`, `unsupported`, or `provider_default` as its
+`mode`, and optionally set an `effort` for enabled models. Global temperature,
+seed, and reasoning settings can be replaced per model under `parameters`;
+use null temperature/seed values when those controls are unsupported. Mandatory
+reasoning models must remain enabled with a supported effort. Every enabled
+model also declares `capabilities` for reasoning support, effort names,
+temperature, and seed; incompatible requests fail manifest validation. Keep
+`providers.openrouter.require_parameters: true` to reject routes that would
+ignore requested parameters. See the root README for a complete example.
+
 All manifest paths are relative to the repository root. Keep custom manifests
 below `configs/`; they are copied into the benchmark image together with
 `data/`. The manifest validator rejects missing files, paths outside the
@@ -37,6 +48,15 @@ Validate before starting Docker from a local virtual environment:
 python scripts/benchmark_manifest.py \
   --config configs/benchmark.yaml \
   validate
+```
+
+Use `configs/benchmark-smoke.yaml` for a six-question integration check
+(three QA and three PDDL questions) before running the complete benchmark.
+Production manifests expect 50 questions per task by default; a deliberately
+smaller manifest must set `benchmark.expected_question_count`.
+
+```bash
+./scripts/run_benchmark.sh --config configs/benchmark-smoke.yaml
 ```
 
 The question generator convention is:
@@ -106,8 +126,8 @@ The benchmark container displays nested Rich progress bars for model sweeps and
 the questions in each configuration, followed by a normalized table containing
 the model, task, question count, tool executability, Cypher
 solution/grounding matches, final-answer matches, token totals, and throughput.
-Reports separate new conversation input from all processed prompt tokens and
-provider-reported cache usage. Request-level HTTP logs,
+Reports show input, output, cached-input, and reasoning-token totals summed from
+provider usage across each conversation. Request-level HTTP logs,
 Neo4j notifications, answer-parser warnings, and raw tool errors are suppressed
 from the live console and written to `benchmark.log`. A diagnostics table shows
 how many messages of each category were captured, so the cleaner output does not
@@ -121,9 +141,16 @@ For Ollama runs, enabled model names are read from the manifest and missing
 models are pulled into the persistent `ollama-cache` volume. If an unrelated
 container named `ollama` already exists, stop or rename it because local metric
 collection expects the benchmark container to use that name.
-After collecting the unloaded GPU baseline, each model is warmed before its
-measured questions. Configure this with `warmup_enabled`, `warmup_requests`,
-and `warmup_prompt` under `providers.ollama.local_metrics`.
+After collecting the unloaded GPU baseline, each model receives a separately
+recorded cold warmup request and is verified as resident before measured
+questions. Configure this with `warmup_enabled`, `warmup_requests`,
+`warmup_prompt`, `warmup_keep_alive`, and `warmup_verify_resident` under
+`providers.ollama.local_metrics`.
+
+The report keeps CPU average/peak, RAM peak, VRAM peak, GPU average, GPU power,
+and GPU energy under Local Resources. Ollama response timings—including model
+load duration—and generation throughput are reported under Latency. TTFT is not
+collected.
 
 For the default manifest, outputs are stored under:
 

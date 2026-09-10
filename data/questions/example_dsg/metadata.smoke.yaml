@@ -1,0 +1,27 @@
+---
+schema_version: 1
+scene_id: example_dsg
+scene_graph:
+  path: data/scene_graphs/example_dsg.json
+  sha256: 8caa134540fcf27d94e9d3d31a50886fe4d84bdd9b7eccdaa5897d124285e656
+question_catalog:
+  path: data/questions/question_types.yaml
+  sha256: 04fba84f5bcecc7e85bfba7c6867f1424cacac9d9004a200c3737d214118b77e
+generator:
+  path: scripts/generate_questions.py
+  version: 2
+  sha256: 03c89785e260139b8461782e37c90ef3dae21005e95bfa4730eee9d27b65b8a6
+  spark_dsg_version: 1.1.3
+  pyyaml_version: 6.0.3
+parameters:
+  purpose: temporary smoke test for report and usage-accounting changes
+  source: selected from the reproducible 50-question example_dsg sets
+  qa_question_count: 3
+  pddl_question_count: 3
+artifacts:
+  qa:
+    path: data/questions/example_dsg/qa_questions.smoke.yaml
+    sha256: 0798ebe14f46e5429f425d96f1d269097d51f468e00cdcd1535482f3b58bf19a
+  pddl:
+    path: data/questions/example_dsg/pddl_questions.smoke.yaml
+    sha256: 16220d71c62286f356cde0f4ad1fbc0f6e5671af4f208329ef1b377eaff81529

@@ -27,6 +27,25 @@ class QuestionArtifactStructureTest(unittest.TestCase):
         self.assertEqual(metadata["parameters"]["pddl_question_count"], 50)
         self.assertEqual(set(metadata["artifacts"]), {"qa", "pddl"})
 
+    def test_smoke_question_set_is_small_and_metadata_free(self) -> None:
+        for filename in (
+            "qa_questions.smoke.yaml",
+            "pddl_questions.smoke.yaml",
+        ):
+            with (QUESTION_DIRECTORY / filename).open(encoding="utf-8") as stream:
+                data = yaml.safe_load(stream)
+
+            self.assertEqual(set(data), {"questions"})
+            self.assertEqual(len(data["questions"]), 3)
+
+        with (QUESTION_DIRECTORY / "metadata.smoke.yaml").open(
+            encoding="utf-8"
+        ) as stream:
+            metadata = yaml.safe_load(stream)
+        self.assertEqual(metadata["scene_id"], "example_dsg")
+        self.assertEqual(metadata["parameters"]["qa_question_count"], 3)
+        self.assertEqual(metadata["parameters"]["pddl_question_count"], 3)
+
 
 if __name__ == "__main__":
     unittest.main()
