@@ -184,7 +184,7 @@ questions:
   - room
 - uid: QA018
   name: Object count in a room
-  question: Count the objects contained under room R1.
+  question: Count the distinct object nodes contained under room R1.
   solution: '27'
   correctness_comparator:
     comparison_type: SLDP
@@ -305,7 +305,7 @@ questions:
   - room
 - uid: QA029
   name: Room connectivity degree
-  question: What is the connectivity degree of room R4?
+  question: How many distinct rooms are directly connected to R4?
   solution: '2'
   correctness_comparator:
     comparison_type: SLDP
@@ -370,7 +370,7 @@ questions:
   - place
 - uid: QA035
   name: Place connectivity degree
-  question: How many same-layer place edges touch P9420?
+  question: How many distinct same-layer place nodes are directly connected to P9420?
   solution: '6'
   correctness_comparator:
     comparison_type: SLDP
@@ -427,7 +427,7 @@ questions:
   - object
 - uid: QA040
   name: Farthest object
-  question: Which object center lies farthest from O55?
+  question: Which object is farthest from O55 by center-to-center distance?
   solution: <O237>
   correctness_comparator:
     comparison_type: SLDP
@@ -460,7 +460,7 @@ questions:
   - class
 - uid: QA043
   name: Nearest place to an object
-  question: Which navigable place center is closest to object O66?
+  question: Which navigable place is closest to object O66 by center-to-center distance?
   solution: <P22249>
   correctness_comparator:
     comparison_type: SLDP
@@ -471,7 +471,7 @@ questions:
   - place
 - uid: QA044
   name: Nearest room to an object
-  question: Which room center is geometrically closest to O36?
+  question: Which room is closest to O36 by center-to-center distance?
   solution: <R3>
   correctness_comparator:
     comparison_type: SLDP
@@ -515,7 +515,7 @@ questions:
   - class
 - uid: QA048
   name: Nearest object to a room center
-  question: Which object center is nearest to the center of R3?
+  question: Which object is nearest to the center of R3?
   solution: <O43>
   correctness_comparator:
     comparison_type: SLDP

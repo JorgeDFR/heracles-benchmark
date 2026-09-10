@@ -26,8 +26,9 @@ model lists, and metric settings. Set `enabled: true` only for the models that
 should run.
 
 The `agent.reasoning` mapping normalizes thinking across Ollama and OpenRouter:
-choose `enabled`, `disabled`, `unsupported`, or `provider_default` as its
-`mode`, and optionally set an `effort` for enabled models. Global temperature,
+choose `enabled`, `disabled`, or `unsupported` as its `mode`, and optionally set
+an `effort` for enabled models. `model_default`, null, or an omitted effort
+enables reasoning with the model/provider default. Global temperature,
 seed, and reasoning settings can be replaced per model under `parameters`;
 use null temperature/seed values when those controls are unsupported. Mandatory
 reasoning models must remain enabled with a supported effort. Every enabled
@@ -142,8 +143,9 @@ models are pulled into the persistent `ollama-cache` volume. If an unrelated
 container named `ollama` already exists, stop or rename it because local metric
 collection expects the benchmark container to use that name.
 After collecting the unloaded GPU baseline, each model receives a separately
-recorded cold warmup request and is verified as resident before measured
-questions. Configure this with `warmup_enabled`, `warmup_requests`,
+recorded preload/cold-start request and then `warmup_requests` post-load warmup
+requests before it is verified as resident and measured questions begin.
+Configure this with `warmup_enabled`, `warmup_requests`,
 `warmup_prompt`, `warmup_keep_alive`, and `warmup_verify_resident` under
 `providers.ollama.local_metrics`.
 

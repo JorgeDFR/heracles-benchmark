@@ -17,7 +17,7 @@ agent:
   seed: 123
   reasoning:
     mode: enabled
-    effort: provider_default
+    effort: null
   max_iterations: 5
 
 providers:
@@ -32,6 +32,9 @@ providers:
           reasoning_efforts: null
           temperature: true
           seed: true
+        parameters:
+          reasoning:
+            mode: disabled
     local_metrics:
       enabled: true
       target_provider: ollama
@@ -42,7 +45,7 @@ providers:
       gpu_baseline_seconds: 5
       unload_models_before_baseline: true
       baseline_adjust_gpu: true
-      # Baseline is collected first; warmup then loads the model before measured work.
+      # Baseline, one cold preload, then this many resident warmups precede measurement.
       warmup_enabled: true
       warmup_requests: 1
       warmup_prompt: Reply with OK.
@@ -61,3 +64,7 @@ providers:
           reasoning_efforts: [low, medium, high]
           temperature: true
           seed: true
+        parameters:
+          reasoning:
+            mode: enabled
+            effort: medium # default

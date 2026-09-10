@@ -133,7 +133,7 @@ agent:
   seed: 123
   reasoning:
     mode: enabled
-    effort: provider_default
+    effort: model_default         # `null` and an omitted effort are equivalent.
 
 providers:
   openrouter:
@@ -154,22 +154,38 @@ providers:
             effort: null
 ```
 
-Reasoning mode is `enabled`, `disabled`, `unsupported`, or
-`provider_default`. Use `unsupported` for a model with no reasoning control and
-`provider_default` only when deliberately accepting an uncontrolled provider
-default. An enabled model may use any non-empty provider effort name; leave
-`effort` null when it supports reasoning but no effort selector. Models with
-mandatory reasoning must use `enabled` and one of their supported efforts. For
-example, Ollama GPT-OSS cannot disable thinking and accepts only `low`,
+Reasoning mode is `enabled`, `disabled`, or `unsupported`. Use `unsupported`
+for a model with no reasoning control. An enabled model may use any non-empty
+provider effort name. Set `effort: model_default`, `effort: null`, or omit the
+field to enable reasoning while using the model/provider default, whether or
+not explicit effort levels are available. `model_default` is canonicalized to
+null before execution. A per-model override lets other models retain a global
+effort:
+
+```yaml
+capabilities:
+  reasoning: optional
+  reasoning_efforts: null
+  temperature: true
+  seed: true
+parameters:
+  reasoning:
+    mode: enabled
+    effort: model_default
+```
+
+Models with mandatory reasoning must use `enabled`. When an explicit effort is
+selected, it must be supported by that model. For example, Ollama GPT-OSS
+cannot disable thinking and accepts only `low`,
 `medium`, or `high`. OpenRouter's `require_parameters: true` prevents routing
 to an endpoint that would silently ignore supplied controls. The requested
 effective settings and declared capabilities are saved in result metadata and
 shown in the report's Provider Models tab. Capabilities are kept explicitly in
 the manifest rather than fetched during a run, so validation does not add a
 network request or change when a provider updates its model catalog.
-When a capability exposes an effort, temperature, or seed control, validation
-requires an explicit value so a benchmark cannot silently inherit a provider
-default.
+When an effort is provided, validation checks it against the model capability
+declaration. Supported temperature and seed controls still require explicit
+values for reproducibility.
 
 Inspect an exact provider model and generate a suggested capability block with:
 
@@ -198,6 +214,9 @@ the Git submodules before building. Then run:
 
 ```bash
 cp docker/benchmark/.env.example docker/benchmark/.env
+```
+
+```bash
 ./scripts/run_benchmark.sh
 ```
 
@@ -221,9 +240,10 @@ HTTP, database-notification, validation, and tool diagnostics are retained in
 `benchmark.log` beside the report instead of being streamed to the terminal.
 
 For Ollama, the launcher-generated configuration collects the unloaded GPU
-baseline, performs the configured model warmup, and only then starts measured
-questions. The cold warmup request is recorded separately, `keep_alive` keeps
-the model resident, and `/api/ps` verifies residency before measurement. Set
+baseline, performs one separately recorded preload/cold-start request followed
+by the configured number of post-load warmup requests, and only then starts
+measured questions. `keep_alive` keeps the model resident, and `/api/ps`
+verifies residency before measurement. Set
 `warmup_enabled`, `warmup_requests`, `warmup_prompt`, `warmup_keep_alive`, and
 `warmup_verify_resident` under `providers.ollama.local_metrics`.
 

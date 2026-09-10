@@ -37,7 +37,7 @@ ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_SCENE = ROOT / "data" / "scene_graphs" / "example_dsg.json"
 DEFAULT_CATALOG = ROOT / "data" / "questions" / "question_types.yaml"
 DEFAULT_QUESTION_ROOT = ROOT / "data" / "questions"
-GENERATOR_VERSION = 2
+GENERATOR_VERSION = 3
 LOCAL_ID_MASK = (1 << 56) - 1
 
 LAYER_NAMES = {
@@ -530,7 +530,7 @@ def qa_questions(scene: Scene, choices: Choices) -> dict[str, Question]:
     )
     count_room = choices.one(scene.rooms, "a room object count")
     q["qa_object_count_in_room"] = Question(
-        f"Count the objects contained under room {count_room.symbol}.",
+        f"Count the distinct object nodes contained under room {count_room.symbol}.",
         str(len(scene.objects_by_room[count_room.symbol])),
     )
     room_class_pairs = [
@@ -640,7 +640,7 @@ def qa_questions(scene: Scene, choices: Choices) -> dict[str, Question]:
     )
     degree_room = choices.one(scene.rooms, "a room degree")
     q["qa_room_degree"] = Question(
-        f"What is the connectivity degree of room {degree_room.symbol}?",
+        f"How many distinct rooms are directly connected to {degree_room.symbol}?",
         str(len(room_adjacency[degree_room.symbol])),
     )
     max_degree = max(map(len, room_adjacency.values()))
@@ -684,7 +684,8 @@ def qa_questions(scene: Scene, choices: Choices) -> dict[str, Question]:
     )
     degree_place = choices.one(scene.places, "a place degree")
     q["qa_place_degree"] = Question(
-        f"How many same-layer place edges touch {degree_place.symbol}?",
+        "How many distinct same-layer place nodes are directly connected to "
+        f"{degree_place.symbol}?",
         str(len(place_adjacency[degree_place.symbol])),
     )
     hop_place = choices.one(connected_places, "a hop-query place")
@@ -734,7 +735,8 @@ def qa_questions(scene: Scene, choices: Choices) -> dict[str, Question]:
     )
     far_reference = choices.one(scene.objects, "an object far-distance reference")
     q["qa_farthest_object"] = Question(
-        f"Which object center lies farthest from {far_reference.symbol}?",
+        f"Which object is farthest from {far_reference.symbol} by "
+        "center-to-center distance?",
         sldp_set(
             entity.symbol
             for entity in extrema(
@@ -783,12 +785,13 @@ def qa_questions(scene: Scene, choices: Choices) -> dict[str, Question]:
     )
     place_ref = choices.one(scene.objects, "an object for nearest-place lookup")
     q["qa_nearest_place_to_object"] = Question(
-        f"Which navigable place center is closest to object {place_ref.symbol}?",
+        f"Which navigable place is closest to object {place_ref.symbol} by "
+        "center-to-center distance?",
         sldp_set(entity.symbol for entity in extrema(place_ref, scene.places)),
     )
     room_ref = choices.one(scene.objects, "an object for nearest-room lookup")
     q["qa_nearest_room_to_object"] = Question(
-        f"Which room center is geometrically closest to {room_ref.symbol}?",
+        f"Which room is closest to {room_ref.symbol} by center-to-center distance?",
         sldp_set(entity.symbol for entity in extrema(room_ref, scene.rooms)),
     )
     room_pairs = [
@@ -827,7 +830,7 @@ def qa_questions(scene: Scene, choices: Choices) -> dict[str, Question]:
     )
     near_room = choices.one(scene.rooms, "a room for nearest-object lookup")
     q["qa_nearest_object_to_room"] = Question(
-        f"Which object center is nearest to the center of {near_room.symbol}?",
+        f"Which object is nearest to the center of {near_room.symbol}?",
         sldp_set(entity.symbol for entity in extrema(near_room, scene.objects)),
     )
     far_room = choices.one(scene.rooms, "a room for farthest-object lookup")
@@ -1019,7 +1022,7 @@ def pddl_questions(scene: Scene, choices: Choices) -> dict[str, Question]:
         far_ref, [item for item in scene.objects if item != far_ref], farthest=True
     )
     q["pddl_visit_farthest_object"] = Question(
-        f"Reach the object farthest from {far_ref.symbol} by center distance.",
+        f"Pass by the object farthest from {far_ref.symbol} by center distance.",
         pddl_for_entities("visited-object", far_targets),
     )
     far_end_ref = choices.one(scene.objects, "a farthest final reference")
@@ -1049,7 +1052,7 @@ def pddl_questions(scene: Scene, choices: Choices) -> dict[str, Question]:
     nearest_room_ref = choices.one(scene.objects, "a nearest-room reference")
     nearest_rooms = extrema(nearest_room_ref, scene.rooms)
     q["pddl_visit_nearest_room"] = Question(
-        f"Enter the room whose center is closest to {nearest_room_ref.symbol}.",
+        f"Visit the room whose center is closest to {nearest_room_ref.symbol}.",
         pddl_for_entities("visited-region", nearest_rooms),
     )
     nearest_end_ref = choices.one(scene.objects, "a nearest final-room reference")
@@ -1062,7 +1065,7 @@ def pddl_questions(scene: Scene, choices: Choices) -> dict[str, Question]:
     max_degree = max(map(len, room_adjacency.values()))
     min_degree = min(map(len, room_adjacency.values()))
     q["pddl_visit_most_connected_room"] = Question(
-        "Visit a room with the maximum number of direct room connections.",
+        "Visit a room with the maximum number of distinct direct room neighbors.",
         pddl_group(
             "or",
             [
@@ -1086,7 +1089,7 @@ def pddl_questions(scene: Scene, choices: Choices) -> dict[str, Question]:
     rooms_with_neighbors = [item for item in scene.rooms if room_adjacency[item.symbol]]
     adjacent_ref = choices.one(rooms_with_neighbors, "a room with adjacent rooms")
     q["pddl_visit_adjacent_rooms"] = Question(
-        f"Cover every room directly connected to {adjacent_ref.symbol}.",
+        f"Visit every distinct room directly connected to {adjacent_ref.symbol}.",
         pddl_group(
             "and",
             [
@@ -1111,7 +1114,7 @@ def pddl_questions(scene: Scene, choices: Choices) -> dict[str, Question]:
     cross_obj = choices.one(scene.objects, "a cross-layer object")
     cross_room = choices.one(scene.rooms, "a cross-layer room")
     q["pddl_visit_object_or_room"] = Question(
-        f"Either pass object {cross_obj.symbol} or enter room {cross_room.symbol}.",
+        f"Either pass object {cross_obj.symbol} or visit room {cross_room.symbol}.",
         pddl_group(
             "or",
             [
@@ -1123,7 +1126,7 @@ def pddl_questions(scene: Scene, choices: Choices) -> dict[str, Question]:
     both_obj = choices.one(scene.objects, "a conjunctive object")
     both_room = choices.one(scene.rooms, "a conjunctive room")
     q["pddl_visit_object_and_room"] = Question(
-        f"Make sure you pass {both_obj.symbol} and also enter {both_room.symbol}.",
+        f"Make sure you pass {both_obj.symbol} and also visit {both_room.symbol}.",
         pddl_group(
             "and",
             [

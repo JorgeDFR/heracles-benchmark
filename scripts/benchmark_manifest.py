@@ -22,7 +22,7 @@ import yaml
 ROOT = Path(__file__).resolve().parents[1]
 SUPPORTED_PROVIDERS = ("ollama", "openrouter")
 INFERENCE_PARAMETER_NAMES = {"temperature", "seed", "reasoning"}
-REASONING_MODES = {"enabled", "disabled", "unsupported", "provider_default"}
+REASONING_MODES = {"enabled", "disabled", "unsupported"}
 REASONING_SUPPORT = {"required", "optional", "unsupported"}
 TASK_SPECS = {
     "qa": {
@@ -76,7 +76,7 @@ def validate_inference_parameters(
     *,
     partial: bool = False,
 ) -> dict[str, Any]:
-    parameters = required_mapping(parameters, field)
+    parameters = deepcopy(required_mapping(parameters, field))
     unknown = set(parameters) - INFERENCE_PARAMETER_NAMES
     if unknown:
         raise ManifestError(
@@ -117,6 +117,11 @@ def validate_inference_parameters(
                 + ", ".join(sorted(unknown_reasoning))
             )
         mode = reasoning.get("mode")
+        if mode == "provider_default":
+            raise ManifestError(
+                f"`{field}.reasoning.mode` no longer supports `provider_default`; "
+                "use `mode: enabled` with `effort: null` to request default effort"
+            )
         if mode not in REASONING_MODES:
             raise ManifestError(
                 f"`{field}.reasoning.mode` must be one of: "
@@ -128,6 +133,19 @@ def validate_inference_parameters(
         ):
             raise ManifestError(
                 f"`{field}.reasoning.effort` must be a non-empty string or null"
+            )
+        if effort == "model_default":
+            reasoning["effort"] = None
+            effort = None
+        if effort in REASONING_MODES:
+            raise ManifestError(
+                f"`{field}.reasoning.effort` uses reserved reasoning mode "
+                f"`{effort}`; set it as `mode` and set `effort: null`"
+            )
+        if effort == "provider_default":
+            raise ManifestError(
+                f"`{field}.reasoning.effort` no longer supports "
+                "`provider_default`; use null to request default effort"
             )
         if mode != "enabled" and effort is not None:
             raise ManifestError(
@@ -212,11 +230,6 @@ def validate_parameter_capabilities(
                 f"Reasoning effort `{effort}` is not declared by `{field}`; "
                 f"supported values are: {', '.join(efforts)}"
             )
-    if mode == "enabled" and efforts is not None and effort is None:
-        raise ManifestError(
-            f"`{field}` exposes reasoning effort selection; set an explicit "
-            "effective effort"
-        )
     if not capabilities["temperature"] and parameters["temperature"] is not None:
         raise ManifestError(
             f"`{field}` declares temperature unsupported; set the effective "

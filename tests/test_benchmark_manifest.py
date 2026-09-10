@@ -20,10 +20,14 @@ class BenchmarkInferenceParametersTest(unittest.TestCase):
             parameters = manifest.inference_parameters
             self.assertEqual(parameters["temperature"], manifest.agent["temperature"])
             self.assertEqual(parameters["seed"], manifest.agent["seed"])
-            self.assertEqual(parameters["reasoning"], manifest.agent["reasoning"])
+            self.assertEqual(
+                parameters["reasoning"]["mode"],
+                manifest.agent["reasoning"]["mode"],
+            )
+            self.assertIsNone(parameters["reasoning"]["effort"])
             self.assertIn(
                 parameters["reasoning"]["mode"],
-                {"enabled", "disabled", "unsupported", "provider_default"},
+                {"enabled", "disabled", "unsupported"},
             )
 
     def test_generated_sweep_contains_effective_parameters_and_enforcement(self) -> None:
@@ -73,6 +77,25 @@ class BenchmarkInferenceParametersTest(unittest.TestCase):
         with self.assertRaisesRegex(ManifestError, "only be set"):
             manifest.validate()
 
+    def test_removed_provider_default_effort_has_actionable_error(self) -> None:
+        manifest = self.load_manifest()
+        manifest.raw = deepcopy(manifest.raw)
+        manifest.raw["agent"]["reasoning"]["effort"] = "provider_default"
+
+        with self.assertRaisesRegex(ManifestError, "use null"):
+            manifest.validate()
+
+    def test_removed_provider_default_mode_has_actionable_error(self) -> None:
+        manifest = self.load_manifest()
+        manifest.raw = deepcopy(manifest.raw)
+        manifest.raw["agent"]["reasoning"] = {
+            "mode": "provider_default",
+            "effort": None,
+        }
+
+        with self.assertRaisesRegex(ManifestError, "mode: enabled"):
+            manifest.validate()
+
     def test_mandatory_reasoning_cannot_be_disabled(self) -> None:
         manifest = self.load_manifest()
         manifest.raw = deepcopy(manifest.raw)
@@ -93,13 +116,21 @@ class BenchmarkInferenceParametersTest(unittest.TestCase):
         with self.assertRaisesRegex(ManifestError, "temperature unsupported"):
             manifest.validate()
 
-    def test_supported_effort_must_be_selected_explicitly(self) -> None:
+    def test_enabled_reasoning_can_use_default_effort(self) -> None:
         manifest = self.load_manifest()
         manifest.raw = deepcopy(manifest.raw)
         manifest.raw["agent"]["reasoning"]["effort"] = None
 
-        with self.assertRaisesRegex(ManifestError, "explicit effective effort"):
-            manifest.validate()
+        manifest.validate()
+        self.assertIsNone(manifest.inference_parameters["reasoning"]["effort"])
+
+    def test_model_default_effort_alias_is_canonicalized_to_null(self) -> None:
+        manifest = self.load_manifest()
+        manifest.raw = deepcopy(manifest.raw)
+        manifest.raw["agent"]["reasoning"]["effort"] = "model_default"
+
+        manifest.validate()
+        self.assertIsNone(manifest.inference_parameters["reasoning"]["effort"])
 
     def test_supported_sampling_controls_must_be_set_explicitly(self) -> None:
         manifest = self.load_manifest()

@@ -9,8 +9,8 @@ question_catalog:
   sha256: 04fba84f5bcecc7e85bfba7c6867f1424cacac9d9004a200c3737d214118b77e
 generator:
   path: scripts/generate_questions.py
-  version: 2
-  sha256: 03c89785e260139b8461782e37c90ef3dae21005e95bfa4730eee9d27b65b8a6
+  version: 3
+  sha256: b3bfff2128656a748bc8ab045f33dd46a17e66e3b529cda956b72461d9ed9f00
   spark_dsg_version: 1.1.3
   pyyaml_version: 6.0.3
 parameters:
@@ -27,7 +27,7 @@ parameters:
 artifacts:
   qa:
     path: data/questions/example_dsg/qa_questions.yaml
-    sha256: 51a0014e15e5319fdab4b6c354f6f2fd90e7e6a9343c89bc4c3be1e01f37c935
+    sha256: 81ce4a72526b24c71d8d567ab54ef1024ab34ba7a3f3573838a1c8136928bcd1
   pddl:
     path: data/questions/example_dsg/pddl_questions.yaml
-    sha256: a45d3b094d84f488bc064b0d44375f46a7e703d359e9361308505cdac80b3980
+    sha256: f31d3b203345a89de1e4a317502b116a5ce5e78a5868be4d91cc6d989f99c4bc

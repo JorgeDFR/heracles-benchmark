@@ -9,8 +9,8 @@ question_catalog:
   sha256: 04fba84f5bcecc7e85bfba7c6867f1424cacac9d9004a200c3737d214118b77e
 generator:
   path: scripts/generate_questions.py
-  version: 2
-  sha256: 03c89785e260139b8461782e37c90ef3dae21005e95bfa4730eee9d27b65b8a6
+  version: 3
+  sha256: b3bfff2128656a748bc8ab045f33dd46a17e66e3b529cda956b72461d9ed9f00
   spark_dsg_version: 1.1.3
   pyyaml_version: 6.0.3
 parameters:

@@ -233,7 +233,7 @@ questions:
   - manipulation
 - uid: PDDL022
   name: Visit a farthest object
-  question: Reach the object farthest from O39 by center distance.
+  question: Pass by the object farthest from O39 by center distance.
   solution: (visited-object O237)
   correctness_comparator:
     comparison_type: PDDL
@@ -277,7 +277,7 @@ questions:
   - visit
 - uid: PDDL026
   name: Visit the nearest room
-  question: Enter the room whose center is closest to O36.
+  question: Visit the room whose center is closest to O36.
   solution: (visited-region R3)
   correctness_comparator:
     comparison_type: PDDL
@@ -299,7 +299,7 @@ questions:
   - final-location
 - uid: PDDL028
   name: Visit a most-connected room
-  question: Visit a room with the maximum number of direct room connections.
+  question: Visit a room with the maximum number of distinct direct room neighbors.
   solution: (visited-region R2)
   correctness_comparator:
     comparison_type: PDDL
@@ -321,7 +321,7 @@ questions:
   - final-location
 - uid: PDDL030
   name: Visit every adjacent room
-  question: Cover every room directly connected to R3.
+  question: Visit every distinct room directly connected to R3.
   solution: (and (visited-region R2) (visited-region R5))
   correctness_comparator:
     comparison_type: PDDL
@@ -343,7 +343,7 @@ questions:
   - object
 - uid: PDDL032
   name: Visit an object or a room
-  question: Either pass object O363 or enter room R5.
+  question: Either pass object O363 or visit room R5.
   solution: (or (visited-object O363) (visited-region R5))
   correctness_comparator:
     comparison_type: PDDL
@@ -354,7 +354,7 @@ questions:
   - combination
 - uid: PDDL033
   name: Visit an object and a room
-  question: Make sure you pass O79 and also enter R5.
+  question: Make sure you pass O79 and also visit R5.
   solution: (and (visited-object O79) (visited-region R5))
   correctness_comparator:
     comparison_type: PDDL
