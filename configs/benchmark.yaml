@@ -31,6 +31,9 @@ providers:
           reasoning_efforts: null
           temperature: true
           seed: true
+        parameters:
+          reasoning:
+            mode: disabled
       - alias: gemma-4-26b
         model: gemma4:26b
         enabled: false
@@ -39,6 +42,9 @@ providers:
           reasoning_efforts: null
           temperature: true
           seed: true
+        parameters:
+          reasoning:
+            mode: disabled
     local_metrics:
       enabled: true
       target_provider: ollama
@@ -69,6 +75,10 @@ providers:
           reasoning_efforts: [low, medium, high]
           temperature: true
           seed: true
+        parameters:
+          reasoning:
+            mode: enabled
+            effort: medium
       - alias: gemma-4-31b-it
         model: google/gemma-4-31b-it
         enabled: false
@@ -77,6 +87,9 @@ providers:
           reasoning_efforts: null
           temperature: true
           seed: true
+        parameters:
+          reasoning:
+            mode: disabled
       - alias: gemma-4-26b-a4b-it
         model: google/gemma-4-26b-a4b-it
         enabled: false
@@ -85,6 +98,9 @@ providers:
           reasoning_efforts: null
           temperature: true
           seed: true
+        parameters:
+          reasoning:
+            mode: disabled
       - alias: deepseek-v4-pro
         model: deepseek/deepseek-v4-pro
         enabled: false
@@ -93,6 +109,10 @@ providers:
           reasoning_efforts: [high, xhigh]
           temperature: true
           seed: true
+        parameters:
+          reasoning:
+            mode: enabled
+            effort: high
       - alias: deepseek-v4-flash
         model: deepseek/deepseek-v4-flash
         enabled: false
@@ -101,3 +121,7 @@ providers:
           reasoning_efforts: [high, xhigh]
           temperature: true
           seed: true
+        parameters:
+          reasoning:
+            mode: enabled
+            effort: high

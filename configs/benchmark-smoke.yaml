@@ -17,7 +17,7 @@ agent:
   seed: 123
   reasoning:
     mode: enabled
-    effort: null
+    effort: model_default
   max_iterations: 5
 
 providers:
@@ -67,4 +67,4 @@ providers:
         parameters:
           reasoning:
             mode: enabled
-            effort: medium # default
+            effort: medium
