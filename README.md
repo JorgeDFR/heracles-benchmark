@@ -84,9 +84,28 @@ The generator produces one grounded item per entry in
 is deterministic for a given graph, catalog, and seed. Run
 `python scripts/generate_questions.py --list-types` to inspect the taxonomy.
 
-Use `--avoid-questions path/to/questions.yaml` one or more times to reject exact
+Each catalog entry owns its `question_template`, with named placeholders such
+as `{center_obj}` filled by the generator. Edit wording in the catalog; graph
+sampling and solution computation remain in Python. Display names are derived
+from the semantic IDs rather than maintained separately in the catalog.
+
+The `overlap_class` field classifies each type against the 3dsg-cypher-agent
+QA/PDDL template catalogs: `direct` for the same central task, `related` for a
+variant or composition, and `absent` for an operation not found there. These
+labels describe task-family overlap, not confirmed model training exposure.
+Generated questions retain `question_type`, `overlap_class`, and operation
+tags. The HTML report's **Task overlap** selector filters Questions and
+recomputes Overview metrics for the selected class. Older results without
+classification appear as **Unclassified**.
+
+Use `--avoid-questions path/to/questions.yaml` one or more times to reject
 wording collisions with additional benchmark, evaluation, or training files.
-The example questions under `external/heracles_agents` are checked by default.
+The check includes parameterized wording variants such as `{case.object}` and
+checks both catalog templates and rendered questions. The example questions
+under `external/heracles_agents` are checked by default. Both training catalogs
+are also checked automatically when the sibling `3dsg-cypher-agent` checkout
+is available; otherwise pass their paths explicitly. Avoidance inputs and their
+checksums are recorded in the generated metadata.
 
 The full suite expects semantic object and room labels, at least two objects and
 rooms, 2D or 3D navigable places, containment edges, and connected room and
@@ -277,5 +296,3 @@ docker compose \
   -f docker/main/docker-compose.yaml \
   run --rm cli
 ```
-
-Set `OPENROUTER_API_KEY` in `docker/main/.env` before running `chatdsg`.

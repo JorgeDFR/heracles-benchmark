@@ -2,6 +2,8 @@
 questions:
 - uid: QA001
   name: Object class inventory
+  question_type: qa_object_class_inventory
+  overlap_class: direct
   question: Give the complete set of object categories represented in this map.
   solution: <appliance, bag, bed, bicycle, box, decor, food, light, seating, sign, storage, trash>
   correctness_comparator:
@@ -12,6 +14,8 @@ questions:
   - class
 - uid: QA002
   name: Object total
+  question_type: qa_object_total
+  overlap_class: direct
   question: How many object nodes does the scene contain?
   solution: '65'
   correctness_comparator:
@@ -22,6 +26,8 @@ questions:
   - object
 - uid: QA003
   name: Room total
+  question_type: qa_room_total
+  overlap_class: direct
   question: What is the total number of mapped rooms?
   solution: '5'
   correctness_comparator:
@@ -31,7 +37,9 @@ questions:
   - count
   - room
 - uid: QA004
-  name: Navigable place total
+  name: Place total
+  question_type: qa_place_total
+  overlap_class: direct
   question: Count all navigable place nodes, combining the 2D and 3D place layers.
   solution: '96'
   correctness_comparator:
@@ -42,6 +50,8 @@ questions:
   - place
 - uid: QA005
   name: Room class inventory
+  question_type: qa_room_class_inventory
+  overlap_class: related
   question: Which distinct room categories occur in the scene?
   solution: <hallway, lounge>
   correctness_comparator:
@@ -52,7 +62,9 @@ questions:
   - class
   - room
 - uid: QA006
-  name: Objects of a class
+  name: Object ids for class
+  question_type: qa_object_ids_for_class
+  overlap_class: related
   question: Return the IDs of every object categorized as food in the map.
   solution: <O8>
   correctness_comparator:
@@ -63,7 +75,9 @@ questions:
   - class
   - object
 - uid: QA007
-  name: Object class frequency
+  name: Object count for class
+  question_type: qa_object_count_for_class
+  overlap_class: direct
   question: How many seat objects are represented?
   solution: '22'
   correctness_comparator:
@@ -74,7 +88,9 @@ questions:
   - class
   - object
 - uid: QA008
-  name: Object class centers
+  name: Object centers for class
+  question_type: qa_object_centers_for_class
+  overlap_class: direct
   question: Report all 3D center points for the ornament objects.
   solution: <POINT(-19.03 -3.96 0.58), POINT(-19.09 -4.18 0.56), POINT(-21.19 -21.22 0.62), POINT(3.66
     -1.63 0.85), POINT(6.39 -4.99 -0.49)>
@@ -87,6 +103,8 @@ questions:
   - object
 - uid: QA009
   name: Object class lookup
+  question_type: qa_object_class_lookup
+  overlap_class: direct
   question: What semantic category is assigned to O251?
   solution: seating
   correctness_comparator:
@@ -98,7 +116,9 @@ questions:
   - object
 - uid: QA010
   name: Object center lookup
-  question: Where is the center of object O17?
+  question_type: qa_object_center_lookup
+  overlap_class: direct
+  question: Provide the recorded 3D center coordinates for scene object O17.
   solution: POINT(-18.86 -4.15 0.05)
   correctness_comparator:
     comparison_type: SLDP
@@ -107,7 +127,9 @@ questions:
   - position
   - object
 - uid: QA011
-  name: Rooms of a class
+  name: Rooms for class
+  question_type: qa_rooms_for_class
+  overlap_class: related
   question: List the room IDs categorized as passage.
   solution: <R2, R3, R4, R5>
   correctness_comparator:
@@ -119,6 +141,8 @@ questions:
   - room
 - uid: QA012
   name: Room center lookup
+  question_type: qa_room_center_lookup
+  overlap_class: related
   question: Give the center point recorded for room R2.
   solution: POINT(-14.76 -4.98 -0.53)
   correctness_comparator:
@@ -128,7 +152,9 @@ questions:
   - position
   - room
 - uid: QA013
-  name: Object parent place
+  name: Parent place of object
+  question_type: qa_parent_place_of_object
+  overlap_class: direct
   question: Which place nodes directly contain O36?
   solution: <P8638>
   correctness_comparator:
@@ -139,7 +165,9 @@ questions:
   - object
   - place
 - uid: QA014
-  name: Object parent room
+  name: Parent room of object
+  question_type: qa_parent_room_of_object
+  overlap_class: related
   question: Following containment through places, which rooms contain O3?
   solution: <R1>
   correctness_comparator:
@@ -150,7 +178,9 @@ questions:
   - object
   - room
 - uid: QA015
-  name: Place parent room
+  name: Parent room of place
+  question_type: qa_parent_room_of_place
+  overlap_class: related
   question: Name every room that is a parent of place P3167.
   solution: <R2>
   correctness_comparator:
@@ -161,7 +191,9 @@ questions:
   - place
   - room
 - uid: QA016
-  name: Objects in a room
+  name: Objects in room
+  question_type: qa_objects_in_room
+  overlap_class: direct
   question: Which object IDs descend from room R4?
   solution: <O95, O300>
   correctness_comparator:
@@ -172,7 +204,9 @@ questions:
   - object
   - room
 - uid: QA017
-  name: Object classes in a room
+  name: Object classes in room
+  question_type: qa_object_classes_in_room
+  overlap_class: direct
   question: What kinds of objects can be found inside R4?
   solution: <light, sign>
   correctness_comparator:
@@ -183,7 +217,9 @@ questions:
   - class
   - room
 - uid: QA018
-  name: Object count in a room
+  name: Object count in room
+  question_type: qa_object_count_in_room
+  overlap_class: direct
   question: Count the distinct object nodes contained under room R1.
   solution: '27'
   correctness_comparator:
@@ -194,7 +230,9 @@ questions:
   - count
   - room
 - uid: QA019
-  name: Class-filtered room objects
+  name: Class objects in room
+  question_type: qa_class_objects_in_room
+  overlap_class: direct
   question: Identify each signage located in R1.
   solution: <O3, O255, O264, O283>
   correctness_comparator:
@@ -205,7 +243,9 @@ questions:
   - filter
   - class
 - uid: QA020
-  name: Class frequency in a room
+  name: Class count in room
+  question_type: qa_class_count_in_room
+  overlap_class: related
   question: How many sign objects belong to R4?
   solution: '1'
   correctness_comparator:
@@ -216,7 +256,9 @@ questions:
   - count
   - class
 - uid: QA021
-  name: Places in a room
+  name: Places in room
+  question_type: qa_places_in_room
+  overlap_class: related
   question: Enumerate the place nodes immediately below R2.
   solution: <P2541, P3095, P3105, P3166, P3167, P3195, P4389, P6219, P6255, P6397, P6567, P6665, P6726,
     P7279, P7281, P7488, P9420, P9421, P67045, P67046, P67673, P67676>
@@ -228,7 +270,9 @@ questions:
   - place
   - room
 - uid: QA022
-  name: Place count in a room
+  name: Place count in room
+  question_type: qa_place_count_in_room
+  overlap_class: related
   question: How many direct place children does R1 have?
   solution: '22'
   correctness_comparator:
@@ -239,7 +283,9 @@ questions:
   - count
   - place
 - uid: QA023
-  name: Objects in a place
+  name: Objects in place
+  question_type: qa_objects_in_place
+  overlap_class: direct
   question: List the objects attached directly to place P6219.
   solution: <O17, O19>
   correctness_comparator:
@@ -250,7 +296,9 @@ questions:
   - object
   - place
 - uid: QA024
-  name: Object classes in a place
+  name: Object classes in place
+  question_type: qa_object_classes_in_place
+  overlap_class: direct
   question: Which object categories are directly contained by P21172?
   solution: <decor, trash>
   correctness_comparator:
@@ -261,7 +309,9 @@ questions:
   - class
   - place
 - uid: QA025
-  name: Object count in a place
+  name: Object count in place
+  question_type: qa_object_count_in_place
+  overlap_class: direct
   question: How many object children are assigned to P59110?
   solution: '12'
   correctness_comparator:
@@ -272,7 +322,9 @@ questions:
   - count
   - place
 - uid: QA026
-  name: Rooms containing a class
+  name: Rooms containing class
+  question_type: qa_rooms_containing_class
+  overlap_class: direct
   question: Which rooms contain at least one storage fixture?
   solution: <R1, R2, R5>
   correctness_comparator:
@@ -283,7 +335,9 @@ questions:
   - class
   - room
 - uid: QA027
-  name: Room count containing a class
+  name: Room count containing class
+  question_type: qa_room_count_containing_class
+  overlap_class: related
   question: In how many rooms does a device appear?
   solution: '1'
   correctness_comparator:
@@ -294,7 +348,9 @@ questions:
   - count
   - class
 - uid: QA028
-  name: Adjacent rooms
+  name: Room neighbors
+  question_type: qa_room_neighbors
+  overlap_class: direct
   question: Which rooms share a direct connectivity edge with R5?
   solution: <R3, R4>
   correctness_comparator:
@@ -304,7 +360,9 @@ questions:
   - connectivity
   - room
 - uid: QA029
-  name: Room connectivity degree
+  name: Room degree
+  question_type: qa_room_degree
+  overlap_class: direct
   question: How many distinct rooms are directly connected to R4?
   solution: '2'
   correctness_comparator:
@@ -316,6 +374,8 @@ questions:
   - room
 - uid: QA030
   name: Most connected rooms
+  question_type: qa_most_connected_rooms
+  overlap_class: direct
   question: Return every room tied for the greatest number of direct room connections.
   solution: <R2>
   correctness_comparator:
@@ -327,6 +387,8 @@ questions:
   - room
 - uid: QA031
   name: Least connected rooms
+  question_type: qa_least_connected_rooms
+  overlap_class: direct
   question: Which rooms are tied at the minimum room-connectivity degree?
   solution: <R1>
   correctness_comparator:
@@ -337,7 +399,9 @@ questions:
   - extrema
   - room
 - uid: QA032
-  name: Shortest room route
+  name: Room shortest path
+  question_type: qa_room_shortest_path
+  overlap_class: absent
   question: Give one shortest room-by-room route from R1 to R3, including both ends.
   solution: '[R1, R2, R3]'
   correctness_comparator:
@@ -349,6 +413,8 @@ questions:
   - room
 - uid: QA033
   name: Room hop distance
+  question_type: qa_room_hop_distance
+  overlap_class: absent
   question: How many room edges separate R1 from R3 along a shortest route?
   solution: '2'
   correctness_comparator:
@@ -359,7 +425,9 @@ questions:
   - count
   - path
 - uid: QA034
-  name: Adjacent places
+  name: Place neighbors
+  question_type: qa_place_neighbors
+  overlap_class: related
   question: Return the immediate navigation neighbors of place P2410.
   solution: <P754, P1568, P1833, P2441, P2541>
   correctness_comparator:
@@ -369,7 +437,9 @@ questions:
   - connectivity
   - place
 - uid: QA035
-  name: Place connectivity degree
+  name: Place degree
+  question_type: qa_place_degree
+  overlap_class: related
   question: How many distinct same-layer place nodes are directly connected to P9420?
   solution: '6'
   correctness_comparator:
@@ -380,7 +450,9 @@ questions:
   - count
   - place
 - uid: QA036
-  name: Places within hop budget
+  name: Places within hops
+  question_type: qa_places_within_hops
+  overlap_class: direct
   question: Which other places are reachable from P1833 in at most 2 place edges?
   solution: <P754, P1350, P1396, P1568, P2410, P2441, P2541, P56525, P56710, P57510, P58431, P58432, P59110,
     P60843, P75035, P75286>
@@ -392,7 +464,9 @@ questions:
   - reachability
   - place
 - uid: QA037
-  name: Shortest place route
+  name: Place shortest path
+  question_type: qa_place_shortest_path
+  overlap_class: absent
   question: Trace one minimum-hop place route from P6726 to P29521.
   solution: '[P6726, P6397, P6219, P3095, P3167, P3166, P3105, P3107, P68067, P68306, P26753, P27669,
     P27795, P29521]'
@@ -404,7 +478,9 @@ questions:
   - path
   - place
 - uid: QA038
-  name: Objects in neighboring places
+  name: Objects in neighbor places
+  question_type: qa_objects_in_neighbor_places
+  overlap_class: related
   question: Which objects belong to places directly adjacent to P22515?
   solution: <O55, O58>
   correctness_comparator:
@@ -416,6 +492,8 @@ questions:
   - object
 - uid: QA039
   name: Nearest object
+  question_type: qa_nearest_object
+  overlap_class: direct
   question: Using center-to-center distance, which object is nearest to O282?
   solution: <O269>
   correctness_comparator:
@@ -427,7 +505,9 @@ questions:
   - object
 - uid: QA040
   name: Farthest object
-  question: Which object is farthest from O55 by center-to-center distance?
+  question_type: qa_farthest_object
+  overlap_class: direct
+  question: Considering every other object, which is most distant from O55 by center-to-center distance?
   solution: <O237>
   correctness_comparator:
     comparison_type: SLDP
@@ -437,7 +517,9 @@ questions:
   - distance
   - object
 - uid: QA041
-  name: Nearest different-class object
+  name: Nearest different class object
+  question_type: qa_nearest_different_class_object
+  overlap_class: direct
   question: What is the closest object to O43 that has a different semantic class?
   solution: <O36>
   correctness_comparator:
@@ -448,7 +530,9 @@ questions:
   - distance
   - class
 - uid: QA042
-  name: Closest cross-class pairs
+  name: Closest cross class pair
+  question_type: qa_closest_cross_class_pair
+  overlap_class: related
   question: Which pairs consisting of a notice and a carton are tied for the smallest center distance?
   solution: <[O59, O63]>
   correctness_comparator:
@@ -459,7 +543,9 @@ questions:
   - distance
   - class
 - uid: QA043
-  name: Nearest place to an object
+  name: Nearest place to object
+  question_type: qa_nearest_place_to_object
+  overlap_class: direct
   question: Which navigable place is closest to object O66 by center-to-center distance?
   solution: <P22249>
   correctness_comparator:
@@ -470,7 +556,9 @@ questions:
   - distance
   - place
 - uid: QA044
-  name: Nearest room to an object
+  name: Nearest room to object
+  question_type: qa_nearest_room_to_object
+  overlap_class: direct
   question: Which room is closest to O36 by center-to-center distance?
   solution: <R3>
   correctness_comparator:
@@ -481,7 +569,9 @@ questions:
   - distance
   - room
 - uid: QA045
-  name: Closest room pairs
+  name: Closest room pair
+  question_type: qa_closest_room_pair
+  overlap_class: direct
   question: Which room pairs are tied for the smallest distance between recorded centers?
   solution: <[R4, R5]>
   correctness_comparator:
@@ -492,7 +582,9 @@ questions:
   - distance
   - room
 - uid: QA046
-  name: Highest object of a class
+  name: Highest object of class
+  question_type: qa_highest_object_of_class
+  overlap_class: absent
   question: Which notice reaches the greatest center height?
   solution: <O95>
   correctness_comparator:
@@ -503,7 +595,9 @@ questions:
   - extrema
   - class
 - uid: QA047
-  name: Lowest object of a class
+  name: Lowest object of class
+  question_type: qa_lowest_object_of_class
+  overlap_class: absent
   question: Which storage unit has the lowest center z-coordinate?
   solution: <O66>
   correctness_comparator:
@@ -514,7 +608,9 @@ questions:
   - extrema
   - class
 - uid: QA048
-  name: Nearest object to a room center
+  name: Nearest object to room
+  question_type: qa_nearest_object_to_room
+  overlap_class: related
   question: Which object is nearest to the center of R3?
   solution: <O43>
   correctness_comparator:
@@ -525,7 +621,9 @@ questions:
   - distance
   - room
 - uid: QA049
-  name: Farthest object from a room center
+  name: Farthest object from room
+  question_type: qa_farthest_object_from_room
+  overlap_class: related
   question: Find the object farthest from room center R1.
   solution: <O79>
   correctness_comparator:
@@ -536,7 +634,9 @@ questions:
   - distance
   - room
 - uid: QA050
-  name: Objects inside a radius
+  name: Objects within radius
+  question_type: qa_objects_within_radius
+  overlap_class: direct
   question: Which other objects have centers no more than 0.76 meters from O18?
   solution: <O17, O19, O29, O30>
   correctness_comparator:

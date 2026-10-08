@@ -1,7 +1,9 @@
 ---
 questions:
 - uid: PDDL-SMOKE-001
-  name: Visit a named object
+  name: Visit object symbol
+  question_type: pddl_visit_object_symbol
+  overlap_class: direct
   question: Pass by object O84 before the task is complete.
   solution: (visited-object O84)
   correctness_comparator:
@@ -13,7 +15,9 @@ questions:
   - object
   - visit
 - uid: PDDL-SMOKE-002
-  name: End at a named object
+  name: End at object symbol
+  question_type: pddl_end_at_object_symbol
+  overlap_class: direct
   question: Finish the mission at O266.
   solution: (at-object O266)
   correctness_comparator:
@@ -25,7 +29,9 @@ questions:
   - object
   - final-location
 - uid: PDDL-SMOKE-003
-  name: Inspect a named object
+  name: Inspect object symbol
+  question_type: pddl_inspect_object_symbol
+  overlap_class: direct
   question: Examine object O70 closely.
   solution: (safe O70)
   correctness_comparator:

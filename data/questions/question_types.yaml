@@ -1,407 +1,508 @@
 ---
-# One generated benchmark item is produced for every entry in each section.
-# The IDs are intentionally semantic: they describe the reasoning operation,
-# not the wording variant or a particular scene entity.
+# One generated item per type. Wording uses named {parameters} supplied by the generator.
+# overlap_class compares task families with the 3dsg-cypher-agent QA/PDDL catalogs:
+# direct = same central task; related = variant/composition; absent = operation not found.
+# These labels describe catalog overlap, not confirmed training exposure.
 qa:
   - id: qa_object_class_inventory
-    name: Object class inventory
     description: List the distinct semantic classes represented by objects.
+    question_template: "Give the complete set of object categories represented in this map."
+    overlap_class: direct
     tags: [inventory, class]
   - id: qa_object_total
-    name: Object total
     description: Count all object nodes in the graph.
+    question_template: "How many object nodes does the scene contain?"
+    overlap_class: direct
     tags: [count, object]
   - id: qa_room_total
-    name: Room total
     description: Count all room nodes in the graph.
+    question_template: "What is the total number of mapped rooms?"
+    overlap_class: direct
     tags: [count, room]
   - id: qa_place_total
-    name: Navigable place total
     description: Count all 2D and 3D navigable place nodes.
+    question_template: "Count all navigable place nodes, combining the 2D and 3D place layers."
+    overlap_class: direct
     tags: [count, place]
   - id: qa_room_class_inventory
-    name: Room class inventory
     description: List the distinct semantic classes represented by rooms.
+    question_template: "Which distinct room categories occur in the scene?"
+    overlap_class: related
     tags: [inventory, class, room]
   - id: qa_object_ids_for_class
-    name: Objects of a class
     description: Return every object symbol belonging to a sampled class.
+    question_template: "Return the IDs of every object categorized as {class_word} in the map."
+    overlap_class: related
     tags: [filter, class, object]
   - id: qa_object_count_for_class
-    name: Object class frequency
     description: Count the objects belonging to a sampled semantic class.
+    question_template: "How many {count_class} objects are represented?"
+    overlap_class: direct
     tags: [count, class, object]
   - id: qa_object_centers_for_class
-    name: Object class centers
     description: Return the 3D centers of all objects in a sampled class.
+    question_template: "Report all 3D center points for the {center_class} objects."
+    overlap_class: direct
     tags: [position, class, object]
   - id: qa_object_class_lookup
-    name: Object class lookup
     description: Identify the semantic class of an object symbol.
+    question_template: "What semantic category is assigned to {obj}?"
+    overlap_class: direct
     tags: [attribute, class, object]
   - id: qa_object_center_lookup
-    name: Object center lookup
     description: Return the 3D center of an object symbol.
+    question_template: "Provide the recorded 3D center coordinates for scene object {center_obj}."
+    overlap_class: direct
     tags: [position, object]
   - id: qa_rooms_for_class
-    name: Rooms of a class
     description: Return every room symbol belonging to a sampled class.
+    question_template: "List the room IDs categorized as {room_class}."
+    overlap_class: related
     tags: [filter, class, room]
   - id: qa_room_center_lookup
-    name: Room center lookup
     description: Return the 3D center of a room symbol.
+    question_template: "Give the center point recorded for room {room}."
+    overlap_class: related
     tags: [position, room]
   - id: qa_parent_place_of_object
-    name: Object parent place
     description: Find every immediate place containing an object.
+    question_template: "Which place nodes directly contain {child_obj}?"
+    overlap_class: direct
     tags: [hierarchy, object, place]
   - id: qa_parent_room_of_object
-    name: Object parent room
     description: Traverse all object-to-place-to-room containment paths.
+    question_template: "Following containment through places, which rooms contain {room_obj}?"
+    overlap_class: related
     tags: [hierarchy, object, room]
   - id: qa_parent_room_of_place
-    name: Place parent room
     description: Find every room that immediately contains a place.
+    question_template: "Name every room that is a parent of place {room_place}."
+    overlap_class: related
     tags: [hierarchy, place, room]
   - id: qa_objects_in_room
-    name: Objects in a room
     description: List object descendants of a room through its places.
+    question_template: "Which object IDs descend from room {populated_room}?"
+    overlap_class: direct
     tags: [hierarchy, object, room]
   - id: qa_object_classes_in_room
-    name: Object classes in a room
     description: List distinct object classes found below a room.
+    question_template: "What kinds of objects can be found inside {class_room}?"
+    overlap_class: direct
     tags: [hierarchy, class, room]
   - id: qa_object_count_in_room
-    name: Object count in a room
     description: Count all object descendants of a room.
+    question_template: "Count the distinct object nodes contained under room {count_room}."
+    overlap_class: direct
     tags: [hierarchy, count, room]
   - id: qa_class_objects_in_room
-    name: Class-filtered room objects
     description: List objects of one class inside a room.
+    question_template: "Identify each {filtered_class} located in {filtered_room}."
+    overlap_class: direct
     tags: [hierarchy, filter, class]
   - id: qa_class_count_in_room
-    name: Class frequency in a room
     description: Count objects of one class inside a room.
+    question_template: "How many {count_pair_1} objects belong to {count_pair_0}?"
+    overlap_class: related
     tags: [hierarchy, count, class]
   - id: qa_places_in_room
-    name: Places in a room
     description: List the immediate place children of a room.
+    question_template: "Enumerate the place nodes immediately below {room}."
+    overlap_class: related
     tags: [hierarchy, place, room]
   - id: qa_place_count_in_room
-    name: Place count in a room
     description: Count the immediate place children of a room.
+    question_template: "How many direct place children does {place_count_room} have?"
+    overlap_class: related
     tags: [hierarchy, count, place]
   - id: qa_objects_in_place
-    name: Objects in a place
     description: List the immediate object children of a place.
+    question_template: "List the objects attached directly to place {populated_place}."
+    overlap_class: direct
     tags: [hierarchy, object, place]
   - id: qa_object_classes_in_place
-    name: Object classes in a place
     description: List distinct classes among a place's object children.
+    question_template: "Which object categories are directly contained by {class_place}?"
+    overlap_class: direct
     tags: [hierarchy, class, place]
   - id: qa_object_count_in_place
-    name: Object count in a place
     description: Count a place's immediate object children.
+    question_template: "How many object children are assigned to {count_place}?"
+    overlap_class: direct
     tags: [hierarchy, count, place]
   - id: qa_rooms_containing_class
-    name: Rooms containing a class
     description: List rooms that contain at least one object of a class.
+    question_template: "Which rooms contain at least one {containing_class}?"
+    overlap_class: direct
     tags: [hierarchy, class, room]
   - id: qa_room_count_containing_class
-    name: Room count containing a class
     description: Count rooms that contain at least one object of a class.
+    question_template: "In how many rooms does a {room_count_class} appear?"
+    overlap_class: related
     tags: [hierarchy, count, class]
   - id: qa_room_neighbors
-    name: Adjacent rooms
     description: List rooms connected directly to a sampled room.
+    question_template: "Which rooms share a direct connectivity edge with {neighbor_room}?"
+    overlap_class: direct
     tags: [connectivity, room]
   - id: qa_room_degree
-    name: Room connectivity degree
     description: Count the direct room neighbors of a sampled room.
+    question_template: "How many distinct rooms are directly connected to {degree_room}?"
+    overlap_class: direct
     tags: [connectivity, count, room]
   - id: qa_most_connected_rooms
-    name: Most connected rooms
     description: Return every room tied for maximum connectivity degree.
+    question_template: "Return every room tied for the greatest number of direct room connections."
+    overlap_class: direct
     tags: [connectivity, extrema, room]
   - id: qa_least_connected_rooms
-    name: Least connected rooms
     description: Return every room tied for minimum connectivity degree.
+    question_template: "Which rooms are tied at the minimum room-connectivity degree?"
+    overlap_class: direct
     tags: [connectivity, extrema, room]
   - id: qa_room_shortest_path
-    name: Shortest room route
     description: Return an ordered shortest path between two rooms.
+    question_template: "Give one shortest room-by-room route from {path_left} to {path_right}, including both ends."
+    overlap_class: absent
     tags: [connectivity, path, room]
   - id: qa_room_hop_distance
-    name: Room hop distance
     description: Count edges on a shortest route between two rooms.
+    question_template: "How many room edges separate {path_left} from {path_right} along a shortest route?"
+    overlap_class: absent
     tags: [connectivity, count, path]
   - id: qa_place_neighbors
-    name: Adjacent places
     description: List places connected directly to a sampled place.
+    question_template: "Return the immediate navigation neighbors of place {neighbor_place}."
+    overlap_class: related
     tags: [connectivity, place]
   - id: qa_place_degree
-    name: Place connectivity degree
     description: Count the direct place neighbors of a sampled place.
+    question_template: "How many distinct same-layer place nodes are directly connected to {degree_place}?"
+    overlap_class: related
     tags: [connectivity, count, place]
   - id: qa_places_within_hops
-    name: Places within hop budget
     description: List places reachable within a sampled small hop budget.
+    question_template: "Which other places are reachable from {hop_place} in at most {hop_budget} place edges?"
+    overlap_class: direct
     tags: [connectivity, reachability, place]
   - id: qa_place_shortest_path
-    name: Shortest place route
     description: Return an ordered shortest path between two places.
+    question_template: "Trace one minimum-hop place route from {place_left} to {place_right}."
+    overlap_class: absent
     tags: [connectivity, path, place]
   - id: qa_objects_in_neighbor_places
-    name: Objects in neighboring places
     description: List objects attached to direct neighbors of a place.
+    question_template: "Which objects belong to places directly adjacent to {object_neighbor_place}?"
+    overlap_class: related
     tags: [connectivity, hierarchy, object]
   - id: qa_nearest_object
-    name: Nearest object
     description: Find the nearest other object by Euclidean center distance.
+    question_template: "Using center-to-center distance, which object is nearest to {reference}?"
+    overlap_class: direct
     tags: [spatial, distance, object]
   - id: qa_farthest_object
-    name: Farthest object
     description: Find the farthest other object by Euclidean center distance.
+    question_template: "Considering every other object, which is most distant from {far_reference} by center-to-center distance?"
+    overlap_class: direct
     tags: [spatial, distance, object]
   - id: qa_nearest_different_class_object
-    name: Nearest different-class object
     description: Find the closest object whose class differs from a reference.
+    question_template: "What is the closest object to {mixed_ref} that has a different semantic class?"
+    overlap_class: direct
     tags: [spatial, distance, class]
   - id: qa_closest_cross_class_pair
-    name: Closest cross-class pairs
     description: Find all closest object pairs drawn from two sampled classes.
+    question_template: "Which pairs consisting of {class_a_word_phrase} and {class_b_word_phrase} are tied for the smallest center distance?"
+    overlap_class: related
     tags: [spatial, distance, class]
   - id: qa_nearest_place_to_object
-    name: Nearest place to an object
     description: Find the nearest navigable place center to an object.
+    question_template: "Which navigable place is closest to object {place_ref} by center-to-center distance?"
+    overlap_class: direct
     tags: [spatial, distance, place]
   - id: qa_nearest_room_to_object
-    name: Nearest room to an object
     description: Find the nearest room center to an object.
+    question_template: "Which room is closest to {room_ref} by center-to-center distance?"
+    overlap_class: direct
     tags: [spatial, distance, room]
   - id: qa_closest_room_pair
-    name: Closest room pairs
     description: Find all room pairs tied for minimum center separation.
+    question_template: "Which room pairs are tied for the smallest distance between recorded centers?"
+    overlap_class: direct
     tags: [spatial, distance, room]
   - id: qa_highest_object_of_class
-    name: Highest object of a class
     description: Find class members with maximum z coordinate.
+    question_template: "Which {height_class} reaches the greatest center height?"
+    overlap_class: absent
     tags: [spatial, extrema, class]
   - id: qa_lowest_object_of_class
-    name: Lowest object of a class
     description: Find class members with minimum z coordinate.
+    question_template: "Which {low_class} has the lowest center z-coordinate?"
+    overlap_class: absent
     tags: [spatial, extrema, class]
   - id: qa_nearest_object_to_room
-    name: Nearest object to a room center
     description: Find the object closest to a sampled room center.
+    question_template: "Which object is nearest to the center of {near_room}?"
+    overlap_class: related
     tags: [spatial, distance, room]
   - id: qa_farthest_object_from_room
-    name: Farthest object from a room center
     description: Find the object farthest from a sampled room center.
+    question_template: "Find the object farthest from room center {far_room}."
+    overlap_class: related
     tags: [spatial, distance, room]
   - id: qa_objects_within_radius
-    name: Objects inside a radius
     description: List other objects within a data-derived radius of a reference.
+    question_template: "Which other objects have centers no more than {radius} meters from {radius_ref}?"
+    overlap_class: direct
     tags: [spatial, radius, object]
 
 pddl:
   - id: pddl_visit_object_symbol
-    name: Visit a named object
     description: Require visiting one explicit object symbol.
+    question_template: "Pass by object {obj} before the task is complete."
+    overlap_class: direct
     tags: [direct-symbol, object, visit]
   - id: pddl_end_at_object_symbol
-    name: End at a named object
     description: Require finishing at one explicit object symbol.
+    question_template: "Finish the mission at {obj2}."
+    overlap_class: direct
     tags: [direct-symbol, object, final-location]
   - id: pddl_inspect_object_symbol
-    name: Inspect a named object
     description: Require inspecting one explicit object symbol.
+    question_template: "Examine object {inspect_obj} closely."
+    overlap_class: direct
     tags: [direct-symbol, object, inspect]
   - id: pddl_hold_object_symbol
-    name: Pick up a named object
     description: Require holding one explicit object symbol.
+    question_template: "Pick up {hold_obj} and retain it."
+    overlap_class: related
     tags: [direct-symbol, object, manipulation]
   - id: pddl_visit_room_symbol
-    name: Visit a named room
     description: Require visiting one explicit room symbol.
+    question_template: "Enter room {room} at some point."
+    overlap_class: direct
     tags: [direct-symbol, room, visit]
   - id: pddl_end_in_room_symbol
-    name: End in a named room
     description: Require finishing inside one explicit room symbol.
+    question_template: "Conclude the route inside {end_room}."
+    overlap_class: direct
     tags: [direct-symbol, room, final-location]
   - id: pddl_visit_place_symbol
-    name: Visit a named place
     description: Require visiting one explicit 2D or 3D place symbol.
+    question_template: "Include place {place} on the route."
+    overlap_class: direct
     tags: [direct-symbol, place, visit]
   - id: pddl_end_at_place_symbol
-    name: End at a named place
     description: Require finishing at one explicit 2D or 3D place symbol.
+    question_template: "Make {end_place} the final waypoint."
+    overlap_class: direct
     tags: [direct-symbol, place, final-location]
   - id: pddl_hold_object_class
-    name: Pick up an object by class
     description: Permit holding any object belonging to a referenced class.
+    question_template: "Bring along any {hold_class} you can choose."
+    overlap_class: direct
     tags: [class-reference, object, manipulation]
   - id: pddl_visit_object_class
-    name: Visit an object by class
     description: Permit visiting any object belonging to a referenced class.
+    question_template: "Approach one of the {visit_class} objects."
+    overlap_class: direct
     tags: [class-reference, object, visit]
   - id: pddl_end_at_object_class
-    name: End at an object by class
     description: Permit finishing at any object belonging to a referenced class.
+    question_template: "Stop beside {end_class_word_phrase} when finished."
+    overlap_class: direct
     tags: [class-reference, object, final-location]
   - id: pddl_inspect_object_class
-    name: Inspect an object by class
     description: Permit inspecting any object belonging to a referenced class.
+    question_template: "Check any one {inspect_class} for safety."
+    overlap_class: direct
     tags: [class-reference, object, inspect]
   - id: pddl_visit_room_class
-    name: Visit a room by class
     description: Permit visiting any room belonging to a referenced class.
+    question_template: "Travel through {visit_room_word_phrase} of your choice."
+    overlap_class: direct
     tags: [class-reference, room, visit]
   - id: pddl_end_in_room_class
-    name: End in a room by class
     description: Permit finishing in any room belonging to a referenced class.
+    question_template: "End the assignment in any {end_room_class}."
+    overlap_class: direct
     tags: [class-reference, room, final-location]
   - id: pddl_visit_room_containing_object
-    name: Visit the room containing an object
     description: Resolve an explicit object through the containment hierarchy.
+    question_template: "Visit the room that contains {hierarchy_obj}."
+    overlap_class: direct
     tags: [hierarchy-reference, room, visit]
   - id: pddl_end_in_room_containing_object
-    name: End in the room containing an object
     description: Finish in the room resolved from an explicit object.
+    question_template: "Finish in whichever room contains object {hierarchy_end_obj}."
+    overlap_class: direct
     tags: [hierarchy-reference, room, final-location]
   - id: pddl_visit_parent_place
-    name: Visit an object's parent place
     description: Visit the immediate place containing an explicit object.
+    question_template: "Navigate through the place holding {parent_obj}."
+    overlap_class: related
     tags: [hierarchy-reference, place, visit]
   - id: pddl_end_at_parent_place
-    name: End at an object's parent place
     description: Finish at the immediate place containing an explicit object.
+    question_template: "Finish at the place directly containing {parent_end_obj}."
+    overlap_class: related
     tags: [hierarchy-reference, place, final-location]
   - id: pddl_visit_nearest_object
-    name: Visit a nearest object
     description: Resolve the nearest other object to an explicit reference.
+    question_template: "Visit the object whose center is nearest to {near_ref}."
+    overlap_class: related
     tags: [spatial-reference, object, visit]
   - id: pddl_inspect_nearest_object
-    name: Inspect a nearest object
     description: Inspect the nearest other object to an explicit reference.
+    question_template: "Inspect the object positioned closest to {inspect_ref}."
+    overlap_class: related
     tags: [spatial-reference, object, inspect]
   - id: pddl_hold_nearest_class_object
-    name: Pick up the nearest class member
     description: Hold the nearest member of a class to a reference object.
+    question_template: "Pick up the {nearest_class} closest to {nearest_class_ref}."
+    overlap_class: related
     tags: [spatial-reference, class-reference, manipulation]
   - id: pddl_visit_farthest_object
-    name: Visit a farthest object
     description: Visit the farthest other object from an explicit reference.
+    question_template: "Pass by the object farthest from {far_ref} by center distance."
+    overlap_class: related
     tags: [spatial-reference, object, visit]
   - id: pddl_end_at_farthest_object
-    name: End at a farthest object
     description: Finish at the farthest other object from a reference.
+    question_template: "Finish at the object most distant from {far_end_ref}."
+    overlap_class: related
     tags: [spatial-reference, object, final-location]
   - id: pddl_inspect_highest_class_object
-    name: Inspect the highest class member
     description: Inspect a maximum-z member of a referenced class.
+    question_template: "Inspect the highest-positioned {high_class}."
+    overlap_class: absent
     tags: [spatial-reference, extrema, inspect]
   - id: pddl_visit_lowest_class_object
-    name: Visit the lowest class member
     description: Visit a minimum-z member of a referenced class.
+    question_template: "Visit the {low_class} with the smallest center height."
+    overlap_class: absent
     tags: [spatial-reference, extrema, visit]
   - id: pddl_visit_nearest_room
-    name: Visit the nearest room
     description: Visit the room center nearest to an explicit object.
+    question_template: "Visit the room whose center is closest to {nearest_room_ref}."
+    overlap_class: related
     tags: [spatial-reference, room, visit]
   - id: pddl_end_in_nearest_room
-    name: End in the nearest room
     description: Finish in the room center nearest to an explicit object.
+    question_template: "Conclude in the room geometrically nearest to {nearest_end_ref}."
+    overlap_class: related
     tags: [spatial-reference, room, final-location]
   - id: pddl_visit_most_connected_room
-    name: Visit a most-connected room
     description: Visit any room tied for maximum room degree.
+    question_template: "Visit a room with the maximum number of distinct direct room neighbors."
+    overlap_class: related
     tags: [connectivity-reference, extrema, visit]
   - id: pddl_end_in_least_connected_room
-    name: End in a least-connected room
     description: Finish in any room tied for minimum room degree.
+    question_template: "Finish in a room tied for the smallest connectivity degree."
+    overlap_class: related
     tags: [connectivity-reference, extrema, final-location]
   - id: pddl_visit_adjacent_rooms
-    name: Visit every adjacent room
     description: Require visits to all direct neighbors of a room.
+    question_template: "Visit every distinct room directly connected to {adjacent_ref}."
+    overlap_class: related
     tags: [connectivity-reference, conjunction, room]
   - id: pddl_visit_either_object
-    name: Visit either named object
     description: Offer an explicit disjunction between two object visits.
+    question_template: "Visit either {either_a} or {either_b}; one is enough."
+    overlap_class: related
     tags: [direct-symbol, disjunction, object]
   - id: pddl_visit_object_or_room
-    name: Visit an object or a room
     description: Offer a cross-layer disjunction of visit goals.
+    question_template: "Either pass object {cross_obj} or visit room {cross_room}."
+    overlap_class: related
     tags: [direct-symbol, disjunction, combination]
   - id: pddl_visit_object_and_room
-    name: Visit an object and a room
     description: Conjoin explicit object and room visit goals.
+    question_template: "Make sure you pass {both_obj} and also visit {both_room}."
+    overlap_class: related
     tags: [direct-symbol, conjunction, combination]
   - id: pddl_inspect_and_hold_object
-    name: Inspect and hold an object
     description: Conjoin inspection and holding for the same object.
+    question_template: "Verify {inspect_hold} is safe and keep hold of it."
+    overlap_class: related
     tags: [direct-symbol, conjunction, manipulation]
   - id: pddl_visit_then_end_at_object
-    name: Visit then end at objects
     description: Encode an ordered two-object instruction using visited and at.
+    question_template: "Pass {order_a} first, then finish at {order_b}."
+    overlap_class: direct
     tags: [ordering, object, final-location]
   - id: pddl_visit_room_then_end_at_object
-    name: Visit room then end at object
     description: Encode an ordered room-to-object instruction.
+    question_template: "Travel through {order_room} before ending at {order_object}."
+    overlap_class: related
     tags: [ordering, combination, final-location]
   - id: pddl_visit_object_then_end_in_room
-    name: Visit object then end in room
     description: Encode an ordered object-to-room instruction.
+    question_template: "Visit {first_object}, and make {final_room} your final room."
+    overlap_class: related
     tags: [ordering, combination, final-location]
   - id: pddl_visit_place_then_end_in_room
-    name: Visit place then end in room
     description: Encode an ordered place-to-room instruction.
+    question_template: "Go via {first_place}, then end inside {place_final_room}."
+    overlap_class: direct
     tags: [ordering, combination, final-location]
   - id: pddl_visit_room_then_end_at_place
-    name: Visit room then end at place
     description: Encode an ordered room-to-place instruction.
+    question_template: "Enter {first_room} along the way and stop finally at {final_place}."
+    overlap_class: related
     tags: [ordering, combination, final-location]
   - id: pddl_visit_then_end_at_place
-    name: Visit then end at places
     description: Encode an ordered two-place instruction.
+    question_template: "Include {place_a} before making {place_b} the endpoint."
+    overlap_class: direct
     tags: [ordering, place, final-location]
   - id: pddl_inspect_then_end_at_place
-    name: Inspect then end at place
     description: Conjoin an inspection with a final place location.
+    question_template: "Inspect {inspect_order_obj}, then conclude at {inspect_order_place}."
+    overlap_class: direct
     tags: [combination, inspect, final-location]
   - id: pddl_hold_then_end_in_room
-    name: Hold then end in room
     description: Conjoin a holding goal with a final room location.
+    question_template: "Keep {carry_obj} in hand and finish inside {carry_room}."
+    overlap_class: related
     tags: [combination, manipulation, final-location]
   - id: pddl_move_object_to_place
-    name: Move an object to a place
     description: Relocate an explicit object to an explicit place.
+    question_template: "Relocate {move_obj} into place {move_place}."
+    overlap_class: direct
     tags: [direct-symbol, manipulation, place]
   - id: pddl_move_class_object_to_place
-    name: Move a class member to a place
     description: Permit relocating any member of a class to a place.
+    question_template: "Move any one {move_class} into {move_class_place}."
+    overlap_class: related
     tags: [class-reference, disjunction, manipulation]
   - id: pddl_move_object_to_neighbor_place
-    name: Move an object to a neighboring place
     description: Resolve a destination adjacent to the object's current place.
+    question_template: "Transfer {neighbor_move_obj} to place {neighbor_destination}, adjacent to its current place."
+    overlap_class: direct
     tags: [connectivity-reference, hierarchy-reference, manipulation]
   - id: pddl_do_not_hold_object
-    name: Do not hold an object
     description: Negate holding for an explicit object.
+    question_template: "Ensure object {avoid_obj} is not being carried."
+    overlap_class: direct
     tags: [direct-symbol, negation, manipulation]
   - id: pddl_visit_without_holding
-    name: Visit without holding
     description: Visit an explicit object while negating its holding predicate.
+    question_template: "Visit {visit_free_obj} but do not take it with you."
+    overlap_class: direct
     tags: [conjunction, negation, object]
   - id: pddl_visit_room_avoid_neighbor
-    name: Visit a room while avoiding a neighbor
     description: Require one room visit and negate a neighboring room visit.
+    question_template: "Visit {target_room} while never entering its neighbor {avoided_room}."
+    overlap_class: related
     tags: [connectivity-reference, negation, conjunction]
   - id: pddl_hold_class_or_inspect_object
-    name: Hold a class or inspect an object
     description: Combine class grounding and an explicit inspection in a disjunction.
+    question_template: "Either carry {alternative_class_phrase} or inspect {alternative_obj}."
+    overlap_class: related
     tags: [class-reference, disjunction, combination]
   - id: pddl_visit_class_and_end_in_room
-    name: Visit a class and end in a room
     description: Visit any member of an object class and finish in a named room.
+    question_template: "Visit {combined_class_phrase}, then finish in {combined_room}."
+    overlap_class: related
     tags: [class-reference, conjunction, final-location]

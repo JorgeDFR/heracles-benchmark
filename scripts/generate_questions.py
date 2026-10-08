@@ -20,6 +20,7 @@ from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
 from itertools import combinations
 from pathlib import Path
+from string import Formatter
 from typing import Any
 
 try:
@@ -37,7 +38,8 @@ ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_SCENE = ROOT / "data" / "scene_graphs" / "example_dsg.json"
 DEFAULT_CATALOG = ROOT / "data" / "questions" / "question_types.yaml"
 DEFAULT_QUESTION_ROOT = ROOT / "data" / "questions"
-GENERATOR_VERSION = 3
+GENERATOR_VERSION = 4
+OVERLAP_CLASSES = frozenset({"direct", "related", "absent"})
 LOCAL_ID_MASK = (1 << 56) - 1
 
 LAYER_NAMES = {
@@ -99,7 +101,7 @@ class Entity:
 
 @dataclass(frozen=True)
 class Question:
-    question: str
+    parameters: dict[str, Any]
     solution: str
 
 
@@ -436,62 +438,62 @@ def qa_questions(scene: Scene, choices: Choices) -> dict[str, Question]:
     room_class = choices.room_class()
 
     q["qa_object_class_inventory"] = Question(
-        "Give the complete set of object categories represented in this map.",
+        {},
         sldp_set(sorted(scene.objects_by_class)),
     )
     q["qa_object_total"] = Question(
-        "How many object nodes does the scene contain?", str(len(scene.objects))
+        {}, str(len(scene.objects))
     )
     q["qa_room_total"] = Question(
-        "What is the total number of mapped rooms?", str(len(scene.rooms))
+        {}, str(len(scene.rooms))
     )
     q["qa_place_total"] = Question(
-        "Count all navigable place nodes, combining the 2D and 3D place layers.",
+        {},
         str(len(scene.places)),
     )
     q["qa_room_class_inventory"] = Question(
-        "Which distinct room categories occur in the scene?",
+        {},
         sldp_set(sorted(scene.rooms_by_class)),
     )
     q["qa_object_ids_for_class"] = Question(
-        f"Return the IDs of every object categorized as {class_word} in the map.",
+        {"class_word": class_word},
         sldp_set(entity.symbol for entity in scene.objects_by_class[class_name]),
     )
     count_class = choices.class_name()
     q["qa_object_count_for_class"] = Question(
-        f"How many {choices.vocabulary(count_class)} objects are represented?",
+        {"count_class": choices.vocabulary(count_class)},
         str(len(scene.objects_by_class[count_class])),
     )
     center_class = choices.class_name()
     q["qa_object_centers_for_class"] = Question(
-        f"Report all 3D center points for the {choices.vocabulary(center_class)} objects.",
+        {"center_class": choices.vocabulary(center_class)},
         sldp_set(
             format_point(entity.position)
             for entity in scene.objects_by_class[center_class]
         ),
     )
     q["qa_object_class_lookup"] = Question(
-        f"What semantic category is assigned to {obj.symbol}?",
+        {"obj": obj.symbol},
         obj.semantic_class or "unknown",
     )
     center_obj = choices.one(scene.objects, "an object center lookup")
     q["qa_object_center_lookup"] = Question(
-        f"Where is the center of object {center_obj.symbol}?",
+        {"center_obj": center_obj.symbol},
         format_point(center_obj.position),
     )
     q["qa_rooms_for_class"] = Question(
-        f"List the room IDs categorized as {choices.vocabulary(room_class)}.",
+        {"room_class": choices.vocabulary(room_class)},
         sldp_set(entity.symbol for entity in scene.rooms_by_class[room_class]),
     )
     q["qa_room_center_lookup"] = Question(
-        f"Give the center point recorded for room {room.symbol}.",
+        {"room": room.symbol},
         format_point(room.position),
     )
 
     objects_with_place = [entity for entity in scene.objects if entity.parents]
     child_obj = choices.one(objects_with_place, "an object with a parent place")
     q["qa_parent_place_of_object"] = Question(
-        f"Which place nodes directly contain {child_obj.symbol}?",
+        {"child_obj": child_obj.symbol},
         sldp_set(sorted_symbols(child_obj.parents)),
     )
     objects_with_room = [
@@ -499,13 +501,13 @@ def qa_questions(scene: Scene, choices: Choices) -> dict[str, Question]:
     ]
     room_obj = choices.one(objects_with_room, "an object contained in a room")
     q["qa_parent_room_of_object"] = Question(
-        f"Following containment through places, which rooms contain {room_obj.symbol}?",
+        {"room_obj": room_obj.symbol},
         sldp_set(scene.rooms_for_object(room_obj.symbol)),
     )
     places_with_room = [entity for entity in scene.places if entity.parents]
     room_place = choices.one(places_with_room, "a place contained in a room")
     q["qa_parent_room_of_place"] = Question(
-        f"Name every room that is a parent of place {room_place.symbol}.",
+        {"room_place": room_place.symbol},
         sldp_set(sorted_symbols(room_place.parents)),
     )
 
@@ -513,7 +515,7 @@ def qa_questions(scene: Scene, choices: Choices) -> dict[str, Question]:
     populated_room = choices.one(rooms_with_objects, "a room containing objects")
     populated_ids = scene.objects_by_room[populated_room.symbol]
     q["qa_objects_in_room"] = Question(
-        f"Which object IDs descend from room {populated_room.symbol}?",
+        {"populated_room": populated_room.symbol},
         sldp_set(populated_ids),
     )
     class_room = choices.one(rooms_with_objects, "a room containing object classes")
@@ -525,12 +527,12 @@ def qa_questions(scene: Scene, choices: Choices) -> dict[str, Question]:
         - {None}
     )
     q["qa_object_classes_in_room"] = Question(
-        f"What kinds of objects can be found inside {class_room.symbol}?",
+        {"class_room": class_room.symbol},
         sldp_set(classes_in_room),
     )
     count_room = choices.one(scene.rooms, "a room object count")
     q["qa_object_count_in_room"] = Question(
-        f"Count the distinct object nodes contained under room {count_room.symbol}.",
+        {"count_room": count_room.symbol},
         str(len(scene.objects_by_room[count_room.symbol])),
     )
     room_class_pairs = [
@@ -551,7 +553,10 @@ def qa_questions(scene: Scene, choices: Choices) -> dict[str, Question]:
         if scene.entity(symbol).semantic_class == filtered_class
     ]
     q["qa_class_objects_in_room"] = Question(
-        f"Identify each {choices.vocabulary(filtered_class)} located in {filtered_room.symbol}.",
+        {
+            "filtered_class": choices.vocabulary(filtered_class),
+            "filtered_room": filtered_room.symbol,
+        },
         sldp_set(filtered_ids),
     )
     count_pair = choices.one(room_class_pairs, "a room/class count pair")
@@ -561,28 +566,31 @@ def qa_questions(scene: Scene, choices: Choices) -> dict[str, Question]:
         if scene.entity(symbol).semantic_class == count_pair[1]
     ]
     q["qa_class_count_in_room"] = Question(
-        f"How many {choices.vocabulary(count_pair[1])} objects belong to {count_pair[0].symbol}?",
+        {
+            "count_pair_1": choices.vocabulary(count_pair[1]),
+            "count_pair_0": count_pair[0].symbol,
+        },
         str(len(count_ids)),
     )
     q["qa_places_in_room"] = Question(
-        f"Enumerate the place nodes immediately below {room.symbol}.",
+        {"room": room.symbol},
         sldp_set(scene.places_by_room[room.symbol]),
     )
     place_count_room = choices.one(scene.rooms, "a room place count")
     q["qa_place_count_in_room"] = Question(
-        f"How many direct place children does {place_count_room.symbol} have?",
+        {"place_count_room": place_count_room.symbol},
         str(len(scene.places_by_room[place_count_room.symbol])),
     )
 
     populated_places = [p for p in scene.places if scene.objects_by_place[p.symbol]]
     populated_place = choices.one(populated_places, "a place containing objects")
     q["qa_objects_in_place"] = Question(
-        f"List the objects attached directly to place {populated_place.symbol}.",
+        {"populated_place": populated_place.symbol},
         sldp_set(scene.objects_by_place[populated_place.symbol]),
     )
     class_place = choices.one(populated_places, "a place containing object classes")
     q["qa_object_classes_in_place"] = Question(
-        f"Which object categories are directly contained by {class_place.symbol}?",
+        {"class_place": class_place.symbol},
         sldp_set(
             sorted(
                 {
@@ -595,7 +603,7 @@ def qa_questions(scene: Scene, choices: Choices) -> dict[str, Question]:
     )
     count_place = choices.one(scene.places, "a place object count")
     q["qa_object_count_in_place"] = Question(
-        f"How many object children are assigned to {count_place.symbol}?",
+        {"count_place": count_place.symbol},
         str(len(scene.objects_by_place[count_place.symbol])),
     )
     classes_in_rooms = [
@@ -615,7 +623,7 @@ def qa_questions(scene: Scene, choices: Choices) -> dict[str, Question]:
         for room_symbol in scene.rooms_for_object(entity.symbol)
     )
     q["qa_rooms_containing_class"] = Question(
-        f"Which rooms contain at least one {choices.vocabulary(containing_class)}?",
+        {"containing_class": choices.vocabulary(containing_class)},
         sldp_set(containing_rooms),
     )
     room_count_class = choices.one(
@@ -627,7 +635,7 @@ def qa_questions(scene: Scene, choices: Choices) -> dict[str, Question]:
         for room_symbol in scene.rooms_for_object(entity.symbol)
     }
     q["qa_room_count_containing_class"] = Question(
-        f"In how many rooms does a {choices.vocabulary(room_count_class)} appear?",
+        {"room_count_class": choices.vocabulary(room_count_class)},
         str(len(room_count_symbols)),
     )
 
@@ -635,18 +643,18 @@ def qa_questions(scene: Scene, choices: Choices) -> dict[str, Question]:
     connected_rooms = [r for r in scene.rooms if room_adjacency[r.symbol]]
     neighbor_room = choices.one(connected_rooms, "a room with a neighbor")
     q["qa_room_neighbors"] = Question(
-        f"Which rooms share a direct connectivity edge with {neighbor_room.symbol}?",
+        {"neighbor_room": neighbor_room.symbol},
         sldp_set(sorted_symbols(room_adjacency[neighbor_room.symbol])),
     )
     degree_room = choices.one(scene.rooms, "a room degree")
     q["qa_room_degree"] = Question(
-        f"How many distinct rooms are directly connected to {degree_room.symbol}?",
+        {"degree_room": degree_room.symbol},
         str(len(room_adjacency[degree_room.symbol])),
     )
     max_degree = max(map(len, room_adjacency.values()))
     min_degree = min(map(len, room_adjacency.values()))
     q["qa_most_connected_rooms"] = Question(
-        "Return every room tied for the greatest number of direct room connections.",
+        {},
         sldp_set(
             sorted_symbols(
                 symbol
@@ -656,7 +664,7 @@ def qa_questions(scene: Scene, choices: Choices) -> dict[str, Question]:
         ),
     )
     q["qa_least_connected_rooms"] = Question(
-        "Which rooms are tied at the minimum room-connectivity degree?",
+        {},
         sldp_set(
             sorted_symbols(
                 symbol
@@ -667,11 +675,11 @@ def qa_questions(scene: Scene, choices: Choices) -> dict[str, Question]:
     )
     path_left, path_right, room_path = pair_with_path(scene, "room")
     q["qa_room_shortest_path"] = Question(
-        f"Give one shortest room-by-room route from {path_left.symbol} to {path_right.symbol}, including both ends.",
+        {"path_left": path_left.symbol, "path_right": path_right.symbol},
         sldp_list(room_path),
     )
     q["qa_room_hop_distance"] = Question(
-        f"How many room edges separate {path_left.symbol} from {path_right.symbol} along a shortest route?",
+        {"path_left": path_left.symbol, "path_right": path_right.symbol},
         str(len(room_path) - 1),
     )
 
@@ -679,13 +687,12 @@ def qa_questions(scene: Scene, choices: Choices) -> dict[str, Question]:
     connected_places = [p for p in scene.places if place_adjacency[p.symbol]]
     neighbor_place = choices.one(connected_places, "a connected place")
     q["qa_place_neighbors"] = Question(
-        f"Return the immediate navigation neighbors of place {neighbor_place.symbol}.",
+        {"neighbor_place": neighbor_place.symbol},
         sldp_set(sorted_symbols(place_adjacency[neighbor_place.symbol])),
     )
     degree_place = choices.one(scene.places, "a place degree")
     q["qa_place_degree"] = Question(
-        "How many distinct same-layer place nodes are directly connected to "
-        f"{degree_place.symbol}?",
+        {"degree_place": degree_place.symbol},
         str(len(place_adjacency[degree_place.symbol])),
     )
     hop_place = choices.one(connected_places, "a hop-query place")
@@ -699,12 +706,12 @@ def qa_questions(scene: Scene, choices: Choices) -> dict[str, Question]:
         reached.update(frontier)
     reached.discard(hop_place.symbol)
     q["qa_places_within_hops"] = Question(
-        f"Which other places are reachable from {hop_place.symbol} in at most {hop_budget} place edges?",
+        {"hop_place": hop_place.symbol, "hop_budget": hop_budget},
         sldp_set(sorted_symbols(reached)),
     )
     place_left, place_right, place_path = pair_with_path(scene, "place")
     q["qa_place_shortest_path"] = Question(
-        f"Trace one minimum-hop place route from {place_left.symbol} to {place_right.symbol}.",
+        {"place_left": place_left.symbol, "place_right": place_right.symbol},
         sldp_list(place_path),
     )
     neighbor_object_places = [
@@ -723,20 +730,19 @@ def qa_questions(scene: Scene, choices: Choices) -> dict[str, Question]:
         for object_symbol in scene.objects_by_place[neighbor]
     )
     q["qa_objects_in_neighbor_places"] = Question(
-        f"Which objects belong to places directly adjacent to {object_neighbor_place.symbol}?",
+        {"object_neighbor_place": object_neighbor_place.symbol},
         sldp_set(neighbor_objects),
     )
 
     reference = choices.one(scene.objects, "an object distance reference")
     other_objects = [candidate for candidate in scene.objects if candidate != reference]
     q["qa_nearest_object"] = Question(
-        f"Using center-to-center distance, which object is nearest to {reference.symbol}?",
+        {"reference": reference.symbol},
         sldp_set(entity.symbol for entity in extrema(reference, other_objects)),
     )
     far_reference = choices.one(scene.objects, "an object far-distance reference")
     q["qa_farthest_object"] = Question(
-        f"Which object is farthest from {far_reference.symbol} by "
-        "center-to-center distance?",
+        {"far_reference": far_reference.symbol},
         sldp_set(
             entity.symbol
             for entity in extrema(
@@ -762,7 +768,7 @@ def qa_questions(scene: Scene, choices: Choices) -> dict[str, Question]:
         if entity.semantic_class != mixed_ref.semantic_class
     ]
     q["qa_nearest_different_class_object"] = Question(
-        f"What is the closest object to {mixed_ref.symbol} that has a different semantic class?",
+        {"mixed_ref": mixed_ref.symbol},
         sldp_set(entity.symbol for entity in extrema(mixed_ref, different)),
     )
     class_a, class_b = choices.two(list(scene.objects_by_class), "two object classes")
@@ -780,18 +786,20 @@ def qa_questions(scene: Scene, choices: Choices) -> dict[str, Question]:
     class_a_word = choices.vocabulary(class_a)
     class_b_word = choices.vocabulary(class_b)
     q["qa_closest_cross_class_pair"] = Question(
-        f"Which pairs consisting of {indefinite(class_a_word)} and {indefinite(class_b_word)} are tied for the smallest center distance?",
+        {
+            "class_a_word_phrase": indefinite(class_a_word),
+            "class_b_word_phrase": indefinite(class_b_word),
+        },
         sldp_set(sorted(closest_cross_pairs)),
     )
     place_ref = choices.one(scene.objects, "an object for nearest-place lookup")
     q["qa_nearest_place_to_object"] = Question(
-        f"Which navigable place is closest to object {place_ref.symbol} by "
-        "center-to-center distance?",
+        {"place_ref": place_ref.symbol},
         sldp_set(entity.symbol for entity in extrema(place_ref, scene.places)),
     )
     room_ref = choices.one(scene.objects, "an object for nearest-room lookup")
     q["qa_nearest_room_to_object"] = Question(
-        f"Which room is closest to {room_ref.symbol} by center-to-center distance?",
+        {"room_ref": room_ref.symbol},
         sldp_set(entity.symbol for entity in extrema(room_ref, scene.rooms)),
     )
     room_pairs = [
@@ -809,12 +817,12 @@ def qa_questions(scene: Scene, choices: Choices) -> dict[str, Question]:
         if math.isclose(value, room_pair_distance, abs_tol=1e-9)
     ]
     q["qa_closest_room_pair"] = Question(
-        "Which room pairs are tied for the smallest distance between recorded centers?",
+        {},
         sldp_set(sorted(closest_room_pairs)),
     )
     height_class = choices.class_name()
     q["qa_highest_object_of_class"] = Question(
-        f"Which {choices.vocabulary(height_class)} reaches the greatest center height?",
+        {"height_class": choices.vocabulary(height_class)},
         sldp_set(
             entity.symbol
             for entity in axis_extrema(scene.objects_by_class[height_class], 2, True)
@@ -822,7 +830,7 @@ def qa_questions(scene: Scene, choices: Choices) -> dict[str, Question]:
     )
     low_class = choices.class_name()
     q["qa_lowest_object_of_class"] = Question(
-        f"Which {choices.vocabulary(low_class)} has the lowest center z-coordinate?",
+        {"low_class": choices.vocabulary(low_class)},
         sldp_set(
             entity.symbol
             for entity in axis_extrema(scene.objects_by_class[low_class], 2, False)
@@ -830,12 +838,12 @@ def qa_questions(scene: Scene, choices: Choices) -> dict[str, Question]:
     )
     near_room = choices.one(scene.rooms, "a room for nearest-object lookup")
     q["qa_nearest_object_to_room"] = Question(
-        f"Which object is nearest to the center of {near_room.symbol}?",
+        {"near_room": near_room.symbol},
         sldp_set(entity.symbol for entity in extrema(near_room, scene.objects)),
     )
     far_room = choices.one(scene.rooms, "a room for farthest-object lookup")
     q["qa_farthest_object_from_room"] = Question(
-        f"Find the object farthest from room center {far_room.symbol}.",
+        {"far_room": far_room.symbol},
         sldp_set(
             entity.symbol for entity in extrema(far_room, scene.objects, farthest=True)
         ),
@@ -858,7 +866,7 @@ def qa_questions(scene: Scene, choices: Choices) -> dict[str, Question]:
         if candidate != radius_ref and euclidean(radius_ref, candidate) <= radius
     )
     q["qa_objects_within_radius"] = Question(
-        f"Which other objects have centers no more than {format_number(radius)} meters from {radius_ref.symbol}?",
+        {"radius": format_number(radius), "radius_ref": radius_ref.symbol},
         sldp_set(radius_objects),
     )
     return q
@@ -874,50 +882,50 @@ def pddl_questions(scene: Scene, choices: Choices) -> dict[str, Question]:
     place = choices.one(scene.places, "a PDDL place")
 
     q["pddl_visit_object_symbol"] = Question(
-        f"Pass by object {obj.symbol} before the task is complete.",
+        {"obj": obj.symbol},
         pddl_fact("visited-object", obj.symbol),
     )
     q["pddl_end_at_object_symbol"] = Question(
-        f"Finish the mission at {obj2.symbol}.", pddl_fact("at-object", obj2.symbol)
+        {"obj2": obj2.symbol}, pddl_fact("at-object", obj2.symbol)
     )
     inspect_obj = choices.one(scene.objects, "an inspection object")
     q["pddl_inspect_object_symbol"] = Question(
-        f"Examine object {inspect_obj.symbol} closely.",
+        {"inspect_obj": inspect_obj.symbol},
         pddl_fact("safe", inspect_obj.symbol),
     )
     hold_obj = choices.one(scene.objects, "a pickup object")
     q["pddl_hold_object_symbol"] = Question(
-        f"Pick up {hold_obj.symbol} and retain it.",
+        {"hold_obj": hold_obj.symbol},
         pddl_fact("holding", hold_obj.symbol),
     )
     q["pddl_visit_room_symbol"] = Question(
-        f"Enter room {room.symbol} at some point.",
+        {"room": room.symbol},
         pddl_fact("visited-region", room.symbol),
     )
     end_room = choices.one(scene.rooms, "a final room")
     q["pddl_end_in_room_symbol"] = Question(
-        f"Conclude the route inside {end_room.symbol}.",
+        {"end_room": end_room.symbol},
         pddl_fact("in-region", end_room.symbol),
     )
     q["pddl_visit_place_symbol"] = Question(
-        f"Include place {place.symbol} on the route.",
+        {"place": place.symbol},
         pddl_fact("visited-place", place.symbol),
     )
     end_place = choices.one(scene.places, "a final place")
     q["pddl_end_at_place_symbol"] = Question(
-        f"Make {end_place.symbol} the final waypoint.",
+        {"end_place": end_place.symbol},
         pddl_fact("at-place", end_place.symbol),
     )
 
     hold_class = choices.class_name(multiple=True)
     hold_members = scene.objects_by_class[hold_class]
     q["pddl_hold_object_class"] = Question(
-        f"Bring along any {choices.vocabulary(hold_class)} you can choose.",
+        {"hold_class": choices.vocabulary(hold_class)},
         pddl_for_entities("holding", hold_members, force_operator=True),
     )
     visit_class = choices.class_name(multiple=True)
     q["pddl_visit_object_class"] = Question(
-        f"Approach one of the {choices.vocabulary(visit_class)} objects.",
+        {"visit_class": choices.vocabulary(visit_class)},
         pddl_for_entities(
             "visited-object",
             scene.objects_by_class[visit_class],
@@ -927,14 +935,14 @@ def pddl_questions(scene: Scene, choices: Choices) -> dict[str, Question]:
     end_class = choices.class_name(multiple=True)
     end_class_word = choices.vocabulary(end_class)
     q["pddl_end_at_object_class"] = Question(
-        f"Stop beside {indefinite(end_class_word)} when finished.",
+        {"end_class_word_phrase": indefinite(end_class_word)},
         pddl_for_entities(
             "at-object", scene.objects_by_class[end_class], force_operator=True
         ),
     )
     inspect_class = choices.class_name(multiple=True)
     q["pddl_inspect_object_class"] = Question(
-        f"Check any one {choices.vocabulary(inspect_class)} for safety.",
+        {"inspect_class": choices.vocabulary(inspect_class)},
         pddl_for_entities(
             "safe", scene.objects_by_class[inspect_class], force_operator=True
         ),
@@ -942,7 +950,7 @@ def pddl_questions(scene: Scene, choices: Choices) -> dict[str, Question]:
     visit_room_class = choices.room_class(multiple=True)
     visit_room_word = choices.vocabulary(visit_room_class)
     q["pddl_visit_room_class"] = Question(
-        f"Travel through {indefinite(visit_room_word)} of your choice.",
+        {"visit_room_word_phrase": indefinite(visit_room_word)},
         pddl_for_entities(
             "visited-region",
             scene.rooms_by_class[visit_room_class],
@@ -951,7 +959,7 @@ def pddl_questions(scene: Scene, choices: Choices) -> dict[str, Question]:
     )
     end_room_class = choices.room_class(multiple=True)
     q["pddl_end_in_room_class"] = Question(
-        f"End the assignment in any {choices.vocabulary(end_room_class)}.",
+        {"end_room_class": choices.vocabulary(end_room_class)},
         pddl_for_entities(
             "in-region",
             scene.rooms_by_class[end_room_class],
@@ -965,12 +973,12 @@ def pddl_questions(scene: Scene, choices: Choices) -> dict[str, Question]:
     hierarchy_obj = choices.one(objects_with_room, "an object in a room")
     hierarchy_room = scene.rooms_for_object(hierarchy_obj.symbol)[0]
     q["pddl_visit_room_containing_object"] = Question(
-        f"Visit the room that contains {hierarchy_obj.symbol}.",
+        {"hierarchy_obj": hierarchy_obj.symbol},
         pddl_fact("visited-region", hierarchy_room),
     )
     hierarchy_end_obj = choices.one(objects_with_room, "another object in a room")
     q["pddl_end_in_room_containing_object"] = Question(
-        f"Finish in whichever room contains object {hierarchy_end_obj.symbol}.",
+        {"hierarchy_end_obj": hierarchy_end_obj.symbol},
         pddl_fact("in-region", scene.rooms_for_object(hierarchy_end_obj.symbol)[0]),
     )
     objects_with_place = [
@@ -980,12 +988,12 @@ def pddl_questions(scene: Scene, choices: Choices) -> dict[str, Question]:
     ]
     parent_obj = choices.one(objects_with_place, "an object with a place")
     q["pddl_visit_parent_place"] = Question(
-        f"Navigate through the place holding {parent_obj.symbol}.",
+        {"parent_obj": parent_obj.symbol},
         pddl_fact("visited-place", parent_obj.parent or ""),
     )
     parent_end_obj = choices.one(objects_with_place, "an object with a final place")
     q["pddl_end_at_parent_place"] = Question(
-        f"Finish at the place directly containing {parent_end_obj.symbol}.",
+        {"parent_end_obj": parent_end_obj.symbol},
         pddl_fact("at-place", parent_end_obj.parent or ""),
     )
 
@@ -994,7 +1002,7 @@ def pddl_questions(scene: Scene, choices: Choices) -> dict[str, Question]:
         near_ref, [item for item in scene.objects if item != near_ref]
     )
     q["pddl_visit_nearest_object"] = Question(
-        f"Visit the object whose center is nearest to {near_ref.symbol}.",
+        {"near_ref": near_ref.symbol},
         pddl_for_entities("visited-object", near_targets),
     )
     inspect_ref = choices.one(scene.objects, "a nearest inspection reference")
@@ -1002,7 +1010,7 @@ def pddl_questions(scene: Scene, choices: Choices) -> dict[str, Question]:
         inspect_ref, [item for item in scene.objects if item != inspect_ref]
     )
     q["pddl_inspect_nearest_object"] = Question(
-        f"Inspect the object positioned closest to {inspect_ref.symbol}.",
+        {"inspect_ref": inspect_ref.symbol},
         pddl_for_entities("safe", inspect_targets),
     )
     nearest_class = choices.class_name(multiple=True)
@@ -1014,7 +1022,10 @@ def pddl_questions(scene: Scene, choices: Choices) -> dict[str, Question]:
         nearest_class_ref, scene.objects_by_class[nearest_class]
     )
     q["pddl_hold_nearest_class_object"] = Question(
-        f"Pick up the {choices.vocabulary(nearest_class)} closest to {nearest_class_ref.symbol}.",
+        {
+            "nearest_class": choices.vocabulary(nearest_class),
+            "nearest_class_ref": nearest_class_ref.symbol,
+        },
         pddl_for_entities("holding", nearest_class_targets),
     )
     far_ref = choices.one(scene.objects, "a farthest-object reference")
@@ -1022,7 +1033,7 @@ def pddl_questions(scene: Scene, choices: Choices) -> dict[str, Question]:
         far_ref, [item for item in scene.objects if item != far_ref], farthest=True
     )
     q["pddl_visit_farthest_object"] = Question(
-        f"Pass by the object farthest from {far_ref.symbol} by center distance.",
+        {"far_ref": far_ref.symbol},
         pddl_for_entities("visited-object", far_targets),
     )
     far_end_ref = choices.one(scene.objects, "a farthest final reference")
@@ -1032,19 +1043,19 @@ def pddl_questions(scene: Scene, choices: Choices) -> dict[str, Question]:
         farthest=True,
     )
     q["pddl_end_at_farthest_object"] = Question(
-        f"Finish at the object most distant from {far_end_ref.symbol}.",
+        {"far_end_ref": far_end_ref.symbol},
         pddl_for_entities("at-object", far_end_targets),
     )
     high_class = choices.class_name()
     q["pddl_inspect_highest_class_object"] = Question(
-        f"Inspect the highest-positioned {choices.vocabulary(high_class)}.",
+        {"high_class": choices.vocabulary(high_class)},
         pddl_for_entities(
             "safe", axis_extrema(scene.objects_by_class[high_class], 2, True)
         ),
     )
     low_class = choices.class_name()
     q["pddl_visit_lowest_class_object"] = Question(
-        f"Visit the {choices.vocabulary(low_class)} with the smallest center height.",
+        {"low_class": choices.vocabulary(low_class)},
         pddl_for_entities(
             "visited-object", axis_extrema(scene.objects_by_class[low_class], 2, False)
         ),
@@ -1052,12 +1063,12 @@ def pddl_questions(scene: Scene, choices: Choices) -> dict[str, Question]:
     nearest_room_ref = choices.one(scene.objects, "a nearest-room reference")
     nearest_rooms = extrema(nearest_room_ref, scene.rooms)
     q["pddl_visit_nearest_room"] = Question(
-        f"Visit the room whose center is closest to {nearest_room_ref.symbol}.",
+        {"nearest_room_ref": nearest_room_ref.symbol},
         pddl_for_entities("visited-region", nearest_rooms),
     )
     nearest_end_ref = choices.one(scene.objects, "a nearest final-room reference")
     q["pddl_end_in_nearest_room"] = Question(
-        f"Conclude in the room geometrically nearest to {nearest_end_ref.symbol}.",
+        {"nearest_end_ref": nearest_end_ref.symbol},
         pddl_for_entities("in-region", extrema(nearest_end_ref, scene.rooms)),
     )
 
@@ -1065,7 +1076,7 @@ def pddl_questions(scene: Scene, choices: Choices) -> dict[str, Question]:
     max_degree = max(map(len, room_adjacency.values()))
     min_degree = min(map(len, room_adjacency.values()))
     q["pddl_visit_most_connected_room"] = Question(
-        "Visit a room with the maximum number of distinct direct room neighbors.",
+        {},
         pddl_group(
             "or",
             [
@@ -1076,7 +1087,7 @@ def pddl_questions(scene: Scene, choices: Choices) -> dict[str, Question]:
         ),
     )
     q["pddl_end_in_least_connected_room"] = Question(
-        "Finish in a room tied for the smallest connectivity degree.",
+        {},
         pddl_group(
             "or",
             [
@@ -1089,7 +1100,7 @@ def pddl_questions(scene: Scene, choices: Choices) -> dict[str, Question]:
     rooms_with_neighbors = [item for item in scene.rooms if room_adjacency[item.symbol]]
     adjacent_ref = choices.one(rooms_with_neighbors, "a room with adjacent rooms")
     q["pddl_visit_adjacent_rooms"] = Question(
-        f"Visit every distinct room directly connected to {adjacent_ref.symbol}.",
+        {"adjacent_ref": adjacent_ref.symbol},
         pddl_group(
             "and",
             [
@@ -1102,7 +1113,7 @@ def pddl_questions(scene: Scene, choices: Choices) -> dict[str, Question]:
 
     either_a, either_b = choices.two(scene.objects, "an object disjunction")
     q["pddl_visit_either_object"] = Question(
-        f"Visit either {either_a.symbol} or {either_b.symbol}; one is enough.",
+        {"either_a": either_a.symbol, "either_b": either_b.symbol},
         pddl_group(
             "or",
             [
@@ -1114,7 +1125,7 @@ def pddl_questions(scene: Scene, choices: Choices) -> dict[str, Question]:
     cross_obj = choices.one(scene.objects, "a cross-layer object")
     cross_room = choices.one(scene.rooms, "a cross-layer room")
     q["pddl_visit_object_or_room"] = Question(
-        f"Either pass object {cross_obj.symbol} or visit room {cross_room.symbol}.",
+        {"cross_obj": cross_obj.symbol, "cross_room": cross_room.symbol},
         pddl_group(
             "or",
             [
@@ -1126,7 +1137,7 @@ def pddl_questions(scene: Scene, choices: Choices) -> dict[str, Question]:
     both_obj = choices.one(scene.objects, "a conjunctive object")
     both_room = choices.one(scene.rooms, "a conjunctive room")
     q["pddl_visit_object_and_room"] = Question(
-        f"Make sure you pass {both_obj.symbol} and also visit {both_room.symbol}.",
+        {"both_obj": both_obj.symbol, "both_room": both_room.symbol},
         pddl_group(
             "and",
             [
@@ -1137,7 +1148,7 @@ def pddl_questions(scene: Scene, choices: Choices) -> dict[str, Question]:
     )
     inspect_hold = choices.one(scene.objects, "an inspect-and-hold object")
     q["pddl_inspect_and_hold_object"] = Question(
-        f"Verify {inspect_hold.symbol} is safe and keep hold of it.",
+        {"inspect_hold": inspect_hold.symbol},
         pddl_group(
             "and",
             [
@@ -1149,7 +1160,7 @@ def pddl_questions(scene: Scene, choices: Choices) -> dict[str, Question]:
 
     order_a, order_b = choices.two(scene.objects, "an ordered object pair")
     q["pddl_visit_then_end_at_object"] = Question(
-        f"Pass {order_a.symbol} first, then finish at {order_b.symbol}.",
+        {"order_a": order_a.symbol, "order_b": order_b.symbol},
         pddl_group(
             "and",
             [
@@ -1161,7 +1172,7 @@ def pddl_questions(scene: Scene, choices: Choices) -> dict[str, Question]:
     order_room = choices.one(scene.rooms, "an ordered first room")
     order_object = choices.one(scene.objects, "an ordered final object")
     q["pddl_visit_room_then_end_at_object"] = Question(
-        f"Travel through {order_room.symbol} before ending at {order_object.symbol}.",
+        {"order_room": order_room.symbol, "order_object": order_object.symbol},
         pddl_group(
             "and",
             [
@@ -1173,7 +1184,7 @@ def pddl_questions(scene: Scene, choices: Choices) -> dict[str, Question]:
     first_object = choices.one(scene.objects, "an ordered first object")
     final_room = choices.one(scene.rooms, "an ordered final room")
     q["pddl_visit_object_then_end_in_room"] = Question(
-        f"Visit {first_object.symbol}, and make {final_room.symbol} your final room.",
+        {"first_object": first_object.symbol, "final_room": final_room.symbol},
         pddl_group(
             "and",
             [
@@ -1185,7 +1196,7 @@ def pddl_questions(scene: Scene, choices: Choices) -> dict[str, Question]:
     first_place = choices.one(scene.places, "an ordered first place")
     place_final_room = choices.one(scene.rooms, "a place-to-room final room")
     q["pddl_visit_place_then_end_in_room"] = Question(
-        f"Go via {first_place.symbol}, then end inside {place_final_room.symbol}.",
+        {"first_place": first_place.symbol, "place_final_room": place_final_room.symbol},
         pddl_group(
             "and",
             [
@@ -1197,7 +1208,7 @@ def pddl_questions(scene: Scene, choices: Choices) -> dict[str, Question]:
     first_room = choices.one(scene.rooms, "a room-to-place first room")
     final_place = choices.one(scene.places, "a room-to-place final place")
     q["pddl_visit_room_then_end_at_place"] = Question(
-        f"Enter {first_room.symbol} along the way and stop finally at {final_place.symbol}.",
+        {"first_room": first_room.symbol, "final_place": final_place.symbol},
         pddl_group(
             "and",
             [
@@ -1208,7 +1219,7 @@ def pddl_questions(scene: Scene, choices: Choices) -> dict[str, Question]:
     )
     place_a, place_b = choices.two(scene.places, "an ordered place pair")
     q["pddl_visit_then_end_at_place"] = Question(
-        f"Include {place_a.symbol} before making {place_b.symbol} the endpoint.",
+        {"place_a": place_a.symbol, "place_b": place_b.symbol},
         pddl_group(
             "and",
             [
@@ -1220,7 +1231,10 @@ def pddl_questions(scene: Scene, choices: Choices) -> dict[str, Question]:
     inspect_order_obj = choices.one(scene.objects, "an inspection/order object")
     inspect_order_place = choices.one(scene.places, "an inspection/order place")
     q["pddl_inspect_then_end_at_place"] = Question(
-        f"Inspect {inspect_order_obj.symbol}, then conclude at {inspect_order_place.symbol}.",
+        {
+            "inspect_order_obj": inspect_order_obj.symbol,
+            "inspect_order_place": inspect_order_place.symbol,
+        },
         pddl_group(
             "and",
             [
@@ -1232,7 +1246,7 @@ def pddl_questions(scene: Scene, choices: Choices) -> dict[str, Question]:
     carry_obj = choices.one(scene.objects, "a carried object")
     carry_room = choices.one(scene.rooms, "a carrying destination room")
     q["pddl_hold_then_end_in_room"] = Question(
-        f"Keep {carry_obj.symbol} in hand and finish inside {carry_room.symbol}.",
+        {"carry_obj": carry_obj.symbol, "carry_room": carry_room.symbol},
         pddl_group(
             "and",
             [
@@ -1248,13 +1262,16 @@ def pddl_questions(scene: Scene, choices: Choices) -> dict[str, Question]:
         "a relocation destination",
     )
     q["pddl_move_object_to_place"] = Question(
-        f"Relocate {move_obj.symbol} into place {move_place.symbol}.",
+        {"move_obj": move_obj.symbol, "move_place": move_place.symbol},
         pddl_fact("object-in-place", move_obj.symbol, move_place.symbol),
     )
     move_class = choices.class_name(multiple=True)
     move_class_place = choices.one(scene.places, "a class relocation destination")
     q["pddl_move_class_object_to_place"] = Question(
-        f"Move any one {choices.vocabulary(move_class)} into {move_class_place.symbol}.",
+        {
+            "move_class": choices.vocabulary(move_class),
+            "move_class_place": move_class_place.symbol,
+        },
         pddl_group(
             "or",
             [
@@ -1278,7 +1295,10 @@ def pddl_questions(scene: Scene, choices: Choices) -> dict[str, Question]:
         "a neighboring destination place",
     )
     q["pddl_move_object_to_neighbor_place"] = Question(
-        f"Transfer {neighbor_move_obj.symbol} to place {neighbor_destination}, adjacent to its current place.",
+        {
+            "neighbor_move_obj": neighbor_move_obj.symbol,
+            "neighbor_destination": neighbor_destination,
+        },
         pddl_fact(
             "object-in-place",
             neighbor_move_obj.symbol,
@@ -1288,12 +1308,12 @@ def pddl_questions(scene: Scene, choices: Choices) -> dict[str, Question]:
 
     avoid_obj = choices.one(scene.objects, "an object not to hold")
     q["pddl_do_not_hold_object"] = Question(
-        f"Ensure object {avoid_obj.symbol} is not being carried.",
+        {"avoid_obj": avoid_obj.symbol},
         f"(not {pddl_fact('holding', avoid_obj.symbol)})",
     )
     visit_free_obj = choices.one(scene.objects, "an object to visit without carrying")
     q["pddl_visit_without_holding"] = Question(
-        f"Visit {visit_free_obj.symbol} but do not take it with you.",
+        {"visit_free_obj": visit_free_obj.symbol},
         pddl_group(
             "and",
             [
@@ -1307,7 +1327,7 @@ def pddl_questions(scene: Scene, choices: Choices) -> dict[str, Question]:
         sorted_symbols(room_adjacency[target_room.symbol]), "an adjacent room to avoid"
     )
     q["pddl_visit_room_avoid_neighbor"] = Question(
-        f"Visit {target_room.symbol} while never entering its neighbor {avoided_room}.",
+        {"target_room": target_room.symbol, "avoided_room": avoided_room},
         pddl_group(
             "and",
             [
@@ -1324,7 +1344,10 @@ def pddl_questions(scene: Scene, choices: Choices) -> dict[str, Question]:
         force_operator=True,
     )
     q["pddl_hold_class_or_inspect_object"] = Question(
-        f"Either carry {indefinite(choices.vocabulary(alternative_class))} or inspect {alternative_obj.symbol}.",
+        {
+            "alternative_class_phrase": indefinite(choices.vocabulary(alternative_class)),
+            "alternative_obj": alternative_obj.symbol,
+        },
         pddl_group(
             "or", [holding_alternatives, pddl_fact("safe", alternative_obj.symbol)]
         ),
@@ -1332,7 +1355,10 @@ def pddl_questions(scene: Scene, choices: Choices) -> dict[str, Question]:
     combined_class = choices.class_name(multiple=True)
     combined_room = choices.one(scene.rooms, "a final room for a class visit")
     q["pddl_visit_class_and_end_in_room"] = Question(
-        f"Visit {indefinite(choices.vocabulary(combined_class))}, then finish in {combined_room.symbol}.",
+        {
+            "combined_class_phrase": indefinite(choices.vocabulary(combined_class)),
+            "combined_room": combined_room.symbol,
+        },
         pddl_group(
             "and",
             [
@@ -1359,9 +1385,43 @@ def load_catalog(path: Path) -> dict[str, list[dict[str, Any]]]:
             raise GenerationError(
                 f"Catalog section `{family}` must contain exactly 50 entries"
             )
+        if any(not isinstance(entry, dict) for entry in entries):
+            raise GenerationError(f"Catalog section `{family}` entries must be mappings")
         ids = [entry.get("id") for entry in entries]
+        if any(
+            not isinstance(identifier, str) or not identifier.startswith(f"{family}_")
+            for identifier in ids
+        ):
+            raise GenerationError(
+                f"Catalog section `{family}` IDs must start with `{family}_`"
+            )
         if len(ids) != len(set(ids)):
             raise GenerationError(f"Catalog section `{family}` contains duplicate IDs")
+        for entry in entries:
+            template = entry.get("question_template")
+            if not isinstance(template, str) or not template.strip():
+                raise GenerationError(
+                    f"{entry['id']}: question_template must be non-empty text"
+                )
+            if entry.get("overlap_class") not in OVERLAP_CLASSES:
+                raise GenerationError(
+                    f"{entry['id']}: overlap_class must be direct, related, or absent"
+                )
+            try:
+                fields = list(Formatter().parse(template))
+            except ValueError as exc:
+                raise GenerationError(
+                    f"{entry['id']}: invalid question_template: {exc}"
+                ) from exc
+            for _, field, spec, conversion in fields:
+                if field is not None and (
+                    not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", field)
+                    or spec
+                    or conversion
+                ):
+                    raise GenerationError(
+                        f"{entry['id']}: use simple named placeholders such as {{object}}"
+                    )
     return catalog
 
 
@@ -1382,11 +1442,20 @@ def materialize(
     records = []
     for index, entry in enumerate(catalog, 1):
         item = built[entry["id"]]
+        try:
+            question_text = entry["question_template"].format_map(item.parameters)
+        except (KeyError, ValueError) as exc:
+            raise GenerationError(
+                f"{entry['id']}: cannot render question_template: {exc}"
+            ) from exc
         records.append(
             {
                 "uid": f"{prefix}{index:03d}",
-                "name": entry["name"],
-                "question": item.question,
+                "name": entry["id"].removeprefix(f"{family}_")
+                .replace("_", " ").capitalize(),
+                "question_type": entry["id"],
+                "overlap_class": entry["overlap_class"],
+                "question": question_text,
                 "solution": item.solution,
                 "correctness_comparator": {
                     "comparison_type": comparator,
@@ -1400,6 +1469,18 @@ def materialize(
 
 def normalize_question(value: str) -> str:
     return re.sub(r"\s+", " ", value.strip().casefold())
+
+
+def question_pattern(value: str) -> re.Pattern[str]:
+    """Match wording while treating training-template slots as arbitrary values."""
+    parts = re.split(r"(\{[A-Za-z_][A-Za-z0-9_.]*\})", normalize_question(value))
+    return re.compile(
+        "".join(
+            r".+?" if re.fullmatch(r"\{[A-Za-z_][A-Za-z0-9_.]*\}", part)
+            else re.escape(part)
+            for part in parts
+        )
+    )
 
 
 def file_sha256(path: Path) -> str:
@@ -1431,7 +1512,7 @@ def questions_from_files(paths: Iterable[Path]) -> dict[str, Path]:
     def extract(value: Any) -> Iterable[str]:
         if isinstance(value, dict):
             for key, child in value.items():
-                if key in {"question", "questions", "question_variants"}:
+                if key in {"question", "questions", "question_variants", "question_template"}:
                     if isinstance(child, str):
                         yield child
                     elif isinstance(child, list):
@@ -1453,20 +1534,30 @@ def validate_questions(
     qa_records: list[dict[str, Any]],
     pddl_records: list[dict[str, Any]],
     avoid_paths: list[Path],
+    catalog: dict[str, list[dict[str, Any]]] | None = None,
 ) -> None:
     all_records = qa_records + pddl_records
     normalized = [normalize_question(record["question"]) for record in all_records]
     if len(normalized) != len(set(normalized)):
         raise GenerationError("Generated natural-language questions are not unique")
     known = questions_from_files(avoid_paths)
+    patterns = [question_pattern(template) for template in known]
+    candidates = [record["question"] for record in all_records]
+    if catalog is not None:
+        candidates.extend(
+            entry["question_template"]
+            for family in ("qa", "pddl") for entry in catalog[family]
+        )
     collisions = [
-        record["question"]
-        for record in all_records
-        if normalize_question(record["question"]) in known
+        question
+        for question in candidates
+        if any(
+            pattern.fullmatch(normalize_question(question)) for pattern in patterns
+        )
     ]
     if collisions:
         raise GenerationError(
-            "Generated questions exactly match denylisted examples: " + repr(collisions)
+            "Generated questions match denylisted wording or templates: " + repr(collisions)
         )
 
 
@@ -1543,7 +1634,7 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         type=Path,
         default=[],
         metavar="YAML",
-        help="Reject exact question-text collisions with this YAML file; repeatable",
+        help="Reject wording collisions, including parameterized templates, from this YAML; repeatable",
     )
     parser.add_argument(
         "--list-types",
@@ -1610,7 +1701,17 @@ def main(argv: Sequence[str] | None = None) -> int:
         ]
         avoid_paths = list(args.avoid_questions)
         avoid_paths.extend(path for path in default_examples if path.is_file())
-        validate_questions(qa, pddl, avoid_paths)
+        training_templates = (
+            ROOT.parent / "3dsg-cypher-agent" / "configs" / "question_templates"
+        )
+        avoid_paths.extend(
+            path for path in (
+                training_templates / "cypher_qa_3dsg.yaml",
+                training_templates / "cypher_pddl_3dsg.yaml",
+            ) if path.is_file()
+        )
+        avoid_paths = list(dict.fromkeys(avoid_paths))
+        validate_questions(qa, pddl, avoid_paths, catalog)
 
         scene_id = args.scene_id or re.sub(
             r"[^A-Za-z0-9_.-]+", "_", args.scene_graph.stem
