@@ -173,6 +173,22 @@ providers:
             effort: null
 ```
 
+For OpenRouter, optionally pin each model to a serving provider or endpoint:
+
+```yaml
+parameters:
+  openrouter_provider: deepinfra  # Or an exact endpoint slug, e.g. deepinfra/turbo.
+```
+
+This restricts requests to that provider and disables provider fallbacks, so an
+unavailable provider fails the request instead of switching to a backend with
+different cost or throughput. Use the provider/endpoint slug from the model's
+OpenRouter page; a base slug can match multiple endpoints. See
+[OpenRouter provider routing](https://openrouter.ai/docs/guides/routing/provider-selection).
+Omit the setting or use `null` to retain automatic routing. The setting is only
+supported for OpenRouter models and is saved in result metadata and shown in the
+report's Provider Models tab. The global `require_parameters` policy still applies.
+
 Reasoning mode is `enabled`, `disabled`, or `unsupported`. Use `unsupported`
 for a model with no reasoning control. An enabled model may use any non-empty
 provider effort name. Set `effort: model_default`, `effort: null`, or omit the

@@ -42,7 +42,10 @@ class BenchmarkInferenceParametersTest(unittest.TestCase):
             ]
         )
         self.assertEqual(
-            sweep["models"][0]["parameters"], manifest.inference_parameters
+            sweep["models"][0]["parameters"],
+            manifest.effective_model_parameters(
+                "openrouter", manifest.enabled_models("openrouter")[0]
+            ),
         )
 
     def test_model_parameters_can_omit_unsupported_controls(self) -> None:
@@ -65,6 +68,37 @@ class BenchmarkInferenceParametersTest(unittest.TestCase):
         self.assertEqual(
             manifest.effective_model_parameters("ollama", model), model["parameters"]
         )
+
+    def test_openrouter_provider_is_optional_and_model_specific(self) -> None:
+        for slug in ("deepinfra", "deepinfra/turbo", None):
+            with self.subTest(slug=slug):
+                manifest = self.load_manifest()
+                models = manifest.raw["providers"]["openrouter"]["models"]
+                models[0]["parameters"]["openrouter_provider"] = slug
+                other = deepcopy(models[0])
+                other["alias"] = "automatic-routing"
+                del other["parameters"]["openrouter_provider"]
+                models.append(other)
+
+                manifest.validate()
+                for task in ("qa", "pddl"):
+                    sweep = next(iter(manifest.experiment("openrouter", task)["model_sweeps"].values()))
+                    self.assertEqual(sweep["models"][0]["parameters"]["openrouter_provider"], slug)
+                    self.assertNotIn("openrouter_provider", sweep["models"][-1]["parameters"])
+
+    def test_invalid_openrouter_provider_is_rejected(self) -> None:
+        for slug in ("", "  ", True, 1, [], {}):
+            with self.subTest(slug=slug):
+                manifest = self.load_manifest()
+                manifest.raw["providers"]["openrouter"]["models"][0]["parameters"]["openrouter_provider"] = slug
+                with self.assertRaisesRegex(ManifestError, "openrouter_provider.*non-empty string"):
+                    manifest.validate()
+
+    def test_openrouter_provider_is_rejected_for_ollama(self) -> None:
+        manifest = self.load_manifest()
+        manifest.raw["providers"]["ollama"]["models"][0]["parameters"]["openrouter_provider"] = "deepinfra"
+        with self.assertRaisesRegex(ManifestError, "unsupported parameter.*openrouter_provider"):
+            manifest.validate()
 
     def test_invalid_reasoning_combination_is_rejected(self) -> None:
         manifest = self.load_manifest()

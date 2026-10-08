@@ -75,9 +75,13 @@ def validate_inference_parameters(
     field: str,
     *,
     partial: bool = False,
+    provider: str | None = None,
 ) -> dict[str, Any]:
     parameters = deepcopy(required_mapping(parameters, field))
-    unknown = set(parameters) - INFERENCE_PARAMETER_NAMES
+    allowed = INFERENCE_PARAMETER_NAMES | (
+        {"openrouter_provider"} if provider == "openrouter" else set()
+    )
+    unknown = set(parameters) - allowed
     if unknown:
         raise ManifestError(
             f"`{field}` contains unsupported parameter(s): "
@@ -105,6 +109,11 @@ def validate_inference_parameters(
             isinstance(seed, bool) or not isinstance(seed, int)
         ):
             raise ManifestError(f"`{field}.seed` must be an integer or null")
+
+    if parameters.get("openrouter_provider") is not None:
+        parameters["openrouter_provider"] = required_string(
+            parameters["openrouter_provider"], f"{field}.openrouter_provider"
+        )
 
     if "reasoning" in parameters:
         reasoning = required_mapping(
@@ -395,11 +404,13 @@ class BenchmarkManifest:
                 overrides,
                 f"providers.{provider}.models[{model.get('alias')}].parameters",
                 partial=True,
+                provider=provider,
             )
             parameters.update(deepcopy(overrides))
         return validate_inference_parameters(
             parameters,
             f"effective parameters for {provider}/{model.get('alias')}",
+            provider=provider,
         )
 
     def enabled_models(self, provider: str) -> list[dict[str, Any]]:
@@ -437,6 +448,7 @@ class BenchmarkManifest:
                     model["parameters"],
                     f"providers.{provider}.models[{index}].parameters",
                     partial=True,
+                    provider=provider,
                 )
             if enabled_value:
                 resolved_model = deepcopy(model)

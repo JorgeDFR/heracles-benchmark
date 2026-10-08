@@ -76,6 +76,8 @@ providers:
           temperature: true
           seed: true
         parameters:
+          # Optional provider/endpoint pin; omitted or null keeps automatic routing.
+          # openrouter_provider: deepinfra
           reasoning:
             mode: enabled
             effort: medium
