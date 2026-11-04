@@ -95,8 +95,6 @@ class ResultRow:
     model: str
     questions: int
     final_answer_match: int
-    cypher_solution_match: int
-    cypher_solution_evaluated: int
     tool_executable: int
     tool_executable_evaluated: int
     throughput: float | None
@@ -315,10 +313,6 @@ def result_row(path: Path) -> ResultRow | None:
         final_answer_match=int(
             summary.get("final_answer_match_count", summary.get("correct_count", 0))
         ),
-        cypher_solution_match=int(summary.get("cypher_solution_match_count", 0)),
-        cypher_solution_evaluated=int(
-            summary.get("cypher_solution_match_evaluated", 0)
-        ),
         tool_executable=int(summary.get("tool_executable_count", 0)),
         tool_executable_evaluated=int(summary.get("tool_executable_evaluated", 0)),
         throughput=summary.get("output_tokens_per_second")
@@ -347,7 +341,6 @@ def print_result_rows(provider: str, paths: Sequence[Path]) -> None:
     table.add_column("Model", overflow="fold")
     table.add_column("Questions", justify="right")
     table.add_column("Tool Executable", justify="right")
-    table.add_column("Cypher / Grounding", justify="right")
     table.add_column("Final Answer", justify="right")
     table.add_column("Throughput", justify="right")
     for row in sorted(rows, key=lambda item: (item.task, item.model)):
@@ -357,7 +350,6 @@ def print_result_rows(provider: str, paths: Sequence[Path]) -> None:
             row.model,
             str(row.questions),
             f"{row.tool_executable}/{row.tool_executable_evaluated}",
-            f"{row.cypher_solution_match}/{row.cypher_solution_evaluated}",
             f"{row.final_answer_match}/{row.questions}",
             throughput,
         )

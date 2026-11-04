@@ -125,8 +125,9 @@ The selected provider must also be enabled in the manifest.
 
 The benchmark container displays nested Rich progress bars for model sweeps and
 the questions in each configuration, followed by a normalized table containing
-the model, task, question count, tool executability, Cypher
-solution/grounding matches, final-answer matches, token totals, and throughput.
+the model, task, question count, tool executability, final-answer matches, token
+totals, and throughput. The HTML quality overview shows question count and
+final-answer match.
 Reports show input, output, cached-input, and reasoning-token totals summed from
 provider usage across each conversation. Request-level HTTP logs,
 Neo4j notifications, answer-parser warnings, and raw tool errors are suppressed

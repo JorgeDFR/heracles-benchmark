@@ -97,8 +97,6 @@ class ExperimentParsingTest(unittest.TestCase):
                                 "analysis_summary": {
                                     "questions": 50,
                                     "final_answer_match_count": 42,
-                                    "cypher_solution_match_count": 40,
-                                    "cypher_solution_match_evaluated": 45,
                                     "tool_executable_count": 44,
                                     "tool_executable_evaluated": 45,
                                     "output_tokens_per_second": 19.25,
@@ -118,8 +116,6 @@ class ExperimentParsingTest(unittest.TestCase):
                     model="provider/model",
                     questions=50,
                     final_answer_match=42,
-                    cypher_solution_match=40,
-                    cypher_solution_evaluated=45,
                     tool_executable=44,
                     tool_executable_evaluated=45,
                     throughput=19.25,
