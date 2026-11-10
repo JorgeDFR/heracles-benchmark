@@ -1,41 +1,41 @@
 ---
 questions:
-- uid: QA-SMOKE-001
+- uid: QA001
   name: Object class inventory
   question_type: qa_object_class_inventory
   overlap_class: direct
   question: Give the complete set of object categories represented in this map.
-  solution: <appliance, bag, bed, bicycle, box, decor, food, light, seating, sign, storage, trash>
+  solution: <alarm_clock, armchair, bathtub, bed, bicycle, book, bookcase, box, cabinet, car, ceiling_light,
+    chair, coffee_table, cooktop, desk, detergent, dining_table, dresser, dryer, fridge, fruit_bowl, kettle,
+    kitchen_island, lamp, laptop, laundry_basket, mirror, nightstand, oven, plant, shelf, shoe_cabinet,
+    shower, side_table, sink, sofa, television, toilet, toolbox, toy_box, trash, wardrobe, washer, window>
   correctness_comparator:
     comparison_type: SLDP
     relation: equal
   tags:
-  - smoke
   - inventory
   - class
-- uid: QA-SMOKE-002
+- uid: QA002
   name: Object total
   question_type: qa_object_total
   overlap_class: direct
   question: How many object nodes does the scene contain?
-  solution: '65'
+  solution: '105'
   correctness_comparator:
     comparison_type: SLDP
     relation: equal
   tags:
-  - smoke
   - count
   - object
-- uid: QA-SMOKE-003
+- uid: QA003
   name: Room total
   question_type: qa_room_total
   overlap_class: direct
   question: What is the total number of mapped rooms?
-  solution: '5'
+  solution: '16'
   correctness_comparator:
     comparison_type: SLDP
     relation: equal
   tags:
-  - smoke
   - count
   - room

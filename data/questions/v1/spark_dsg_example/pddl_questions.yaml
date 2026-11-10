@@ -1,0 +1,655 @@
+---
+questions:
+- uid: PDDL001
+  name: Visit object symbol
+  question_type: pddl_visit_object_symbol
+  overlap_class: direct
+  question: Pass by object O39 before the task is complete.
+  solution: (visited-object O39)
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - direct-symbol
+  - object
+  - visit
+- uid: PDDL002
+  name: End at object symbol
+  question_type: pddl_end_at_object_symbol
+  overlap_class: direct
+  question: Finish the mission at O51.
+  solution: (at-object O51)
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - direct-symbol
+  - object
+  - final-location
+- uid: PDDL003
+  name: Inspect object symbol
+  question_type: pddl_inspect_object_symbol
+  overlap_class: direct
+  question: Examine object O358 closely.
+  solution: (safe O358)
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - direct-symbol
+  - object
+  - inspect
+- uid: PDDL004
+  name: Hold object symbol
+  question_type: pddl_hold_object_symbol
+  overlap_class: related
+  question: Pick up O373 and retain it.
+  solution: (holding O373)
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - direct-symbol
+  - object
+  - manipulation
+- uid: PDDL005
+  name: Visit room symbol
+  question_type: pddl_visit_room_symbol
+  overlap_class: direct
+  question: Enter room R1 at some point.
+  solution: (visited-region R1)
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - direct-symbol
+  - room
+  - visit
+- uid: PDDL006
+  name: End in room symbol
+  question_type: pddl_end_in_room_symbol
+  overlap_class: direct
+  question: Conclude the route inside R2.
+  solution: (in-region R2)
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - direct-symbol
+  - room
+  - final-location
+- uid: PDDL007
+  name: Visit place symbol
+  question_type: pddl_visit_place_symbol
+  overlap_class: direct
+  question: Include place P7488 on the route.
+  solution: (visited-place P7488)
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - direct-symbol
+  - place
+  - visit
+- uid: PDDL008
+  name: End at place symbol
+  question_type: pddl_end_at_place_symbol
+  overlap_class: direct
+  question: Make P67045 the final waypoint.
+  solution: (at-place P67045)
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - direct-symbol
+  - place
+  - final-location
+- uid: PDDL009
+  name: Hold object class
+  question_type: pddl_hold_object_class
+  overlap_class: direct
+  question: Bring along any trash can you can choose.
+  solution: (or (holding O19) (holding O30) (holding O64) (holding O79))
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - class-reference
+  - object
+  - manipulation
+- uid: PDDL010
+  name: Visit object class
+  question_type: pddl_visit_object_class
+  overlap_class: direct
+  question: Approach one of the decoration objects.
+  solution: (or (visited-object O18) (visited-object O29) (visited-object O70) (visited-object O287) (visited-object
+    O293))
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - class-reference
+  - object
+  - visit
+- uid: PDDL011
+  name: End at object class
+  question_type: pddl_end_at_object_class
+  overlap_class: direct
+  question: Stop beside an appliance when finished.
+  solution: (or (at-object O10) (at-object O83))
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - class-reference
+  - object
+  - final-location
+- uid: PDDL012
+  name: Inspect object class
+  question_type: pddl_inspect_object_class
+  overlap_class: direct
+  question: Check any one storage unit for safety.
+  solution: (or (safe O7) (safe O17) (safe O53) (safe O66) (safe O75) (safe O82) (safe O85) (safe O88)
+    (safe O103) (safe O249) (safe O263) (safe O266) (safe O277) (safe O358) (safe O363))
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - class-reference
+  - object
+  - inspect
+- uid: PDDL013
+  name: Visit room class
+  question_type: pddl_visit_room_class
+  overlap_class: direct
+  question: Travel through a hallway of your choice.
+  solution: (or (visited-region R2) (visited-region R3) (visited-region R4) (visited-region R5))
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - class-reference
+  - room
+  - visit
+- uid: PDDL014
+  name: End in room class
+  question_type: pddl_end_in_room_class
+  overlap_class: direct
+  question: End the assignment in any hallway.
+  solution: (or (in-region R2) (in-region R3) (in-region R4) (in-region R5))
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - class-reference
+  - room
+  - final-location
+- uid: PDDL015
+  name: Visit room containing object
+  question_type: pddl_visit_room_containing_object
+  overlap_class: direct
+  question: Visit the room that contains O255.
+  solution: (visited-region R1)
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - hierarchy-reference
+  - room
+  - visit
+- uid: PDDL016
+  name: End in room containing object
+  question_type: pddl_end_in_room_containing_object
+  overlap_class: direct
+  question: Finish in whichever room contains object O8.
+  solution: (in-region R1)
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - hierarchy-reference
+  - room
+  - final-location
+- uid: PDDL017
+  name: Visit parent place
+  question_type: pddl_visit_parent_place
+  overlap_class: related
+  question: Navigate through the place holding O88.
+  solution: (visited-place P15561)
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - hierarchy-reference
+  - place
+  - visit
+- uid: PDDL018
+  name: End at parent place
+  question_type: pddl_end_at_parent_place
+  overlap_class: related
+  question: Finish at the place directly containing O75.
+  solution: (at-place P15561)
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - hierarchy-reference
+  - place
+  - final-location
+- uid: PDDL019
+  name: Visit nearest object
+  question_type: pddl_visit_nearest_object
+  overlap_class: related
+  question: Visit the object whose center is nearest to O112.
+  solution: (visited-object O317)
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - spatial-reference
+  - object
+  - visit
+- uid: PDDL020
+  name: Inspect nearest object
+  question_type: pddl_inspect_nearest_object
+  overlap_class: related
+  question: Inspect the object positioned closest to O363.
+  solution: (safe O373)
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - spatial-reference
+  - object
+  - inspect
+- uid: PDDL021
+  name: Hold nearest class object
+  question_type: pddl_hold_nearest_class_object
+  overlap_class: related
+  question: Pick up the decoration closest to O59.
+  solution: (holding O70)
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - spatial-reference
+  - class-reference
+  - manipulation
+- uid: PDDL022
+  name: Visit farthest object
+  question_type: pddl_visit_farthest_object
+  overlap_class: related
+  question: Pass by the object farthest from O51 by center distance.
+  solution: (visited-object O237)
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - spatial-reference
+  - object
+  - visit
+- uid: PDDL023
+  name: End at farthest object
+  question_type: pddl_end_at_farthest_object
+  overlap_class: related
+  question: Finish at the object most distant from O84.
+  solution: (at-object O237)
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - spatial-reference
+  - object
+  - final-location
+- uid: PDDL024
+  name: Inspect highest class object
+  question_type: pddl_inspect_highest_class_object
+  overlap_class: absent
+  question: Inspect the highest-positioned seat.
+  solution: (safe O55)
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - spatial-reference
+  - extrema
+  - inspect
+- uid: PDDL025
+  name: Visit lowest class object
+  question_type: pddl_visit_lowest_class_object
+  overlap_class: absent
+  question: Visit the light with the smallest center height.
+  solution: (visited-object O300)
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - spatial-reference
+  - extrema
+  - visit
+- uid: PDDL026
+  name: Visit nearest room
+  question_type: pddl_visit_nearest_room
+  overlap_class: related
+  question: Visit the room whose center is closest to O283.
+  solution: (visited-region R1)
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - spatial-reference
+  - room
+  - visit
+- uid: PDDL027
+  name: End in nearest room
+  question_type: pddl_end_in_nearest_room
+  overlap_class: related
+  question: Conclude in the room geometrically nearest to O58.
+  solution: (in-region R5)
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - spatial-reference
+  - room
+  - final-location
+- uid: PDDL028
+  name: Visit most connected room
+  question_type: pddl_visit_most_connected_room
+  overlap_class: related
+  question: Visit a room with the maximum number of distinct direct room neighbors.
+  solution: (visited-region R2)
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - connectivity-reference
+  - extrema
+  - visit
+- uid: PDDL029
+  name: End in least connected room
+  question_type: pddl_end_in_least_connected_room
+  overlap_class: related
+  question: Finish in a room tied for the smallest connectivity degree.
+  solution: (in-region R1)
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - connectivity-reference
+  - extrema
+  - final-location
+- uid: PDDL030
+  name: Visit adjacent rooms
+  question_type: pddl_visit_adjacent_rooms
+  overlap_class: related
+  question: Visit every distinct room directly connected to R5.
+  solution: (and (visited-region R3) (visited-region R4))
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - connectivity-reference
+  - conjunction
+  - room
+- uid: PDDL031
+  name: Visit either object
+  question_type: pddl_visit_either_object
+  overlap_class: related
+  question: Visit either O53 or O3; one is enough.
+  solution: (or (visited-object O3) (visited-object O53))
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - direct-symbol
+  - disjunction
+  - object
+- uid: PDDL032
+  name: Visit object or room
+  question_type: pddl_visit_object_or_room
+  overlap_class: related
+  question: Either pass object O344 or visit room R4.
+  solution: (or (visited-object O344) (visited-region R4))
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - direct-symbol
+  - disjunction
+  - combination
+- uid: PDDL033
+  name: Visit object and room
+  question_type: pddl_visit_object_and_room
+  overlap_class: related
+  question: Make sure you pass O85 and also visit R2.
+  solution: (and (visited-object O85) (visited-region R2))
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - direct-symbol
+  - conjunction
+  - combination
+- uid: PDDL034
+  name: Inspect and hold object
+  question_type: pddl_inspect_and_hold_object
+  overlap_class: related
+  question: Verify O89 is safe and keep hold of it.
+  solution: (and (safe O89) (holding O89))
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - direct-symbol
+  - conjunction
+  - manipulation
+- uid: PDDL035
+  name: Visit then end at object
+  question_type: pddl_visit_then_end_at_object
+  overlap_class: direct
+  question: Pass O275 first, then finish at O363.
+  solution: (and (visited-object O275) (at-object O363))
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - ordering
+  - object
+  - final-location
+- uid: PDDL036
+  name: Visit room then end at object
+  question_type: pddl_visit_room_then_end_at_object
+  overlap_class: related
+  question: Travel through R5 before ending at O88.
+  solution: (and (visited-region R5) (at-object O88))
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - ordering
+  - combination
+  - final-location
+- uid: PDDL037
+  name: Visit object then end in room
+  question_type: pddl_visit_object_then_end_in_room
+  overlap_class: related
+  question: Visit O18, and make R4 your final room.
+  solution: (and (visited-object O18) (in-region R4))
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - ordering
+  - combination
+  - final-location
+- uid: PDDL038
+  name: Visit place then end in room
+  question_type: pddl_visit_place_then_end_in_room
+  overlap_class: direct
+  question: Go via P8637, then end inside R4.
+  solution: (and (visited-place P8637) (in-region R4))
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - ordering
+  - combination
+  - final-location
+- uid: PDDL039
+  name: Visit room then end at place
+  question_type: pddl_visit_room_then_end_at_place
+  overlap_class: related
+  question: Enter R3 along the way and stop finally at P58530.
+  solution: (and (visited-region R3) (at-place P58530))
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - ordering
+  - combination
+  - final-location
+- uid: PDDL040
+  name: Visit then end at place
+  question_type: pddl_visit_then_end_at_place
+  overlap_class: direct
+  question: Include P27669 before making P25023 the endpoint.
+  solution: (and (visited-place P27669) (at-place P25023))
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - ordering
+  - place
+  - final-location
+- uid: PDDL041
+  name: Inspect then end at place
+  question_type: pddl_inspect_then_end_at_place
+  overlap_class: direct
+  question: Inspect O43, then conclude at P3095.
+  solution: (and (safe O43) (at-place P3095))
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - combination
+  - inspect
+  - final-location
+- uid: PDDL042
+  name: Hold then end in room
+  question_type: pddl_hold_then_end_in_room
+  overlap_class: related
+  question: Keep O63 in hand and finish inside R1.
+  solution: (and (holding O63) (in-region R1))
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - combination
+  - manipulation
+  - final-location
+- uid: PDDL043
+  name: Move object to place
+  question_type: pddl_move_object_to_place
+  overlap_class: direct
+  question: Relocate O27 into place P9420.
+  solution: (object-in-place O27 P9420)
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - direct-symbol
+  - manipulation
+  - place
+- uid: PDDL044
+  name: Move class object to place
+  question_type: pddl_move_class_object_to_place
+  overlap_class: related
+  question: Move any one appliance into P58531.
+  solution: (or (object-in-place O10 P58531) (object-in-place O83 P58531))
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - class-reference
+  - disjunction
+  - manipulation
+- uid: PDDL045
+  name: Move object to neighbor place
+  question_type: pddl_move_object_to_neighbor_place
+  overlap_class: direct
+  question: Transfer O43 to place P15451, adjacent to its current place.
+  solution: (object-in-place O43 P15451)
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - connectivity-reference
+  - hierarchy-reference
+  - manipulation
+- uid: PDDL046
+  name: Do not hold object
+  question_type: pddl_do_not_hold_object
+  overlap_class: direct
+  question: Ensure object O82 is not being carried.
+  solution: (not (holding O82))
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - direct-symbol
+  - negation
+  - manipulation
+- uid: PDDL047
+  name: Visit without holding
+  question_type: pddl_visit_without_holding
+  overlap_class: direct
+  question: Visit O238 but do not take it with you.
+  solution: (and (visited-object O238) (not (holding O238)))
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - conjunction
+  - negation
+  - object
+- uid: PDDL048
+  name: Visit room avoid neighbor
+  question_type: pddl_visit_room_avoid_neighbor
+  overlap_class: related
+  question: Visit R4 while never entering its neighbor R2.
+  solution: (and (visited-region R4) (not (visited-region R2)))
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - connectivity-reference
+  - negation
+  - conjunction
+- uid: PDDL049
+  name: Hold class or inspect object
+  question_type: pddl_hold_class_or_inspect_object
+  overlap_class: related
+  question: Either carry a light or inspect O237.
+  solution: (or (or (holding O237) (holding O300)) (safe O237))
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - class-reference
+  - disjunction
+  - combination
+- uid: PDDL050
+  name: Visit class and end in room
+  question_type: pddl_visit_class_and_end_in_room
+  overlap_class: related
+  question: Visit a trash can, then finish in R4.
+  solution: (and (or (visited-object O19) (visited-object O30) (visited-object O64) (visited-object O79))
+    (in-region R4))
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - class-reference
+  - conjunction
+  - final-location

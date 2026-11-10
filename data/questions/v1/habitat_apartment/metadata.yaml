@@ -1,0 +1,2092 @@
+---
+schema_version: 1
+scene_id: habitat_apartment
+scene_graph:
+  path: data/scene_graphs/habitat_apartment.json
+  sha256: 21484377923396e6a3f28ae3dc01521a2f789e1435387cfbfcde402fe9035f04
+question_catalog:
+  path: data/questions/question_types_v1.yaml
+  sha256: 0cd4080c93d058492b96dd20c4cd4aa3e16b15cbcaa3b5fd15155257b7a896a4
+generator:
+  path: scripts/generate_questions.py
+  version: 9
+  sha256: 272fa8bcae8ed7c185bff9434d8164d9df8e3a43dfad71b25a7adbdc086c3832
+  sampler_path: scripts/question_sampling.py
+  sampler_sha256: 4e1af2bcb4c9aab30307fd378f0e56d4202acb19dddefdc205274edca5212cd5
+  spark_dsg_version: 1.1.3
+  pyyaml_version: 6.0.3
+parameters:
+  seed: 7
+  qa_seed: 7
+  pddl_seed: 7
+  qa_question_count: 50
+  pddl_question_count: 50
+  avoid_question_files:
+  - path: external/heracles_agents/examples/questions/qa_questions.yaml
+    sha256: 4d545d319a799b71b84f632eaf0330a6640b95d43b1c252f8f911e7113ad1e09
+  - path: external/heracles_agents/examples/questions/pddl_questions.yaml
+    sha256: 4de9de91e4b27a50793a4724b985ebaf0991ed8feb6e95f962127882506bb5cc
+  - path: /home/coder/workspace/3dsg-cypher-agent/configs/question_templates/cypher_qa_3dsg.yaml
+    sha256: 9e8028a283e1b703cee6c677ad2cd676b98a46b16f0762f0ae863533a911e481
+  - path: /home/coder/workspace/3dsg-cypher-agent/configs/question_templates/cypher_pddl_3dsg.yaml
+    sha256: 82a57c4954466e9527746839bf8a9e9b819c061433838587dd2a86aca93a1692
+sampling:
+  families:
+    qa_object_class_inventory:
+      status: generated
+      attempts: 1
+      base_assignments: 1
+      preparation_rejections: {}
+      eligible_candidates: 1
+      search_complete: true
+      rejections: {}
+      bindings: {}
+      difficulty_preferences: {}
+      resolved_references: []
+    qa_object_total:
+      status: generated
+      attempts: 1
+      base_assignments: 1
+      preparation_rejections: {}
+      eligible_candidates: 1
+      search_complete: true
+      rejections: {}
+      bindings: {}
+      difficulty_preferences: {}
+      resolved_references: []
+    qa_room_total:
+      status: generated
+      attempts: 1
+      base_assignments: 1
+      preparation_rejections: {}
+      eligible_candidates: 1
+      search_complete: true
+      rejections: {}
+      bindings: {}
+      difficulty_preferences: {}
+      resolved_references: []
+    qa_place_total:
+      status: generated
+      attempts: 1
+      base_assignments: 1
+      preparation_rejections: {}
+      eligible_candidates: 1
+      search_complete: true
+      rejections: {}
+      bindings: {}
+      difficulty_preferences: {}
+      resolved_references: []
+    qa_room_class_inventory:
+      status: generated
+      attempts: 1
+      base_assignments: 1
+      preparation_rejections: {}
+      eligible_candidates: 1
+      search_complete: true
+      rejections: {}
+      bindings: {}
+      difficulty_preferences: {}
+      resolved_references: []
+    qa_object_ids_for_class:
+      status: generated
+      attempts: 44
+      base_assignments: 44
+      preparation_rejections: {}
+      eligible_candidates: 19
+      search_complete: true
+      rejections:
+        class has only one member: 25
+      bindings:
+        target_object_class: mirror
+      difficulty_preferences: {}
+      resolved_references: []
+    qa_object_count_for_class:
+      status: generated
+      attempts: 44
+      base_assignments: 44
+      preparation_rejections: {}
+      eligible_candidates: 19
+      search_complete: true
+      rejections:
+        class count is trivial: 25
+      bindings:
+        target_object_class: shelf
+      difficulty_preferences: {}
+      resolved_references: []
+    qa_object_centers_for_class:
+      status: generated
+      attempts: 44
+      base_assignments: 44
+      preparation_rejections: {}
+      eligible_candidates: 19
+      search_complete: true
+      rejections:
+        class has only one center: 25
+      bindings:
+        target_object_class: laptop
+      difficulty_preferences: {}
+      resolved_references: []
+    qa_object_class_lookup:
+      status: generated
+      attempts: 48
+      base_assignments: 48
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections: {}
+      bindings:
+        object_symbol: O90
+      difficulty_preferences: {}
+      resolved_references:
+      - O90
+    qa_object_center_lookup:
+      status: generated
+      attempts: 48
+      base_assignments: 48
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections: {}
+      bindings:
+        object_symbol: O48
+      difficulty_preferences: {}
+      resolved_references:
+      - O48
+    qa_rooms_for_class:
+      status: generated
+      attempts: 10
+      base_assignments: 10
+      preparation_rejections: {}
+      eligible_candidates: 10
+      search_complete: true
+      rejections: {}
+      bindings:
+        target_room_class: stairs
+      difficulty_preferences: {}
+      resolved_references: []
+    qa_room_center_lookup:
+      status: generated
+      attempts: 16
+      base_assignments: 16
+      preparation_rejections: {}
+      eligible_candidates: 16
+      search_complete: true
+      rejections: {}
+      bindings:
+        room_symbol: R12
+      difficulty_preferences: {}
+      resolved_references:
+      - R12
+    qa_parent_place_of_object:
+      status: generated
+      attempts: 48
+      base_assignments: 48
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections: {}
+      bindings:
+        object_symbol: O4
+      difficulty_preferences: {}
+      resolved_references:
+      - O4
+    qa_parent_room_of_object:
+      status: generated
+      attempts: 48
+      base_assignments: 48
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections: {}
+      bindings:
+        object_symbol: O53
+      difficulty_preferences: {}
+      resolved_references:
+      - O53
+    qa_parent_room_of_place:
+      status: generated
+      attempts: 48
+      base_assignments: 48
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections: {}
+      bindings:
+        place_symbol: P1204
+      difficulty_preferences: {}
+      resolved_references:
+      - P1204
+    qa_objects_in_room:
+      status: generated
+      attempts: 16
+      base_assignments: 16
+      preparation_rejections: {}
+      eligible_candidates: 14
+      search_complete: true
+      rejections:
+        empty result: 2
+      bindings:
+        room_symbol: R2
+      difficulty_preferences: {}
+      resolved_references:
+      - R2
+    qa_object_classes_in_room:
+      status: generated
+      attempts: 16
+      base_assignments: 16
+      preparation_rejections: {}
+      eligible_candidates: 14
+      search_complete: true
+      rejections:
+        empty result: 2
+      bindings:
+        room_symbol: R14
+      difficulty_preferences: {}
+      resolved_references:
+      - R14
+    qa_object_count_in_room:
+      status: generated
+      attempts: 16
+      base_assignments: 16
+      preparation_rejections: {}
+      eligible_candidates: 14
+      search_complete: true
+      rejections:
+        empty room count: 2
+      bindings:
+        room_symbol: R2
+      difficulty_preferences: {}
+      resolved_references:
+      - R2
+    qa_class_objects_in_room:
+      status: generated
+      attempts: 388
+      base_assignments: 388
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections:
+        empty result: 340
+      bindings:
+        target_object_class: chair
+        room_symbol: R2
+      difficulty_preferences: {}
+      resolved_references:
+      - R2
+    qa_class_count_in_room:
+      status: generated
+      attempts: 323
+      base_assignments: 323
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections:
+        empty result: 275
+      bindings:
+        target_object_class: bookcase
+        room_symbol: R4
+      difficulty_preferences: {}
+      resolved_references:
+      - R4
+    qa_places_in_room:
+      status: generated
+      attempts: 16
+      base_assignments: 16
+      preparation_rejections: {}
+      eligible_candidates: 16
+      search_complete: true
+      rejections: {}
+      bindings:
+        room_symbol: R16
+      difficulty_preferences: {}
+      resolved_references:
+      - R16
+    qa_place_count_in_room:
+      status: generated
+      attempts: 16
+      base_assignments: 16
+      preparation_rejections: {}
+      eligible_candidates: 16
+      search_complete: true
+      rejections: {}
+      bindings:
+        room_symbol: R14
+      difficulty_preferences: {}
+      resolved_references:
+      - R14
+    qa_objects_in_place:
+      status: generated
+      attempts: 1223
+      base_assignments: 1223
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections:
+        empty result: 1175
+      bindings:
+        place_symbol: P841
+      difficulty_preferences: {}
+      resolved_references:
+      - P841
+    qa_object_classes_in_place:
+      status: generated
+      attempts: 1288
+      base_assignments: 1288
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections:
+        empty result: 1240
+      bindings:
+        place_symbol: P1152
+      difficulty_preferences: {}
+      resolved_references:
+      - P1152
+    qa_object_count_in_place:
+      status: generated
+      attempts: 1235
+      base_assignments: 1235
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections:
+        empty result: 1187
+      bindings:
+        place_symbol: P808
+      difficulty_preferences: {}
+      resolved_references:
+      - P808
+    qa_rooms_containing_class:
+      status: generated
+      attempts: 44
+      base_assignments: 44
+      preparation_rejections: {}
+      eligible_candidates: 44
+      search_complete: true
+      rejections: {}
+      bindings:
+        target_object_class: detergent
+      difficulty_preferences: {}
+      resolved_references: []
+    qa_room_count_containing_class:
+      status: generated
+      attempts: 44
+      base_assignments: 44
+      preparation_rejections: {}
+      eligible_candidates: 44
+      search_complete: true
+      rejections: {}
+      bindings:
+        target_object_class: laundry_basket
+      difficulty_preferences: {}
+      resolved_references: []
+    qa_room_neighbors:
+      status: generated
+      attempts: 16
+      base_assignments: 16
+      preparation_rejections: {}
+      eligible_candidates: 16
+      search_complete: true
+      rejections: {}
+      bindings:
+        room_symbol: R7
+      difficulty_preferences: {}
+      resolved_references:
+      - R7
+    qa_room_degree:
+      status: generated
+      attempts: 16
+      base_assignments: 16
+      preparation_rejections: {}
+      eligible_candidates: 16
+      search_complete: true
+      rejections: {}
+      bindings:
+        room_symbol: R2
+      difficulty_preferences: {}
+      resolved_references:
+      - R2
+    qa_most_connected_rooms:
+      status: generated
+      attempts: 1
+      base_assignments: 1
+      preparation_rejections: {}
+      eligible_candidates: 1
+      search_complete: true
+      rejections: {}
+      bindings: {}
+      difficulty_preferences: {}
+      resolved_references: []
+    qa_least_connected_rooms:
+      status: generated
+      attempts: 1
+      base_assignments: 1
+      preparation_rejections: {}
+      eligible_candidates: 1
+      search_complete: true
+      rejections: {}
+      bindings: {}
+      difficulty_preferences: {}
+      resolved_references: []
+    qa_room_shortest_path:
+      status: generated
+      attempts: 59
+      base_assignments: 59
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections:
+        need a unique nontrivial route: 11
+      bindings:
+        room_symbol: R15
+        other_room_symbol: R3
+      difficulty_preferences: {}
+      resolved_references:
+      - R3
+      - R15
+    qa_room_hop_distance:
+      status: generated
+      attempts: 56
+      base_assignments: 56
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections:
+        need a unique nontrivial route: 8
+      bindings:
+        room_symbol: R10
+        other_room_symbol: R15
+      difficulty_preferences: {}
+      resolved_references:
+      - R10
+      - R15
+    qa_place_neighbors:
+      status: generated
+      attempts: 48
+      base_assignments: 48
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections: {}
+      bindings:
+        place_symbol: P756
+      difficulty_preferences: {}
+      resolved_references:
+      - P756
+    qa_place_degree:
+      status: generated
+      attempts: 48
+      base_assignments: 48
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections: {}
+      bindings:
+        place_symbol: P191
+      difficulty_preferences: {}
+      resolved_references:
+      - P191
+    qa_places_within_hops:
+      status: generated
+      attempts: 48
+      base_assignments: 48
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections: {}
+      bindings:
+        place_symbol: P304
+        hop_limit: 6
+      difficulty_preferences: {}
+      resolved_references:
+      - P304
+    qa_place_shortest_path:
+      status: generated
+      attempts: 13094
+      base_assignments: 13094
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections:
+        need a unique nontrivial route: 13046
+      bindings:
+        place_symbol: P1517
+        other_place_symbol: P1539
+      difficulty_preferences: {}
+      resolved_references:
+      - P1517
+      - P1539
+    qa_objects_in_neighbor_places:
+      status: generated
+      attempts: 372
+      base_assignments: 372
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections:
+        empty result: 324
+      bindings:
+        place_symbol: P928
+      difficulty_preferences: {}
+      resolved_references:
+      - P928
+    qa_nearest_object:
+      status: generated
+      attempts: 48
+      base_assignments: 48
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections: {}
+      bindings:
+        object_symbol: O54
+      difficulty_preferences: {}
+      resolved_references:
+      - O54
+    qa_farthest_object:
+      status: generated
+      attempts: 48
+      base_assignments: 48
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections: {}
+      bindings:
+        object_symbol: O61
+      difficulty_preferences: {}
+      resolved_references:
+      - O61
+    qa_nearest_different_class_object:
+      status: generated
+      attempts: 48
+      base_assignments: 48
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections: {}
+      bindings:
+        object_symbol: O91
+      difficulty_preferences: {}
+      resolved_references:
+      - O91
+    qa_closest_cross_class_pair:
+      status: generated
+      attempts: 93
+      base_assignments: 93
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections:
+        fewer than three eligible pairs: 45
+      bindings:
+        target_object_class: cabinet
+        reference_object_class: plant
+      difficulty_preferences: {}
+      resolved_references: []
+    qa_nearest_place_to_object:
+      status: generated
+      attempts: 48
+      base_assignments: 48
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections: {}
+      bindings:
+        object_symbol: O66
+      difficulty_preferences: {}
+      resolved_references:
+      - O66
+    qa_nearest_room_to_object:
+      status: generated
+      attempts: 48
+      base_assignments: 48
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections: {}
+      bindings:
+        object_symbol: O39
+      difficulty_preferences: {}
+      resolved_references:
+      - O39
+    qa_closest_room_pair:
+      status: generated
+      attempts: 1
+      base_assignments: 1
+      preparation_rejections: {}
+      eligible_candidates: 1
+      search_complete: true
+      rejections: {}
+      bindings: {}
+      difficulty_preferences: {}
+      resolved_references: []
+    qa_highest_object_of_class:
+      status: generated
+      attempts: 44
+      base_assignments: 44
+      preparation_rejections: {}
+      eligible_candidates: 19
+      search_complete: true
+      rejections:
+        height class has only one member: 25
+      bindings:
+        target_object_class: toilet
+      difficulty_preferences: {}
+      resolved_references: []
+    qa_lowest_object_of_class:
+      status: generated
+      attempts: 44
+      base_assignments: 44
+      preparation_rejections: {}
+      eligible_candidates: 19
+      search_complete: true
+      rejections:
+        height class has only one member: 25
+      bindings:
+        target_object_class: trash
+      difficulty_preferences: {}
+      resolved_references: []
+    qa_nearest_object_to_room:
+      status: generated
+      attempts: 16
+      base_assignments: 16
+      preparation_rejections: {}
+      eligible_candidates: 16
+      search_complete: true
+      rejections: {}
+      bindings:
+        room_symbol: R16
+      difficulty_preferences: {}
+      resolved_references:
+      - R16
+    qa_farthest_object_from_room:
+      status: generated
+      attempts: 16
+      base_assignments: 16
+      preparation_rejections: {}
+      eligible_candidates: 16
+      search_complete: true
+      rejections: {}
+      bindings:
+        room_symbol: R14
+      difficulty_preferences: {}
+      resolved_references:
+      - R14
+    qa_objects_within_radius:
+      status: generated
+      attempts: 49
+      base_assignments: 48
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections:
+        radius does not divide candidates: 1
+      bindings:
+        object_symbol: O36
+        radius_m: 3.0
+      difficulty_preferences: {}
+      resolved_references:
+      - O36
+    pddl_visit_object_symbol:
+      status: generated
+      attempts: 48
+      base_assignments: 48
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections: {}
+      bindings:
+        object_symbol: O43
+      difficulty_preferences: {}
+      resolved_references:
+      - O43
+    pddl_end_at_object_symbol:
+      status: generated
+      attempts: 48
+      base_assignments: 48
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections: {}
+      bindings:
+        object_symbol: O101
+      difficulty_preferences: {}
+      resolved_references:
+      - O101
+    pddl_inspect_object_symbol:
+      status: generated
+      attempts: 48
+      base_assignments: 48
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections: {}
+      bindings:
+        object_symbol: O86
+      difficulty_preferences: {}
+      resolved_references:
+      - O86
+    pddl_hold_object_symbol:
+      status: generated
+      attempts: 48
+      base_assignments: 48
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections: {}
+      bindings:
+        object_symbol: O95
+      difficulty_preferences: {}
+      resolved_references:
+      - O95
+    pddl_visit_room_symbol:
+      status: generated
+      attempts: 16
+      base_assignments: 16
+      preparation_rejections: {}
+      eligible_candidates: 16
+      search_complete: true
+      rejections: {}
+      bindings:
+        room_symbol: R8
+      difficulty_preferences: {}
+      resolved_references:
+      - R8
+    pddl_end_in_room_symbol:
+      status: generated
+      attempts: 16
+      base_assignments: 16
+      preparation_rejections: {}
+      eligible_candidates: 16
+      search_complete: true
+      rejections: {}
+      bindings:
+        room_symbol: R15
+      difficulty_preferences: {}
+      resolved_references:
+      - R15
+    pddl_visit_place_symbol:
+      status: generated
+      attempts: 48
+      base_assignments: 48
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections: {}
+      bindings:
+        place_symbol: P809
+      difficulty_preferences: {}
+      resolved_references:
+      - P809
+    pddl_end_at_place_symbol:
+      status: generated
+      attempts: 48
+      base_assignments: 48
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections: {}
+      bindings:
+        place_symbol: P1697
+      difficulty_preferences: {}
+      resolved_references:
+      - P1697
+    pddl_hold_object_class:
+      status: generated
+      attempts: 44
+      base_assignments: 44
+      preparation_rejections: {}
+      eligible_candidates: 19
+      search_complete: true
+      rejections:
+        class choice is trivial: 25
+      bindings:
+        target_object_class: nightstand
+      difficulty_preferences: {}
+      resolved_references: []
+    pddl_visit_object_class:
+      status: generated
+      attempts: 44
+      base_assignments: 44
+      preparation_rejections: {}
+      eligible_candidates: 19
+      search_complete: true
+      rejections:
+        class choice is trivial: 25
+      bindings:
+        target_object_class: bed
+      difficulty_preferences: {}
+      resolved_references: []
+    pddl_end_at_object_class:
+      status: generated
+      attempts: 44
+      base_assignments: 44
+      preparation_rejections: {}
+      eligible_candidates: 19
+      search_complete: true
+      rejections:
+        class choice is trivial: 25
+      bindings:
+        target_object_class: book
+      difficulty_preferences: {}
+      resolved_references: []
+    pddl_inspect_object_class:
+      status: generated
+      attempts: 44
+      base_assignments: 44
+      preparation_rejections: {}
+      eligible_candidates: 19
+      search_complete: true
+      rejections:
+        class choice is trivial: 25
+      bindings:
+        target_object_class: wardrobe
+      difficulty_preferences: {}
+      resolved_references: []
+    pddl_visit_room_class:
+      status: generated
+      attempts: 10
+      base_assignments: 10
+      preparation_rejections: {}
+      eligible_candidates: 3
+      search_complete: true
+      rejections:
+        room class choice is trivial: 7
+      bindings:
+        target_room_class: hallway
+      difficulty_preferences: {}
+      resolved_references: []
+    pddl_end_in_room_class:
+      status: generated
+      attempts: 10
+      base_assignments: 10
+      preparation_rejections: {}
+      eligible_candidates: 3
+      search_complete: true
+      rejections:
+        room class choice is trivial: 7
+      bindings:
+        target_room_class: bedroom
+      difficulty_preferences: {}
+      resolved_references: []
+    pddl_visit_room_containing_object:
+      status: generated
+      attempts: 48
+      base_assignments: 48
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections: {}
+      bindings:
+        object_symbol: O99
+      difficulty_preferences: {}
+      resolved_references:
+      - O99
+      - R11
+    pddl_end_in_room_containing_object:
+      status: generated
+      attempts: 48
+      base_assignments: 48
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections: {}
+      bindings:
+        object_symbol: O59
+      difficulty_preferences: {}
+      resolved_references:
+      - O59
+      - R12
+    pddl_visit_parent_place:
+      status: generated
+      attempts: 48
+      base_assignments: 48
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections: {}
+      bindings:
+        object_symbol: O2
+      difficulty_preferences: {}
+      resolved_references:
+      - O2
+      - P198
+    pddl_end_at_parent_place:
+      status: generated
+      attempts: 48
+      base_assignments: 48
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections: {}
+      bindings:
+        object_symbol: O83
+      difficulty_preferences: {}
+      resolved_references:
+      - O83
+      - P1180
+    pddl_visit_nearest_object:
+      status: generated
+      attempts: 48
+      base_assignments: 48
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections: {}
+      bindings:
+        object_symbol: O42
+      difficulty_preferences: {}
+      resolved_references:
+      - O42
+    pddl_inspect_nearest_object:
+      status: generated
+      attempts: 48
+      base_assignments: 48
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections: {}
+      bindings:
+        object_symbol: O64
+      difficulty_preferences: {}
+      resolved_references:
+      - O64
+    pddl_hold_nearest_class_object:
+      status: generated
+      attempts: 115
+      base_assignments: 115
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections:
+        too few spatial candidates: 67
+      bindings:
+        target_object_class: sink
+        object_symbol: O105
+      difficulty_preferences: {}
+      resolved_references:
+      - O105
+    pddl_visit_farthest_object:
+      status: generated
+      attempts: 48
+      base_assignments: 48
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections: {}
+      bindings:
+        object_symbol: O25
+      difficulty_preferences: {}
+      resolved_references:
+      - O25
+    pddl_end_at_farthest_object:
+      status: generated
+      attempts: 48
+      base_assignments: 48
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections: {}
+      bindings:
+        object_symbol: O21
+      difficulty_preferences: {}
+      resolved_references:
+      - O21
+    pddl_inspect_highest_class_object:
+      status: generated
+      attempts: 44
+      base_assignments: 44
+      preparation_rejections: {}
+      eligible_candidates: 19
+      search_complete: true
+      rejections:
+        height class has only one member: 25
+      bindings:
+        target_object_class: lamp
+      difficulty_preferences: {}
+      resolved_references: []
+    pddl_visit_lowest_class_object:
+      status: generated
+      attempts: 44
+      base_assignments: 44
+      preparation_rejections: {}
+      eligible_candidates: 19
+      search_complete: true
+      rejections:
+        height class has only one member: 25
+      bindings:
+        target_object_class: plant
+      difficulty_preferences: {}
+      resolved_references: []
+    pddl_visit_nearest_room:
+      status: generated
+      attempts: 48
+      base_assignments: 48
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections: {}
+      bindings:
+        object_symbol: O24
+      difficulty_preferences: {}
+      resolved_references:
+      - O24
+    pddl_end_in_nearest_room:
+      status: generated
+      attempts: 48
+      base_assignments: 48
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections: {}
+      bindings:
+        object_symbol: O104
+      difficulty_preferences: {}
+      resolved_references:
+      - O104
+    pddl_visit_most_connected_room:
+      status: generated
+      attempts: 1
+      base_assignments: 1
+      preparation_rejections: {}
+      eligible_candidates: 1
+      search_complete: true
+      rejections: {}
+      bindings: {}
+      difficulty_preferences: {}
+      resolved_references: []
+    pddl_end_in_least_connected_room:
+      status: generated
+      attempts: 1
+      base_assignments: 1
+      preparation_rejections: {}
+      eligible_candidates: 1
+      search_complete: true
+      rejections: {}
+      bindings: {}
+      difficulty_preferences: {}
+      resolved_references: []
+    pddl_visit_adjacent_rooms:
+      status: generated
+      attempts: 16
+      base_assignments: 16
+      preparation_rejections: {}
+      eligible_candidates: 16
+      search_complete: true
+      rejections: {}
+      bindings:
+        room_symbol: R13
+      difficulty_preferences: {}
+      resolved_references:
+      - R13
+    pddl_visit_either_object:
+      status: generated
+      attempts: 48
+      base_assignments: 48
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections: {}
+      bindings:
+        other_object_symbol: O26
+        object_symbol: O20
+      difficulty_preferences: {}
+      resolved_references:
+      - O20
+      - O26
+    pddl_visit_object_or_room:
+      status: generated
+      attempts: 48
+      base_assignments: 48
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections: {}
+      bindings:
+        room_symbol: R9
+        object_symbol: O61
+      difficulty_preferences: {}
+      resolved_references:
+      - O61
+      - R9
+    pddl_visit_object_and_room:
+      status: generated
+      attempts: 48
+      base_assignments: 48
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections: {}
+      bindings:
+        room_symbol: R16
+        object_symbol: O44
+      difficulty_preferences: {}
+      resolved_references:
+      - O44
+      - R16
+    pddl_inspect_and_hold_object:
+      status: generated
+      attempts: 48
+      base_assignments: 48
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections: {}
+      bindings:
+        object_symbol: O50
+      difficulty_preferences: {}
+      resolved_references:
+      - O50
+    pddl_visit_then_end_at_object:
+      status: generated
+      attempts: 48
+      base_assignments: 48
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections: {}
+      bindings:
+        other_object_symbol: O85
+        object_symbol: O57
+      difficulty_preferences: {}
+      resolved_references:
+      - O57
+      - O85
+    pddl_visit_room_then_end_at_object:
+      status: generated
+      attempts: 48
+      base_assignments: 48
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections: {}
+      bindings:
+        room_symbol: R11
+        object_symbol: O44
+      difficulty_preferences: {}
+      resolved_references:
+      - O44
+      - R11
+    pddl_visit_object_then_end_in_room:
+      status: generated
+      attempts: 48
+      base_assignments: 48
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections: {}
+      bindings:
+        room_symbol: R13
+        object_symbol: O46
+      difficulty_preferences: {}
+      resolved_references:
+      - O46
+      - R13
+    pddl_visit_place_then_end_in_room:
+      status: generated
+      attempts: 48
+      base_assignments: 48
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections: {}
+      bindings:
+        room_symbol: R8
+        place_symbol: P1395
+      difficulty_preferences: {}
+      resolved_references:
+      - P1395
+      - R8
+    pddl_visit_room_then_end_at_place:
+      status: generated
+      attempts: 48
+      base_assignments: 48
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections: {}
+      bindings:
+        room_symbol: R6
+        place_symbol: P1449
+      difficulty_preferences: {}
+      resolved_references:
+      - P1449
+      - R6
+    pddl_visit_then_end_at_place:
+      status: generated
+      attempts: 48
+      base_assignments: 48
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections: {}
+      bindings:
+        place_symbol: P85
+        other_place_symbol: P1160
+      difficulty_preferences: {}
+      resolved_references:
+      - P85
+      - P1160
+    pddl_inspect_then_end_at_place:
+      status: generated
+      attempts: 48
+      base_assignments: 48
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections: {}
+      bindings:
+        place_symbol: P1496
+        object_symbol: O103
+      difficulty_preferences: {}
+      resolved_references:
+      - O103
+      - P1496
+    pddl_hold_then_end_in_room:
+      status: generated
+      attempts: 48
+      base_assignments: 48
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections: {}
+      bindings:
+        room_symbol: R4
+        object_symbol: O43
+      difficulty_preferences: {}
+      resolved_references:
+      - O43
+      - R4
+    pddl_move_object_to_place:
+      status: generated
+      attempts: 48
+      base_assignments: 48
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections: {}
+      bindings:
+        place_symbol: P889
+        object_symbol: O22
+      difficulty_preferences: {}
+      resolved_references:
+      - O22
+      - P889
+    pddl_move_class_object_to_place:
+      status: generated
+      attempts: 112
+      base_assignments: 112
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections:
+        need multiple nontrivial moves: 64
+      bindings:
+        target_object_class: desk
+        place_symbol: P22
+      difficulty_preferences: {}
+      resolved_references:
+      - P22
+    pddl_move_object_to_neighbor_place:
+      status: generated
+      attempts: 22903
+      base_assignments: 22903
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections:
+        destination is not adjacent to the current place: 22848
+        relocation is already satisfied: 7
+      bindings:
+        place_symbol: P1418
+        object_symbol: O82
+      difficulty_preferences: {}
+      resolved_references:
+      - O82
+      - P1418
+      - P1427
+    pddl_do_not_hold_object:
+      status: generated
+      attempts: 48
+      base_assignments: 48
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections: {}
+      bindings:
+        object_symbol: O40
+      difficulty_preferences: {}
+      resolved_references:
+      - O40
+    pddl_visit_without_holding:
+      status: generated
+      attempts: 48
+      base_assignments: 48
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections: {}
+      bindings:
+        object_symbol: O16
+      difficulty_preferences: {}
+      resolved_references:
+      - O16
+    pddl_visit_room_avoid_neighbor:
+      status: generated
+      attempts: 240
+      base_assignments: 240
+      preparation_rejections: {}
+      eligible_candidates: 32
+      search_complete: true
+      rejections:
+        avoided room is not a neighbor: 208
+      bindings:
+        room_symbol: R8
+        other_room_symbol: R13
+      difficulty_preferences: {}
+      resolved_references:
+      - R8
+      - R13
+    pddl_hold_class_or_inspect_object:
+      status: generated
+      attempts: 113
+      base_assignments: 113
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections:
+        class choice is trivial: 65
+      bindings:
+        target_object_class: shower
+        object_symbol: O39
+      difficulty_preferences: {}
+      resolved_references:
+      - O39
+    pddl_visit_class_and_end_in_room:
+      status: generated
+      attempts: 113
+      base_assignments: 113
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections:
+        class choice is trivial: 65
+      bindings:
+        target_object_class: window
+        room_symbol: R1
+      difficulty_preferences: {}
+      resolved_references:
+      - R1
+  diversity:
+    class_role_counts:
+      reference_object_class:
+        plant: 1
+      target_object_class:
+        bed: 1
+        book: 1
+        bookcase: 1
+        cabinet: 1
+        chair: 1
+        desk: 1
+        detergent: 1
+        lamp: 1
+        laptop: 1
+        laundry_basket: 1
+        mirror: 1
+        nightstand: 1
+        plant: 1
+        shelf: 1
+        shower: 1
+        sink: 1
+        toilet: 1
+        trash: 1
+        wardrobe: 1
+        window: 1
+      target_room_class:
+        bedroom: 1
+        hallway: 1
+        stairs: 1
+    entity_counts:
+      O1: 1
+      O10: 2
+      O100: 1
+      O101: 1
+      O102: 1
+      O103: 2
+      O104: 1
+      O105: 1
+      O11: 2
+      O12: 2
+      O13: 2
+      O14: 2
+      O15: 1
+      O16: 2
+      O17: 1
+      O18: 2
+      O19: 1
+      O2: 2
+      O20: 1
+      O21: 1
+      O22: 1
+      O23: 1
+      O24: 1
+      O25: 1
+      O26: 1
+      O27: 1
+      O28: 1
+      O29: 1
+      O3: 1
+      O30: 1
+      O31: 2
+      O32: 1
+      O33: 1
+      O34: 1
+      O35: 1
+      O36: 1
+      O37: 2
+      O38: 2
+      O39: 2
+      O4: 2
+      O40: 1
+      O41: 1
+      O42: 1
+      O43: 2
+      O44: 2
+      O45: 1
+      O46: 1
+      O47: 1
+      O48: 1
+      O49: 2
+      O5: 1
+      O50: 1
+      O51: 2
+      O52: 2
+      O53: 2
+      O54: 1
+      O55: 1
+      O56: 1
+      O57: 1
+      O58: 1
+      O59: 1
+      O6: 1
+      O60: 1
+      O61: 2
+      O62: 1
+      O63: 1
+      O64: 2
+      O65: 1
+      O66: 2
+      O67: 1
+      O68: 1
+      O69: 1
+      O7: 1
+      O70: 1
+      O71: 1
+      O72: 1
+      O73: 1
+      O74: 1
+      O75: 1
+      O76: 1
+      O77: 1
+      O78: 1
+      O79: 1
+      O8: 1
+      O80: 1
+      O81: 1
+      O82: 2
+      O83: 2
+      O85: 1
+      O86: 1
+      O87: 1
+      O88: 1
+      O89: 2
+      O9: 2
+      O90: 1
+      O91: 1
+      O92: 1
+      O93: 1
+      O94: 1
+      O95: 1
+      O96: 1
+      O97: 1
+      O98: 1
+      O99: 1
+      P1152: 1
+      P1160: 1
+      P1180: 1
+      P1204: 1
+      P1395: 1
+      P1418: 1
+      P1427: 1
+      P1449: 1
+      P1460: 1
+      P1496: 1
+      P1517: 1
+      P1528: 1
+      P1539: 1
+      P1697: 1
+      P1711: 1
+      P1712: 1
+      P1713: 1
+      P1714: 1
+      P1715: 1
+      P1716: 1
+      P1717: 1
+      P1718: 1
+      P1719: 1
+      P1720: 1
+      P1721: 1
+      P1722: 1
+      P1723: 1
+      P1724: 1
+      P1725: 1
+      P1726: 1
+      P1727: 1
+      P1728: 1
+      P1729: 1
+      P1730: 1
+      P1731: 1
+      P1732: 1
+      P1733: 1
+      P1734: 1
+      P1735: 1
+      P1736: 1
+      P1737: 1
+      P1738: 1
+      P1739: 1
+      P1740: 1
+      P1741: 1
+      P1742: 1
+      P1743: 1
+      P1744: 1
+      P1745: 1
+      P1746: 1
+      P1747: 1
+      P1748: 1
+      P1749: 1
+      P1750: 1
+      P1751: 1
+      P1752: 1
+      P1753: 1
+      P1754: 1
+      P1755: 1
+      P1756: 1
+      P1757: 1
+      P1758: 1
+      P1759: 1
+      P1760: 1
+      P1761: 1
+      P1762: 1
+      P1763: 1
+      P1764: 1
+      P1765: 1
+      P1766: 1
+      P1767: 1
+      P1768: 1
+      P1769: 1
+      P1770: 1
+      P1771: 1
+      P1772: 1
+      P1773: 1
+      P1774: 1
+      P1775: 1
+      P1776: 1
+      P1777: 1
+      P1778: 1
+      P1779: 1
+      P1780: 1
+      P1781: 1
+      P1782: 1
+      P1783: 1
+      P1784: 1
+      P1785: 1
+      P1786: 1
+      P1787: 1
+      P1788: 1
+      P1789: 1
+      P1790: 1
+      P1791: 1
+      P1792: 1
+      P1793: 1
+      P1794: 1
+      P1795: 1
+      P1796: 1
+      P1797: 1
+      P1798: 1
+      P1799: 1
+      P1800: 1
+      P1801: 1
+      P1802: 1
+      P1803: 1
+      P1804: 1
+      P1805: 1
+      P1806: 1
+      P1807: 1
+      P1808: 1
+      P1809: 1
+      P1810: 1
+      P1811: 1
+      P1812: 1
+      P1813: 1
+      P1814: 1
+      P1815: 1
+      P1816: 1
+      P1817: 1
+      P1818: 1
+      P1819: 1
+      P1820: 1
+      P1821: 1
+      P1822: 1
+      P1823: 1
+      P1824: 1
+      P1825: 1
+      P1826: 1
+      P1827: 1
+      P1828: 1
+      P1829: 1
+      P1830: 1
+      P1831: 1
+      P1832: 1
+      P1833: 1
+      P1834: 1
+      P1835: 1
+      P1836: 1
+      P1837: 1
+      P1838: 1
+      P1839: 1
+      P1840: 1
+      P1841: 1
+      P1842: 1
+      P1843: 1
+      P1844: 1
+      P1845: 1
+      P1846: 1
+      P1847: 1
+      P1848: 1
+      P1849: 1
+      P1850: 1
+      P1851: 1
+      P1852: 1
+      P1853: 1
+      P1854: 1
+      P1855: 1
+      P1856: 1
+      P1857: 1
+      P1858: 1
+      P1859: 1
+      P1860: 1
+      P1861: 1
+      P1862: 1
+      P1863: 1
+      P1864: 1
+      P1865: 1
+      P1866: 1
+      P1867: 1
+      P1868: 1
+      P1869: 1
+      P1870: 1
+      P1871: 1
+      P1872: 1
+      P1873: 1
+      P1874: 1
+      P1875: 1
+      P1876: 1
+      P1877: 1
+      P1878: 1
+      P1879: 1
+      P1880: 1
+      P1881: 1
+      P1882: 1
+      P1883: 1
+      P1884: 1
+      P1885: 1
+      P1886: 1
+      P1887: 1
+      P1888: 1
+      P1889: 1
+      P1890: 1
+      P1891: 1
+      P1892: 1
+      P1893: 1
+      P1894: 1
+      P1895: 1
+      P1896: 1
+      P1897: 1
+      P1898: 1
+      P1899: 1
+      P1900: 1
+      P1901: 1
+      P1902: 1
+      P1903: 1
+      P1904: 1
+      P1905: 1
+      P1906: 1
+      P1907: 1
+      P1908: 1
+      P1909: 1
+      P191: 1
+      P1910: 1
+      P1911: 1
+      P1912: 1
+      P1913: 1
+      P1914: 1
+      P1915: 1
+      P1916: 1
+      P1917: 1
+      P1918: 1
+      P1919: 1
+      P1920: 1
+      P1921: 1
+      P1922: 1
+      P1923: 1
+      P1924: 1
+      P1925: 1
+      P1926: 1
+      P1927: 1
+      P1928: 1
+      P1929: 1
+      P1930: 1
+      P1931: 1
+      P1932: 1
+      P1933: 1
+      P1934: 1
+      P1935: 1
+      P1936: 1
+      P1937: 1
+      P1938: 1
+      P1939: 1
+      P1940: 1
+      P1941: 1
+      P1942: 1
+      P1943: 1
+      P1944: 1
+      P1945: 1
+      P1946: 1
+      P1947: 1
+      P1948: 1
+      P1949: 1
+      P1950: 1
+      P1951: 1
+      P1952: 1
+      P1953: 1
+      P1954: 1
+      P1955: 1
+      P1956: 1
+      P1957: 1
+      P1958: 1
+      P1959: 1
+      P1960: 1
+      P1961: 1
+      P1962: 1
+      P1963: 1
+      P1964: 1
+      P1965: 1
+      P1966: 1
+      P1967: 1
+      P1968: 1
+      P1969: 1
+      P1970: 1
+      P1971: 1
+      P1972: 1
+      P1973: 1
+      P1974: 1
+      P1975: 1
+      P1976: 1
+      P1977: 1
+      P1978: 1
+      P1979: 1
+      P198: 1
+      P1980: 1
+      P1981: 1
+      P1982: 1
+      P1983: 1
+      P1984: 1
+      P1985: 1
+      P1986: 1
+      P1987: 1
+      P1988: 1
+      P1989: 1
+      P1990: 1
+      P1991: 1
+      P1992: 1
+      P1993: 1
+      P1994: 1
+      P1995: 1
+      P1996: 1
+      P1997: 1
+      P1998: 1
+      P1999: 1
+      P2000: 1
+      P2001: 1
+      P2002: 1
+      P2003: 1
+      P2004: 1
+      P2005: 1
+      P2006: 1
+      P2007: 1
+      P2008: 1
+      P2009: 1
+      P2010: 1
+      P2011: 1
+      P2012: 1
+      P2013: 1
+      P2014: 1
+      P2015: 1
+      P2016: 1
+      P2017: 1
+      P2018: 1
+      P2019: 1
+      P202: 1
+      P2020: 1
+      P2021: 1
+      P2022: 1
+      P2023: 1
+      P2024: 1
+      P2025: 1
+      P2026: 1
+      P2027: 1
+      P2028: 1
+      P2029: 1
+      P2030: 1
+      P2031: 1
+      P2032: 1
+      P2033: 1
+      P2034: 1
+      P2035: 1
+      P2036: 1
+      P2037: 1
+      P2038: 1
+      P2039: 1
+      P2040: 1
+      P2041: 1
+      P2042: 1
+      P2043: 1
+      P2044: 1
+      P2045: 1
+      P2046: 1
+      P2047: 1
+      P2048: 1
+      P2049: 1
+      P2050: 1
+      P2051: 1
+      P2052: 1
+      P2053: 1
+      P2054: 1
+      P2055: 1
+      P2056: 1
+      P2057: 1
+      P2058: 1
+      P2059: 1
+      P2060: 1
+      P2061: 1
+      P2062: 1
+      P2063: 1
+      P2064: 1
+      P2065: 1
+      P2066: 1
+      P2067: 1
+      P2068: 1
+      P2069: 1
+      P2070: 1
+      P2071: 1
+      P2072: 1
+      P2073: 1
+      P2074: 1
+      P2075: 1
+      P2076: 1
+      P2077: 1
+      P2078: 1
+      P2079: 1
+      P2080: 1
+      P2081: 1
+      P2082: 1
+      P2083: 1
+      P2084: 1
+      P2085: 1
+      P2086: 1
+      P2087: 1
+      P2088: 1
+      P2089: 1
+      P2090: 1
+      P2091: 1
+      P2092: 1
+      P2093: 1
+      P2094: 1
+      P2095: 1
+      P2096: 1
+      P2097: 1
+      P2098: 1
+      P2099: 1
+      P2100: 1
+      P2101: 1
+      P2102: 1
+      P2103: 1
+      P2104: 1
+      P2105: 1
+      P2106: 1
+      P2107: 1
+      P2108: 1
+      P2109: 1
+      P2110: 1
+      P2111: 1
+      P2112: 1
+      P2113: 1
+      P2114: 1
+      P2115: 1
+      P2116: 1
+      P2117: 1
+      P2118: 1
+      P2119: 1
+      P2120: 1
+      P2121: 1
+      P2122: 1
+      P2123: 1
+      P2126: 1
+      P2129: 1
+      P2132: 1
+      P2133: 1
+      P2134: 1
+      P22: 1
+      P234: 1
+      P235: 1
+      P236: 1
+      P237: 1
+      P238: 1
+      P239: 1
+      P243: 1
+      P244: 1
+      P245: 1
+      P246: 1
+      P247: 1
+      P248: 1
+      P252: 1
+      P253: 1
+      P254: 1
+      P255: 1
+      P256: 1
+      P257: 1
+      P261: 1
+      P262: 1
+      P263: 1
+      P264: 1
+      P265: 1
+      P266: 1
+      P270: 1
+      P271: 1
+      P272: 1
+      P273: 1
+      P274: 1
+      P275: 1
+      P279: 1
+      P280: 1
+      P281: 1
+      P282: 1
+      P283: 1
+      P284: 1
+      P298: 1
+      P299: 1
+      P300: 1
+      P301: 1
+      P302: 1
+      P303: 1
+      P304: 1
+      P305: 1
+      P306: 1
+      P320: 1
+      P321: 1
+      P322: 1
+      P323: 1
+      P324: 1
+      P325: 1
+      P326: 1
+      P327: 1
+      P328: 1
+      P335: 1
+      P336: 1
+      P337: 1
+      P338: 1
+      P339: 1
+      P340: 1
+      P341: 1
+      P348: 1
+      P349: 1
+      P350: 1
+      P351: 1
+      P352: 1
+      P353: 1
+      P354: 1
+      P361: 1
+      P362: 1
+      P363: 1
+      P364: 1
+      P365: 1
+      P366: 1
+      P367: 1
+      P373: 1
+      P374: 1
+      P375: 1
+      P376: 1
+      P377: 1
+      P378: 1
+      P384: 1
+      P385: 1
+      P386: 1
+      P387: 1
+      P388: 1
+      P389: 1
+      P755: 1
+      P756: 1
+      P762: 1
+      P763: 1
+      P808: 1
+      P809: 1
+      P841: 1
+      P85: 1
+      P861: 1
+      P862: 1
+      P866: 1
+      P867: 1
+      P871: 1
+      P872: 1
+      P889: 1
+      P928: 1
+      R1: 4
+      R10: 4
+      R11: 5
+      R12: 4
+      R13: 5
+      R14: 5
+      R15: 5
+      R16: 5
+      R2: 5
+      R3: 5
+      R4: 5
+      R5: 5
+      R6: 5
+      R7: 5
+      R8: 5
+      R9: 5
+    class_pair_counts:
+      cabinet / plant: 1
+  settings:
+    seed: 7
+    pool_size: 48
+    max_attempts: 30000
+    max_base_assignments: 30000
+    selection_policy: difficulty_preferences_then_diversity
+coverage:
+  qa:
+    requested: 50
+    generated: 50
+    unavailable: 0
+  pddl:
+    requested: 50
+    generated: 50
+    unavailable: 0
+artifacts:
+  qa:
+    path: data/questions/v1/habitat_apartment/qa_questions.yaml
+    sha256: a418dae731569c2d556f1d235759b3bd2da77d4479f00758f33850f0ad9d2f4b
+  pddl:
+    path: data/questions/v1/habitat_apartment/pddl_questions.yaml
+    sha256: f77d0cde3c6342d712ab2d43f1428f88b5e785c85842a19998a5014a4c02e20d

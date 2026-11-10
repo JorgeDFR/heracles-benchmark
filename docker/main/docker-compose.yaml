@@ -33,7 +33,7 @@ services:
     networks: [heracles_net]
     stdin_open: true
     tty: true
-    entrypoint: [ipython, -i, /heracles/examples/load_scene_graph.py, --, --scene_graph, /data/scene_graphs/example_dsg.json]
+    entrypoint: [ipython, -i, /heracles/examples/load_scene_graph.py, --, --scene_graph, /data/scene_graphs/spark_dsg_example.json]
 
   # Interactive LLM-based agent interaction with database
   chatdsg:
@@ -58,7 +58,7 @@ services:
     extra_hosts: [host.docker.internal:host-gateway]
     stdin_open: true
     tty: true
-    entrypoint: [python, simplified_chatdsg.py, --scene-graph, /data/scene_graphs/example_dsg.json]
+    entrypoint: [python, simplified_chatdsg.py, --scene-graph, /data/scene_graphs/spark_dsg_example.json]
 
   # Visualize scene graph in RVIZ using Hydra ROS visualizer
   # hydra_visualization:

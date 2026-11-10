@@ -1,0 +1,1667 @@
+qa:
+- id: qa_class_count_in_room_class
+  description: Calibration anchor for class grounding and containment.
+  question_template: How many {target_object_class_plural} are in the {source_room_class_plural}?
+  overlap_class: direct
+  tags:
+  - hierarchy
+  - count
+  - class
+  parameters:
+    target_object_class_plural: object_class_plural
+    source_room_class_plural: room_class_plural
+  requires:
+  - object_classes
+  - room_classes
+  - containment
+- id: qa_class_near_class
+  description: Calibration anchor for existential metric class relations.
+  question_template: Which {target_object_class_plural} are at most {radius_m} meters from at least one {reference_object_class_singular}?
+  overlap_class: direct
+  tags:
+  - spatial
+  - radius
+  - existential
+  parameters:
+    target_object_class_plural: object_class_plural
+    radius_m: distance_m
+    reference_object_class_singular: object_class_singular
+  requires:
+  - object_classes
+  - object_centers
+- id: qa_closest_class_pairs_in_room_class
+  description: Closest cross-class pairs after a shared-room restriction.
+  question_template: Among pairs consisting of one {target_object_class_singular} and one {reference_object_class_singular} in the same {source_room_class_singular}, which are closest together? Include all ties.
+  overlap_class: related
+  tags:
+  - spatial
+  - pairs
+  - hierarchy
+  - ties
+  parameters:
+    target_object_class_singular: object_class_singular
+    reference_object_class_singular: object_class_singular
+    source_room_class_singular: room_class_singular
+  requires:
+  - object_classes
+  - room_classes
+  - containment
+  - object_centers
+- id: qa_counts_per_room
+  description: Grouped counting with zero rows retained.
+  question_template: How many {target_object_class_plural} are in each {source_room_class_singular}? Include zero counts.
+  overlap_class: related
+  tags:
+  - hierarchy
+  - grouped_count
+  - zero
+  parameters:
+    target_object_class_plural: object_class_plural
+    source_room_class_singular: room_class_singular
+  requires:
+  - object_classes
+  - room_classes
+  - containment
+- id: qa_rooms_with_both_classes
+  description: Intersect two containment conditions.
+  question_template: Which {source_room_class_plural} contain at least one {target_object_class_singular} and at least one {reference_object_class_singular}?
+  overlap_class: related
+  tags:
+  - hierarchy
+  - intersection
+  - existential
+  parameters:
+    source_room_class_plural: room_class_plural
+    target_object_class_singular: object_class_singular
+    reference_object_class_singular: object_class_singular
+  requires:
+  - object_classes
+  - room_classes
+  - containment
+- id: qa_rooms_with_target_without_excluded
+  description: Negate existence of a class rather than filter individual objects.
+  question_template: Which rooms contain at least one {target_object_class_singular} but no {excluded_object_class_plural}?
+  overlap_class: related
+  tags:
+  - hierarchy
+  - anti_join
+  - negation
+  parameters:
+    target_object_class_singular: object_class_singular
+    excluded_object_class_plural: object_class_plural
+  requires:
+  - object_classes
+  - containment
+- id: qa_rooms_with_exact_count
+  description: Filter groups by exact distinct count.
+  question_template: Which {source_room_class_plural} contain exactly {required_count} {target_object_class_counted}?
+  overlap_class: related
+  tags:
+  - hierarchy
+  - grouped_count
+  - exact_cardinality
+  parameters:
+    source_room_class_plural: room_class_plural
+    required_count: positive_integer
+    target_object_class_counted: object_class_counted
+  requires:
+  - object_classes
+  - room_classes
+  - containment
+- id: qa_classes_in_every_room
+  description: Relational division across a class-selected room set.
+  question_template: Which kinds of objects can be found in every {source_room_class_singular}?
+  overlap_class: absent
+  tags:
+  - hierarchy
+  - universal
+  - relational_division
+  parameters:
+    source_room_class_singular: room_class_singular
+  requires:
+  - object_classes
+  - room_classes
+  - containment
+- id: qa_objects_sharing_place
+  description: Resolve same-place membership without giving a place ID.
+  question_template: Which {target_object_class_plural} share a mapped location with at least one {reference_object_class_singular} inside any {source_room_class_singular}?
+  overlap_class: related
+  tags:
+  - hierarchy
+  - shared_parent
+  - class
+  parameters:
+    target_object_class_plural: object_class_plural
+    reference_object_class_singular: object_class_singular
+    source_room_class_singular: room_class_singular
+  requires:
+  - object_classes
+  - room_classes
+  - containment
+  - navigable_places
+- id: qa_rooms_with_most_targets
+  description: Argmax over class-filtered room counts.
+  question_template: Which {source_room_class_plural} have the most {target_object_class_plural}? Include all ties.
+  overlap_class: related
+  tags:
+  - hierarchy
+  - aggregation
+  - extrema
+  parameters:
+    source_room_class_plural: room_class_plural
+    target_object_class_plural: object_class_plural
+  requires:
+  - object_classes
+  - room_classes
+  - containment
+- id: qa_rooms_with_highest_target_fraction
+  description: Optimize a normalized statistic rather than a raw count.
+  question_template: In which nonempty {source_room_class_plural} do {target_object_class_plural} make up the largest
+    proportion of the contents? Include all ties.
+  overlap_class: absent
+  tags:
+  - hierarchy
+  - ratio
+  - extrema
+  parameters:
+    source_room_class_plural: room_class_plural
+    target_object_class_plural: object_class_plural
+  requires:
+  - object_classes
+  - room_classes
+  - containment
+- id: qa_classes_shared_between_room_classes
+  description: Intersect inventories over two semantic region groups.
+  question_template: Which kinds of objects occur in both the {source_room_class_plural} and the {comparison_room_class_plural}?
+  overlap_class: related
+  tags:
+  - hierarchy
+  - class_inventory
+  - intersection
+  parameters:
+    source_room_class_plural: room_class_plural
+    comparison_room_class_plural: room_class_plural
+  requires:
+  - object_classes
+  - room_classes
+  - containment
+- id: qa_classes_exclusive_between_room_classes
+  description: Difference between inventories, with global exclusion over the comparison group.
+  question_template: Which kinds of objects occur in the {source_room_class_plural} but in none of the {comparison_room_class_plural}?
+  overlap_class: related
+  tags:
+  - hierarchy
+  - class_inventory
+  - difference
+  parameters:
+    source_room_class_plural: room_class_plural
+    comparison_room_class_plural: room_class_plural
+  requires:
+  - object_classes
+  - room_classes
+  - containment
+- id: qa_place_counts_in_content_selected_room
+  description: Resolve a room by its contents and count both place layers.
+  question_template: How many mapped locations are directly inside the {source_room_class_singular} containing the
+    only {reference_object_class_singular} found across all {source_room_class_plural}? Count both 2D and 3D locations.
+  overlap_class: related
+  tags:
+  - hierarchy
+  - reference_resolution
+  - place_union
+  - count
+  parameters:
+    source_room_class_singular: room_class_singular
+    reference_object_class_singular: object_class_singular
+    source_room_class_plural: room_class_plural
+  requires:
+  - object_classes
+  - room_classes
+  - containment
+  - navigable_places
+- id: qa_targets_nearer_external_reference
+  description: Compare each target's nearest reference inside and outside its room.
+  question_template: Which {target_object_class_plural} are closer to a {reference_object_class_singular} outside their room than to the nearest {reference_object_class_singular} inside it? Only consider {target_object_class_plural} whose room contains at least one {reference_object_class_singular}.
+  overlap_class: related
+  tags:
+  - hierarchy
+  - spatial
+  - correlated_minima
+  - room_scope
+  parameters:
+    target_object_class_plural: object_class_plural
+    reference_object_class_singular: object_class_singular
+  requires:
+  - object_classes
+  - containment
+  - object_centers
+- id: qa_nearest_targets_per_room
+  description: Grouped minimum distances with each room's own reference set.
+  question_template: For each {source_room_class_singular} containing both {target_object_class_plural} and {reference_object_class_plural}, which of its {target_object_class_plural} are closest to any of its {reference_object_class_plural}? Include all ties.
+  overlap_class: related
+  tags:
+  - hierarchy
+  - spatial
+  - grouped_extrema
+  parameters:
+    source_room_class_singular: room_class_singular
+    target_object_class_plural: object_class_plural
+    reference_object_class_plural: object_class_plural
+  requires:
+  - object_classes
+  - room_classes
+  - containment
+  - object_centers
+- id: qa_nearest_to_room_disambiguated_reference
+  description: Two-stage reference resolution followed by a global search.
+  question_template: Which {target_object_class_plural} anywhere in the scene are closest to the only {reference_object_class_singular} found across all {source_room_class_plural}? Include all ties.
+  overlap_class: related
+  tags:
+  - reference_resolution
+  - hierarchy
+  - spatial
+  - global_scope
+  parameters:
+    target_object_class_plural: object_class_plural
+    reference_object_class_singular: object_class_singular
+    source_room_class_plural: room_class_plural
+  requires:
+  - object_classes
+  - room_classes
+  - containment
+  - object_centers
+- id: qa_global_farthest_from_selected_room
+  description: Separate the anchor's room scope from the global candidate scope.
+  question_template: Which {target_object_class_plural} anywhere in the scene are farthest from the center of the {source_room_class_singular} containing the only {reference_object_class_singular} found across all {source_room_class_plural}? Include all ties.
+  overlap_class: related
+  tags:
+  - reference_resolution
+  - spatial
+  - farthest
+  - global_scope
+  parameters:
+    target_object_class_plural: object_class_plural
+    source_room_class_singular: room_class_singular
+    reference_object_class_singular: object_class_singular
+    source_room_class_plural: room_class_plural
+  requires:
+  - object_classes
+  - room_classes
+  - containment
+  - object_centers
+  - room_centers
+- id: qa_targets_near_every_reference
+  description: Universal spatial qualification.
+  question_template: Which {target_object_class_plural} are at most {radius_m} meters from every {reference_object_class_singular}?
+  overlap_class: related
+  tags:
+  - spatial
+  - universal
+  - radius
+  parameters:
+    target_object_class_plural: object_class_plural
+    radius_m: distance_m
+    reference_object_class_singular: object_class_singular
+  requires:
+  - object_classes
+  - object_centers
+- id: qa_targets_near_no_reference
+  description: Spatial anti-join.
+  question_template: Which {target_object_class_plural} are more than {radius_m} meters from every {reference_object_class_singular}?
+  overlap_class: related
+  tags:
+  - spatial
+  - anti_join
+  - radius
+  parameters:
+    target_object_class_plural: object_class_plural
+    radius_m: distance_m
+    reference_object_class_singular: object_class_singular
+  requires:
+  - object_classes
+  - object_centers
+- id: qa_mean_nearest_reference_distance
+  description: Aggregate a separate nearest-neighbor distance for every target.
+  question_template: What is the average distance in meters from each {target_object_class_singular} to its nearest {reference_object_class_singular}?
+  overlap_class: absent
+  tags:
+  - spatial
+  - nested_aggregation
+  - mean
+  parameters:
+    target_object_class_singular: object_class_singular
+    reference_object_class_singular: object_class_singular
+  requires:
+  - object_classes
+  - object_centers
+- id: qa_minimax_target
+  description: Choose the target with the smallest worst-case reference distance.
+  question_template: Which {target_object_class_plural} have the smallest distance to their farthest {reference_object_class_singular}? Include all ties.
+  overlap_class: absent
+  tags:
+  - spatial
+  - nested_aggregation
+  - minimax
+  parameters:
+    target_object_class_plural: object_class_plural
+    reference_object_class_singular: object_class_singular
+  requires:
+  - object_classes
+  - object_centers
+- id: qa_top_targets_per_room
+  description: Rank candidates separately within each room, retaining boundary ties.
+  question_template: For each {source_room_class_singular} containing both {target_object_class_plural} and {reference_object_class_plural}, which are its {top_k} {target_object_class_plural} closest to any of its {reference_object_class_plural}? Include ties at the cutoff.
+  overlap_class: related
+  tags:
+  - hierarchy
+  - spatial
+  - grouped_ranking
+  parameters:
+    source_room_class_singular: room_class_singular
+    target_object_class_plural: object_class_plural
+    reference_object_class_plural: object_class_plural
+    top_k: positive_integer
+  requires:
+  - object_classes
+  - room_classes
+  - containment
+  - object_centers
+- id: qa_closest_pair_in_different_rooms
+  description: Metric optimization constrained by negative room co-membership.
+  question_template: Which pairs consisting of one {target_object_class_singular} and one {reference_object_class_singular} are closest together, if both belong to rooms but share no room? Include all ties.
+  overlap_class: related
+  tags:
+  - spatial
+  - pairs
+  - hierarchy
+  - anti_join
+  parameters:
+    target_object_class_singular: object_class_singular
+    reference_object_class_singular: object_class_singular
+  requires:
+  - object_classes
+  - containment
+  - object_centers
+- id: qa_targets_within_place_hops
+  description: Compose class references, direct parents, and same-layer reachability.
+  question_template: Which {target_object_class_plural} are at locations in the {place_layer_name} network within {hop_limit} connections of the location of the only {reference_object_class_singular} found across all {source_room_class_plural}?
+  overlap_class: related
+  tags:
+  - hierarchy
+  - connectivity
+  - reference_resolution
+  parameters:
+    target_object_class_plural: object_class_plural
+    place_layer_name: place_layer_name
+    hop_limit: positive_integer
+    reference_object_class_singular: object_class_singular
+    source_room_class_plural: room_class_plural
+  requires:
+  - object_classes
+  - room_classes
+  - containment
+  - selected_place_layer
+  - selected_place_connectivity
+- id: qa_target_count_within_place_hops
+  description: Count targets over deduplicated reachable places.
+  question_template: How many {target_object_class_plural} are at locations in the {place_layer_name} network within {hop_limit} connections of the location of the only {reference_object_class_singular} found across all {source_room_class_plural}?
+  overlap_class: related
+  tags:
+  - hierarchy
+  - connectivity
+  - count
+  parameters:
+    target_object_class_plural: object_class_plural
+    place_layer_name: place_layer_name
+    hop_limit: positive_integer
+    reference_object_class_singular: object_class_singular
+    source_room_class_plural: room_class_plural
+  requires:
+  - object_classes
+  - room_classes
+  - containment
+  - selected_place_layer
+  - selected_place_connectivity
+- id: qa_room_hops_between_content_anchors
+  description: Resolve both endpoints from contents and compute graph distance.
+  question_template: How many room connections are needed on a shortest route from the room containing the only {reference_object_class_singular} to the room containing the only {destination_object_class_singular}?
+  overlap_class: absent
+  tags:
+  - reference_resolution
+  - connectivity
+  - shortest_path
+  parameters:
+    reference_object_class_singular: object_class_singular
+    destination_object_class_singular: object_class_singular
+  requires:
+  - object_classes
+  - containment
+  - room_connectivity
+- id: qa_shortest_room_route_avoiding_class
+  description: Shortest route under a semantic exclusion.
+  question_template: What is one shortest room-by-room route from the room containing the only {reference_object_class_singular} to the room containing the only {destination_object_class_singular}, without entering any {excluded_room_class_singular}? Include both endpoints.
+  overlap_class: absent
+  tags:
+  - connectivity
+  - constrained_path
+  - negation
+  parameters:
+    reference_object_class_singular: object_class_singular
+    destination_object_class_singular: object_class_singular
+    excluded_room_class_singular: room_class_singular
+  requires:
+  - object_classes
+  - room_classes
+  - containment
+  - room_connectivity
+- id: qa_reachable_target_rooms_avoiding_class
+  description: Reachability after removing an entire room category.
+  question_template: From the room containing the only {reference_object_class_singular}, which other rooms containing at least one {target_object_class_singular} can be reached without entering any {excluded_room_class_singular}?
+  overlap_class: related
+  tags:
+  - connectivity
+  - hierarchy
+  - constrained_reachability
+  parameters:
+    reference_object_class_singular: object_class_singular
+    target_object_class_singular: object_class_singular
+    excluded_room_class_singular: room_class_singular
+  requires:
+  - object_classes
+  - room_classes
+  - containment
+  - room_connectivity
+- id: qa_critical_rooms_between_anchors
+  description: Identify rooms required by every route between two semantic anchors.
+  question_template: Which intermediate rooms must every route pass through between the room containing the only {reference_object_class_singular} and the room containing the only {destination_object_class_singular}?
+  overlap_class: absent
+  tags:
+  - connectivity
+  - vertex_cut
+  - universal_paths
+  parameters:
+    reference_object_class_singular: object_class_singular
+    destination_object_class_singular: object_class_singular
+  requires:
+  - object_classes
+  - containment
+  - room_connectivity
+- id: qa_rooms_with_most_distinct_classes
+  description: Find rooms with the greatest object-class diversity.
+  question_template: Which {source_room_class_plural} contain the most different kinds of objects? Include all ties.
+  overlap_class: related
+  tags:
+  - hierarchy
+  - distinct_count
+  - extrema
+  parameters:
+    source_room_class_plural: room_class_plural
+  requires:
+  - object_classes
+  - room_classes
+  - containment
+- id: qa_rooms_with_more_targets_than_references
+  description: Compare two class counts separately within each room.
+  question_template: Which {source_room_class_plural} contain more {target_object_class_plural} than {reference_object_class_plural}?
+  overlap_class: related
+  tags:
+  - hierarchy
+  - grouped_count
+  - comparison
+  parameters:
+    source_room_class_plural: room_class_plural
+    target_object_class_plural: object_class_plural
+    reference_object_class_plural: object_class_plural
+  requires:
+  - object_classes
+  - room_classes
+  - containment
+- id: qa_class_histogram_in_room_class
+  description: Count each represented object class within selected rooms.
+  question_template: How many of each kind of thing are there across all the {source_room_class_plural}?
+  overlap_class: related
+  tags:
+  - hierarchy
+  - histogram
+  - grouped_count
+  parameters:
+    source_room_class_plural: room_class_plural
+  requires:
+  - object_classes
+  - room_classes
+  - containment
+- id: qa_rarest_classes_in_room_class
+  description: Find least frequent represented classes within selected rooms.
+  question_template: Which kinds of objects are least common across all the {source_room_class_plural}? Include all ties and ignore kinds that do not occur there.
+  overlap_class: related
+  tags:
+  - hierarchy
+  - grouped_count
+  - minima
+  parameters:
+    source_room_class_plural: room_class_plural
+  requires:
+  - object_classes
+  - room_classes
+  - containment
+- id: qa_targets_in_distance_band
+  description: Apply lower and upper metric bounds around a resolved reference.
+  question_template: Which {target_object_class_plural} are more than {inner_radius_m} but at most {outer_radius_m} meters from the only {reference_object_class_singular}?
+  overlap_class: related
+  tags:
+  - spatial
+  - distance_band
+  - reference_resolution
+  parameters:
+    target_object_class_plural: object_class_plural
+    inner_radius_m: distance_m
+    outer_radius_m: distance_m
+    reference_object_class_singular: object_class_singular
+  requires:
+  - object_classes
+  - object_centers
+- id: qa_targets_closer_to_first_reference
+  description: Compare two distances to independently resolved class references.
+  question_template: Which {target_object_class_plural} are closer to the only {reference_object_class_singular} than to the only {comparison_object_class_singular}?
+  overlap_class: related
+  tags:
+  - spatial
+  - distance_comparison
+  - reference_resolution
+  parameters:
+    target_object_class_plural: object_class_plural
+    reference_object_class_singular: object_class_singular
+    comparison_object_class_singular: object_class_singular
+  requires:
+  - object_classes
+  - object_centers
+- id: qa_targets_near_two_reference_classes
+  description: Require separate spatial witnesses from two classes.
+  question_template: Which {target_object_class_plural} are within {radius_m} meters of at least one {reference_object_class_singular} and at least one {comparison_object_class_singular}?
+  overlap_class: related
+  tags:
+  - spatial
+  - intersection
+  - existential
+  parameters:
+    target_object_class_plural: object_class_plural
+    radius_m: distance_m
+    reference_object_class_singular: object_class_singular
+    comparison_object_class_singular: object_class_singular
+  requires:
+  - object_classes
+  - object_centers
+- id: qa_nearest_targets_outside_reference_room
+  description: Separate containment exclusion from nearest-neighbor selection.
+  question_template: Which {target_object_class_plural} are closest to the only {reference_object_class_singular}, excluding anything that shares a room with it? Include all ties.
+  overlap_class: related
+  tags:
+  - spatial
+  - hierarchy
+  - anti_join
+  - extrema
+  parameters:
+    target_object_class_plural: object_class_plural
+    reference_object_class_singular: object_class_singular
+  requires:
+  - object_classes
+  - containment
+  - object_centers
+- id: qa_mutual_nearest_class_pairs
+  description: Find reciprocal nearest neighbors between two semantic classes.
+  question_template: Which pairs of one {target_object_class_singular} and one {reference_object_class_singular} are each other's nearest match from the other kind? Include tied nearest matches.
+  overlap_class: absent
+  tags:
+  - spatial
+  - pairs
+  - mutual_nearest
+  parameters:
+    target_object_class_singular: object_class_singular
+    reference_object_class_singular: object_class_singular
+  requires:
+  - object_classes
+  - object_centers
+- id: qa_closest_class_pairs_per_room
+  description: Compute nearest cross-class pairs independently in each room.
+  question_template: For each {source_room_class_singular} containing both {target_object_class_plural} and {reference_object_class_plural}, which pairs consisting of one of each are closest together? Include all ties.
+  overlap_class: related
+  tags:
+  - spatial
+  - hierarchy
+  - grouped_extrema
+  - pairs
+  parameters:
+    source_room_class_singular: room_class_singular
+    target_object_class_plural: object_class_plural
+    reference_object_class_plural: object_class_plural
+  requires:
+  - object_classes
+  - room_classes
+  - containment
+  - object_centers
+- id: qa_nearby_target_counts_per_reference
+  description: Count a separate neighborhood around each reference.
+  question_template: For each {reference_object_class_singular} in any {source_room_class_singular}, how many {target_object_class_plural} anywhere in the scene are within {radius_m} meters of it?
+  overlap_class: related
+  tags:
+  - spatial
+  - hierarchy
+  - grouped_count
+  parameters:
+    reference_object_class_singular: object_class_singular
+    source_room_class_singular: room_class_singular
+    target_object_class_plural: object_class_plural
+    radius_m: distance_m
+  requires:
+  - object_classes
+  - room_classes
+  - containment
+  - object_centers
+- id: qa_rooms_adjacent_to_two_room_classes
+  description: Conjoin two semantic neighbor-existence conditions.
+  question_template: Which rooms are directly connected to at least one {source_room_class_singular} and at least one {comparison_room_class_singular}?
+  overlap_class: related
+  tags:
+  - connectivity
+  - intersection
+  - existential
+  parameters:
+    source_room_class_singular: room_class_singular
+    comparison_room_class_singular: room_class_singular
+  requires:
+  - room_classes
+  - room_connectivity
+- id: qa_rooms_with_only_allowed_neighbors
+  description: Apply a universal class condition to a nonempty neighbor set.
+  question_template: Which rooms have at least one direct neighbor and are connected only to {source_room_class_plural}?
+  overlap_class: related
+  tags:
+  - connectivity
+  - universal
+  - class
+  parameters:
+    source_room_class_plural: room_class_plural
+  requires:
+  - room_classes
+  - room_connectivity
+- id: qa_target_rooms_within_room_hops
+  description: Filter room-hop neighborhoods by their object contents.
+  question_template: Which other rooms containing at least one {target_object_class_singular} are within {hop_limit} room connections of the room containing the only {reference_object_class_singular}?
+  overlap_class: related
+  tags:
+  - connectivity
+  - hierarchy
+  - bounded_reachability
+  parameters:
+    target_object_class_singular: object_class_singular
+    hop_limit: positive_integer
+    reference_object_class_singular: object_class_singular
+  requires:
+  - object_classes
+  - containment
+  - room_connectivity
+- id: qa_common_place_hop_neighborhood
+  description: Intersect navigation neighborhoods of two resolved anchors.
+  question_template: Which locations in the {place_layer_name} network are within {hop_limit} connections of both the location of the only {reference_object_class_singular} and the location of the only {comparison_object_class_singular}?
+  overlap_class: related
+  tags:
+  - connectivity
+  - intersection
+  - reference_resolution
+  parameters:
+    place_layer_name: place_layer_name
+    hop_limit: positive_integer
+    reference_object_class_singular: object_class_singular
+    comparison_object_class_singular: object_class_singular
+  requires:
+  - object_classes
+  - containment
+  - selected_place_layer
+  - selected_place_connectivity
+- id: qa_minimum_length_place_route
+  description: Optimize physical route length rather than edge count.
+  question_template: What is the length in meters of a shortest route through the {place_layer_name} network between the locations of the only {reference_object_class_singular} and the only {destination_object_class_singular}? Measure each connection by the distance between its endpoints.
+  overlap_class: absent
+  tags:
+  - connectivity
+  - weighted_shortest_path
+  - distance
+  parameters:
+    place_layer_name: place_layer_name
+    reference_object_class_singular: object_class_singular
+    destination_object_class_singular: object_class_singular
+  requires:
+  - object_classes
+  - containment
+  - selected_place_layer
+  - selected_place_connectivity
+  - place_centers
+- id: qa_room_avoidance_detour
+  description: Measure the extra hops caused by a semantic route restriction.
+  question_template: How many extra room connections does a shortest route need between the rooms containing the only {reference_object_class_singular} and the only {destination_object_class_singular} when all {excluded_room_class_plural} must be avoided?
+  overlap_class: absent
+  tags:
+  - connectivity
+  - constrained_path
+  - distance_difference
+  parameters:
+    reference_object_class_singular: object_class_singular
+    destination_object_class_singular: object_class_singular
+    excluded_room_class_plural: room_class_plural
+  requires:
+  - object_classes
+  - room_classes
+  - containment
+  - room_connectivity
+- id: qa_room_components_after_category_removal
+  description: Count disconnected components after removing a semantic category.
+  question_template: If all {excluded_room_class_plural} are removed from the room-connectivity map, how many disconnected groups of rooms remain? Count isolated rooms as separate groups.
+  overlap_class: absent
+  tags:
+  - connectivity
+  - components
+  - removal
+  parameters:
+    excluded_room_class_plural: room_class_plural
+  requires:
+  - room_classes
+  - room_connectivity
+- id: qa_rooms_with_all_targets_near_references
+  description: Universal target coverage with a separate spatial witness for each target.
+  question_template: Which {source_room_class_plural} contain at least one {target_object_class_singular} and have every one of their {target_object_class_plural} within {radius_m} meters of at least one of their {reference_object_class_plural}?
+  overlap_class: related
+  tags:
+  - hierarchy
+  - spatial
+  - quantifier_scope
+  - universal
+  parameters:
+    source_room_class_plural: room_class_plural
+    target_object_class_singular: object_class_singular
+    target_object_class_plural: object_class_plural
+    radius_m: distance_m
+    reference_object_class_plural: object_class_plural
+  requires:
+  - object_classes
+  - room_classes
+  - containment
+  - object_centers
+- id: qa_highest_target_in_selected_room
+  description: Resolve a room from a reference and maximize target height.
+  question_template: Which {target_object_class_plural} have the highest centers in the room containing the only {reference_object_class_singular}? Include all ties.
+  overlap_class: absent
+  tags:
+  - hierarchy
+  - spatial
+  - height
+  - extrema
+  parameters:
+    target_object_class_plural: object_class_plural
+    reference_object_class_singular: object_class_singular
+  requires:
+  - object_classes
+  - containment
+  - object_centers
+  - vertical_axis
+pddl:
+- id: pddl_visit_any_class_in_room_class
+  description: Calibration anchor with genuine class ambiguity.
+  question_template: Visit any {target_object_class_singular} in any {source_room_class_singular}.
+  overlap_class: direct
+  tags:
+  - hierarchy
+  - existential
+  - visit
+  parameters:
+    target_object_class_singular: object_class_singular
+    source_room_class_singular: room_class_singular
+  requires:
+  - object_classes
+  - room_classes
+  - containment
+- id: pddl_inspect_closest_between_classes
+  description: Calibration anchor for class-to-class metric grounding.
+  question_template: Inspect any {target_object_class_singular} attaining the smallest distance to any {reference_object_class_singular} in the scene.
+  overlap_class: direct
+  tags:
+  - spatial
+  - extrema
+  - inspect
+  parameters:
+    target_object_class_singular: object_class_singular
+    reference_object_class_singular: object_class_singular
+  requires:
+  - object_classes
+  - object_centers
+- id: pddl_inspect_every_target_in_room_class
+  description: Universal inspection over a containment-filtered class.
+  question_template: Inspect all the {target_object_class_plural} in all the {source_room_class_plural}.
+  overlap_class: related
+  tags:
+  - hierarchy
+  - universal
+  - inspect
+  parameters:
+    target_object_class_plural: object_class_plural
+    source_room_class_plural: room_class_plural
+  requires:
+  - object_classes
+  - room_classes
+  - containment
+- id: pddl_visit_rooms_with_both_classes
+  description: Universal visit over a conjunction of room-content conditions.
+  question_template: Visit every room containing at least one {target_object_class_singular} and at least one {reference_object_class_singular}.
+  overlap_class: related
+  tags:
+  - hierarchy
+  - conjunction
+  - universal
+  - visit
+  parameters:
+    target_object_class_singular: object_class_singular
+    reference_object_class_singular: object_class_singular
+  requires:
+  - object_classes
+  - containment
+- id: pddl_end_in_max_count_room
+  description: Ground a destination through grouped aggregation.
+  question_template: Finish in any {source_room_class_singular} tied for the most {target_object_class_plural}.
+  overlap_class: related
+  tags:
+  - hierarchy
+  - aggregation
+  - extrema
+  - final_location
+  parameters:
+    source_room_class_singular: room_class_singular
+    target_object_class_plural: object_class_plural
+  requires:
+  - object_classes
+  - room_classes
+  - containment
+- id: pddl_visit_one_target_per_room
+  description: Universal room scope with an independent object choice in each room.
+  question_template: Visit at least one {target_object_class_singular} in each {source_room_class_singular} that has any.
+  overlap_class: related
+  tags:
+  - hierarchy
+  - quantifier_scope
+  - conjunction
+  - disjunction
+  parameters:
+    target_object_class_singular: object_class_singular
+    source_room_class_singular: room_class_singular
+  requires:
+  - object_classes
+  - room_classes
+  - containment
+- id: pddl_inspect_and_hold_same_choice
+  description: Two predicates must bind to the same chosen object.
+  question_template: Choose any {target_object_class_singular} in any {source_room_class_singular}, inspect it, and finish holding that same item.
+  overlap_class: related
+  tags:
+  - hierarchy
+  - correlated_choice
+  - inspect
+  - manipulation
+  parameters:
+    target_object_class_singular: object_class_singular
+    source_room_class_singular: room_class_singular
+  requires:
+  - object_classes
+  - room_classes
+  - containment
+- id: pddl_inspect_choice_end_in_same_room
+  description: Preserve the relation between an inspected object and its destination room.
+  question_template: Choose any {target_object_class_singular} in any {source_room_class_singular}, inspect it, and finish in that same room.
+  overlap_class: related
+  tags:
+  - hierarchy
+  - correlated_choice
+  - inspect
+  - final_location
+  parameters:
+    target_object_class_singular: object_class_singular
+    source_room_class_singular: room_class_singular
+  requires:
+  - object_classes
+  - room_classes
+  - containment
+- id: pddl_visit_all_near_reference_class
+  description: Universal action over an existential spatial filter.
+  question_template: Visit all the {target_object_class_plural} within {radius_m} meters of at least one {reference_object_class_singular}.
+  overlap_class: related
+  tags:
+  - spatial
+  - universal
+  - existential
+  - visit
+  parameters:
+    target_object_class_plural: object_class_plural
+    radius_m: distance_m
+    reference_object_class_singular: object_class_singular
+  requires:
+  - object_classes
+  - object_centers
+- id: pddl_inspect_near_target_far_from_excluded
+  description: Compose positive and negative spatial existence conditions.
+  question_template: Inspect all the {target_object_class_plural} within {radius_m} meters of at least one {reference_object_class_singular} and more than {radius_m} meters from every {excluded_object_class_singular}.
+  overlap_class: related
+  tags:
+  - spatial
+  - anti_join
+  - universal
+  - inspect
+  parameters:
+    target_object_class_plural: object_class_plural
+    radius_m: distance_m
+    reference_object_class_singular: object_class_singular
+    excluded_object_class_singular: object_class_singular
+  requires:
+  - object_classes
+  - object_centers
+- id: pddl_move_unique_target_to_reference_place
+  description: Resolve both the moved object and its destination without IDs.
+  question_template: Move the only {target_object_class_singular} found across all {source_room_class_plural} to the same mapped location as the only {reference_object_class_singular} found across all {destination_room_class_plural}.
+  overlap_class: related
+  tags:
+  - hierarchy
+  - reference_resolution
+  - manipulation
+  parameters:
+    target_object_class_singular: object_class_singular
+    source_room_class_plural: room_class_plural
+    reference_object_class_singular: object_class_singular
+    destination_room_class_plural: room_class_plural
+  requires:
+  - object_classes
+  - room_classes
+  - containment
+  - navigable_places
+- id: pddl_move_any_target_beside_selected_reference
+  description: Relocation with destination choices correlated to their containing rooms.
+  question_template: Choose any {reference_object_class_singular} in any {destination_room_class_singular} and move any {target_object_class_singular} that shares no room with it to its mapped location.
+  overlap_class: related
+  tags:
+  - hierarchy
+  - correlated_choice
+  - manipulation
+  parameters:
+    reference_object_class_singular: object_class_singular
+    destination_room_class_singular: room_class_singular
+    target_object_class_singular: object_class_singular
+  requires:
+  - object_classes
+  - room_classes
+  - containment
+  - navigable_places
+- id: pddl_move_all_to_one_shared_destination
+  description: A single destination choice scopes over all moved objects.
+  question_template: Move all the {target_object_class_plural} in all the {source_room_class_plural} to one shared mapped location containing at least one {reference_object_class_singular} inside any {destination_room_class_singular}. You may choose the destination.
+  overlap_class: related
+  tags:
+  - hierarchy
+  - quantifier_scope
+  - manipulation
+  - shared_destination
+  parameters:
+    target_object_class_plural: object_class_plural
+    source_room_class_plural: room_class_plural
+    reference_object_class_singular: object_class_singular
+    destination_room_class_singular: room_class_singular
+  requires:
+  - object_classes
+  - room_classes
+  - containment
+  - navigable_places
+- id: pddl_move_each_to_independent_destination
+  description: Contrast with one shared destination using independent choices.
+  question_template: Move all the {target_object_class_plural} in all the {source_room_class_plural} to mapped locations containing at least one {reference_object_class_singular} inside any {destination_room_class_singular}. Each item may use a different destination.
+  overlap_class: related
+  tags:
+  - hierarchy
+  - quantifier_scope
+  - manipulation
+  - independent_destinations
+  parameters:
+    target_object_class_plural: object_class_plural
+    source_room_class_plural: room_class_plural
+    reference_object_class_singular: object_class_singular
+    destination_room_class_singular: room_class_singular
+  requires:
+  - object_classes
+  - room_classes
+  - containment
+  - navigable_places
+- id: pddl_move_each_to_nearest_reference_place
+  description: Each source has its own geometrically selected destination set.
+  question_template: Move each {target_object_class_singular} in any {source_room_class_singular} to the mapped location of its nearest {reference_object_class_singular}. Use the original positions to find nearest matches. Any tied match is allowed.
+  overlap_class: related
+  tags:
+  - spatial
+  - hierarchy
+  - correlated_choice
+  - manipulation
+  parameters:
+    target_object_class_singular: object_class_singular
+    source_room_class_singular: room_class_singular
+    reference_object_class_singular: object_class_singular
+  requires:
+  - object_classes
+  - room_classes
+  - containment
+  - navigable_places
+  - object_centers
+- id: pddl_inspect_nearest_target_per_room
+  description: Nested universal room scope and metric choices within rooms.
+  question_template: In every {source_room_class_singular} containing both {target_object_class_plural} and {reference_object_class_plural}, inspect any of its {target_object_class_plural} tied for closest to any of its {reference_object_class_plural}.
+  overlap_class: related
+  tags:
+  - hierarchy
+  - grouped_extrema
+  - quantifier_scope
+  - inspect
+  parameters:
+    source_room_class_singular: room_class_singular
+    target_object_class_plural: object_class_plural
+    reference_object_class_plural: object_class_plural
+  requires:
+  - object_classes
+  - room_classes
+  - containment
+  - object_centers
+- id: pddl_visit_target_rooms_avoid_excluded_class
+  description: Positive and negative visit requirements over different room sets.
+  question_template: Visit every room containing at least one {target_object_class_singular}, without ever entering any {excluded_room_class_singular}.
+  overlap_class: related
+  tags:
+  - hierarchy
+  - universal
+  - negation
+  - visit
+  parameters:
+    target_object_class_singular: object_class_singular
+    excluded_room_class_singular: room_class_singular
+  requires:
+  - object_classes
+  - room_classes
+  - containment
+  - room_connectivity
+- id: pddl_end_in_room_without_excluded_object
+  description: Negation during scene selection rather than a negated action predicate.
+  question_template: Finish in any {destination_room_class_singular} containing at least one {target_object_class_singular} but no {excluded_object_class_plural}.
+  overlap_class: related
+  tags:
+  - hierarchy
+  - anti_join
+  - final_location
+  parameters:
+    destination_room_class_singular: room_class_singular
+    target_object_class_singular: object_class_singular
+    excluded_object_class_plural: object_class_plural
+  requires:
+  - object_classes
+  - room_classes
+  - containment
+- id: pddl_finish_holding_no_scoped_target
+  description: Universal negation over a hierarchy-filtered object set.
+  question_template: Finish without holding any of the {target_object_class_plural} originally in any {source_room_class_singular}.
+  overlap_class: related
+  tags:
+  - hierarchy
+  - negation
+  - universal
+  - manipulation
+  parameters:
+    target_object_class_plural: object_class_plural
+    source_room_class_singular: room_class_singular
+  requires:
+  - object_classes
+  - room_classes
+  - containment
+- id: pddl_visit_choice_leave_same_object_unheld
+  description: Keep the visited and negated-holding arguments correlated.
+  question_template: Choose any {target_object_class_singular} in any {source_room_class_singular} to visit, and finish without holding that same item.
+  overlap_class: related
+  tags:
+  - hierarchy
+  - correlated_choice
+  - negation
+  - visit
+  parameters:
+    target_object_class_singular: object_class_singular
+    source_room_class_singular: room_class_singular
+  requires:
+  - object_classes
+  - room_classes
+  - containment
+- id: pddl_alternative_universal_tasks
+  description: Separate complete alternatives from atom-wise alternatives.
+  question_template: Either inspect all the {target_object_class_plural} in all the {source_room_class_plural}, or visit all the {reference_object_class_plural} in all the {destination_room_class_plural}. Either whole task is sufficient.
+  overlap_class: related
+  tags:
+  - hierarchy
+  - universal
+  - conjunction
+  - disjunction
+  parameters:
+    target_object_class_plural: object_class_plural
+    source_room_class_plural: room_class_plural
+    reference_object_class_plural: object_class_plural
+    destination_room_class_plural: room_class_plural
+  requires:
+  - object_classes
+  - room_classes
+  - containment
+- id: pddl_inspections_with_destination_alternative
+  description: A shared universal obligation remains outside a destination disjunction.
+  question_template: Inspect all the {target_object_class_plural} in all the {source_room_class_plural}, and finish either in any {destination_room_class_singular} or beside any {reference_object_class_singular}.
+  overlap_class: related
+  tags:
+  - hierarchy
+  - universal
+  - conjunction
+  - disjunction
+  - final_location
+  parameters:
+    target_object_class_plural: object_class_plural
+    source_room_class_plural: room_class_plural
+    destination_room_class_singular: room_class_singular
+    reference_object_class_singular: object_class_singular
+  requires:
+  - object_classes
+  - room_classes
+  - containment
+- id: pddl_choose_room_inspect_all_its_targets
+  description: Choose one room and preserve all obligations belonging to that choice.
+  question_template: Choose one {source_room_class_singular} containing at least one {target_object_class_singular}. Inspect all its {target_object_class_plural} and finish in that same room.
+  overlap_class: related
+  tags:
+  - hierarchy
+  - correlated_choice
+  - quantifier_scope
+  - final_location
+  parameters:
+    source_room_class_singular: room_class_singular
+    target_object_class_singular: object_class_singular
+    target_object_class_plural: object_class_plural
+  requires:
+  - object_classes
+  - room_classes
+  - containment
+- id: pddl_visit_target_rooms_without_excluded
+  description: Visit all rooms passing positive and negative class-containment filters.
+  question_template: Visit every {source_room_class_singular} containing at least one {target_object_class_singular} and no {excluded_object_class_plural}.
+  overlap_class: related
+  tags:
+  - hierarchy
+  - anti_join
+  - negation
+  - universal
+  - visit
+  parameters:
+    source_room_class_singular: room_class_singular
+    target_object_class_singular: object_class_singular
+    excluded_object_class_plural: object_class_plural
+  requires:
+  - object_classes
+  - room_classes
+  - containment
+- id: pddl_inspect_hop_reachable_targets
+  description: Ground a universal goal through class references and navigation reachability.
+  question_template: Inspect all the {target_object_class_plural} at locations in the {place_layer_name} network within {hop_limit} connections of the location of the only {reference_object_class_singular} found across all {source_room_class_plural}.
+  overlap_class: related
+  tags:
+  - hierarchy
+  - connectivity
+  - universal
+  - inspect
+  parameters:
+    target_object_class_plural: object_class_plural
+    place_layer_name: place_layer_name
+    hop_limit: positive_integer
+    reference_object_class_singular: object_class_singular
+    source_room_class_plural: room_class_plural
+  requires:
+  - object_classes
+  - room_classes
+  - containment
+  - selected_place_layer
+  - selected_place_connectivity
+- id: pddl_end_at_minimum_hop_reference_place
+  description: Optimize a destination by navigation hops rather than metric distance.
+  question_template: Finish at any location containing at least one {target_object_class_singular} in the {place_layer_name} network that takes the fewest connections to reach from the location of the only {reference_object_class_singular} found across all {source_room_class_plural}.
+  overlap_class: absent
+  tags:
+  - connectivity
+  - shortest_path
+  - extrema
+  - final_location
+  parameters:
+    target_object_class_singular: object_class_singular
+    place_layer_name: place_layer_name
+    reference_object_class_singular: object_class_singular
+    source_room_class_plural: room_class_plural
+  requires:
+  - object_classes
+  - room_classes
+  - containment
+  - selected_place_layer
+  - selected_place_connectivity
+  - place_centers
+- id: pddl_hold_minimum_hop_target
+  description: Choose an object by shortest navigation distance to its parent.
+  question_template: Finish holding any {target_object_class_singular} whose location in the {place_layer_name} network takes the fewest connections to reach from the location of the only {reference_object_class_singular} found across all {source_room_class_plural}.
+  overlap_class: absent
+  tags:
+  - connectivity
+  - shortest_path
+  - manipulation
+  parameters:
+    target_object_class_singular: object_class_singular
+    place_layer_name: place_layer_name
+    reference_object_class_singular: object_class_singular
+    source_room_class_plural: room_class_plural
+  requires:
+  - object_classes
+  - room_classes
+  - containment
+  - selected_place_layer
+  - selected_place_connectivity
+  - object_centers
+- id: pddl_inspect_minimax_target
+  description: Ground inspection through a robust spatial optimization.
+  question_template: Inspect any {target_object_class_singular} with the smallest distance to its farthest {reference_object_class_singular}.
+  overlap_class: absent
+  tags:
+  - spatial
+  - minimax
+  - inspect
+  parameters:
+    target_object_class_singular: object_class_singular
+    reference_object_class_singular: object_class_singular
+  requires:
+  - object_classes
+  - object_centers
+- id: pddl_move_one_target_per_source_room
+  description: One independently chosen source object per room, one resolved destination.
+  question_template: From each {source_room_class_singular} containing at least one {target_object_class_singular}, move at least one of its {target_object_class_plural} to the mapped location of the only {reference_object_class_singular} found across all {destination_room_class_plural}.
+  overlap_class: related
+  tags:
+  - hierarchy
+  - quantifier_scope
+  - manipulation
+  parameters:
+    source_room_class_singular: room_class_singular
+    target_object_class_singular: object_class_singular
+    target_object_class_plural: object_class_plural
+    reference_object_class_singular: object_class_singular
+    destination_room_class_plural: room_class_plural
+  requires:
+  - object_classes
+  - room_classes
+  - containment
+  - navigable_places
+- id: pddl_inspect_at_least_two_targets
+  description: Cardinality over distinct goal arguments without fixing which pair.
+  question_template: Ensure at least two distinct {target_object_class_plural} originally in any {source_room_class_singular} have been inspected.
+  overlap_class: absent
+  tags:
+  - hierarchy
+  - cardinality
+  - conjunction
+  - disjunction
+  - inspect
+  parameters:
+    target_object_class_plural: object_class_plural
+    source_room_class_singular: room_class_singular
+  requires:
+  - object_classes
+  - room_classes
+  - containment
+- id: pddl_inspect_targets_above_reference
+  description: Inspect a class subset selected by relative height.
+  question_template: Inspect all the {target_object_class_plural} whose centers are higher than the center of the only {reference_object_class_singular}.
+  overlap_class: absent
+  tags:
+  - spatial
+  - height
+  - universal
+  - inspect
+  parameters:
+    target_object_class_plural: object_class_plural
+    reference_object_class_singular: object_class_singular
+  requires:
+  - object_classes
+  - object_centers
+  - vertical_axis
+- id: pddl_hold_target_closer_to_first_reference
+  description: Hold a choice satisfying a comparison between two distances.
+  question_template: Finish holding any {target_object_class_singular} closer to the only {reference_object_class_singular} than to the only {comparison_object_class_singular}.
+  overlap_class: related
+  tags:
+  - spatial
+  - distance_comparison
+  - manipulation
+  parameters:
+    target_object_class_singular: object_class_singular
+    reference_object_class_singular: object_class_singular
+    comparison_object_class_singular: object_class_singular
+  requires:
+  - object_classes
+  - object_centers
+- id: pddl_inspect_mutual_nearest_pair
+  description: Inspect both members of one reciprocal nearest pair.
+  question_template: Choose one pair consisting of one {target_object_class_singular} and one {reference_object_class_singular} that are each other's nearest match from the other kind, and inspect both. Tied nearest matches are allowed.
+  overlap_class: absent
+  tags:
+  - spatial
+  - mutual_nearest
+  - correlated_choice
+  - inspect
+  parameters:
+    target_object_class_singular: object_class_singular
+    reference_object_class_singular: object_class_singular
+  requires:
+  - object_classes
+  - object_centers
+- id: pddl_inspect_closest_pair_in_room_class
+  description: Inspect both endpoints of one spatially optimal valid pair.
+  question_template: Among pairs consisting of one {target_object_class_singular} and one {reference_object_class_singular} in the same {source_room_class_singular}, choose any closest pair and inspect both members.
+  overlap_class: related
+  tags:
+  - spatial
+  - hierarchy
+  - pairs
+  - correlated_choice
+  - inspect
+  parameters:
+    target_object_class_singular: object_class_singular
+    reference_object_class_singular: object_class_singular
+    source_room_class_singular: room_class_singular
+  requires:
+  - object_classes
+  - room_classes
+  - containment
+  - object_centers
+- id: pddl_end_in_highest_target_fraction_room
+  description: Select a destination by normalized class prevalence.
+  question_template: Finish in any nonempty {destination_room_class_singular} where {target_object_class_plural} make up the largest proportion of the contents.
+  overlap_class: absent
+  tags:
+  - hierarchy
+  - ratio
+  - extrema
+  - final_location
+  parameters:
+    destination_room_class_singular: room_class_singular
+    target_object_class_plural: object_class_plural
+  requires:
+  - object_classes
+  - room_classes
+  - containment
+- id: pddl_visit_rooms_with_exact_target_count
+  description: Visit all rooms selected by exact group cardinality.
+  question_template: Visit every {source_room_class_singular} containing exactly {required_count} {target_object_class_counted}.
+  overlap_class: related
+  tags:
+  - hierarchy
+  - exact_cardinality
+  - universal
+  - visit
+  parameters:
+    source_room_class_singular: room_class_singular
+    required_count: positive_integer
+    target_object_class_counted: object_class_counted
+  requires:
+  - object_classes
+  - room_classes
+  - containment
+- id: pddl_visit_adjacent_rooms_without_target
+  description: Visit a semantically grounded adjacency set after a content anti-join.
+  question_template: Visit every room that contains no {excluded_object_class_plural} and is directly connected to at least one {source_room_class_singular}.
+  overlap_class: related
+  tags:
+  - connectivity
+  - hierarchy
+  - anti_join
+  - universal
+  - visit
+  parameters:
+    excluded_object_class_plural: object_class_plural
+    source_room_class_singular: room_class_singular
+  requires:
+  - object_classes
+  - room_classes
+  - containment
+  - room_connectivity
+- id: pddl_visit_connected_room_pair
+  description: Correlate intermediate and final room choices through adjacency.
+  question_template: Choose any directly connected pair consisting of one {source_room_class_singular} and one {destination_room_class_singular}. Visit the former and finish in the latter.
+  overlap_class: related
+  tags:
+  - connectivity
+  - correlated_choice
+  - visit
+  - final_location
+  parameters:
+    source_room_class_singular: room_class_singular
+    destination_room_class_singular: room_class_singular
+  requires:
+  - room_classes
+  - room_connectivity
+- id: pddl_inspect_one_target_in_each_room_category
+  description: Require separate existential witnesses for two room categories.
+  question_template: Inspect at least one {target_object_class_singular} in any {source_room_class_singular} and at least one in any {destination_room_class_singular}.
+  overlap_class: related
+  tags:
+  - hierarchy
+  - quantifier_scope
+  - conjunction
+  - disjunction
+  - inspect
+  parameters:
+    target_object_class_singular: object_class_singular
+    source_room_class_singular: room_class_singular
+    destination_room_class_singular: room_class_singular
+  requires:
+  - object_classes
+  - room_classes
+  - containment
+- id: pddl_hold_either_class_in_room_class
+  description: Combine class alternatives inside a containment restriction.
+  question_template: From the {source_room_class_plural}, choose either one {target_object_class_singular} or one {alternative_object_class_singular}, and finish holding it.
+  overlap_class: related
+  tags:
+  - hierarchy
+  - class_union
+  - disjunction
+  - manipulation
+  parameters:
+    source_room_class_plural: room_class_plural
+    target_object_class_singular: object_class_singular
+    alternative_object_class_singular: object_class_singular
+  requires:
+  - object_classes
+  - room_classes
+  - containment
+- id: pddl_inspect_all_or_hold_and_end_in_same_room
+  description: Alternative between a universal task and a correlated compound choice.
+  question_template: Either inspect all the {target_object_class_plural} in all the {source_room_class_plural}, or choose any {reference_object_class_singular} in any {destination_room_class_singular}, finish holding it, and finish in that same room.
+  overlap_class: related
+  tags:
+  - hierarchy
+  - universal
+  - correlated_choice
+  - disjunction
+  - manipulation
+  parameters:
+    target_object_class_plural: object_class_plural
+    source_room_class_plural: room_class_plural
+    reference_object_class_singular: object_class_singular
+    destination_room_class_singular: room_class_singular
+  requires:
+  - object_classes
+  - room_classes
+  - containment
+- id: pddl_keep_target_out_of_reference_places
+  description: Negate relocation facts for every place of a reference class.
+  question_template: Ensure the only {target_object_class_singular} does not end up at the same mapped location as any {reference_object_class_singular}.
+  overlap_class: related
+  tags:
+  - hierarchy
+  - negation
+  - universal
+  - manipulation
+  parameters:
+    target_object_class_singular: object_class_singular
+    reference_object_class_singular: object_class_singular
+  requires:
+  - object_classes
+  - containment
+  - navigable_places
+- id: pddl_inspect_choice_without_holding_excluded
+  description: Separate a chosen inspection from universal final holding exclusions.
+  question_template: Inspect any {target_object_class_singular} in any {source_room_class_singular}, and finish without holding any {excluded_object_class_singular}.
+  overlap_class: related
+  tags:
+  - hierarchy
+  - conjunction
+  - disjunction
+  - negation
+  - inspect
+  - manipulation
+  parameters:
+    target_object_class_singular: object_class_singular
+    source_room_class_singular: room_class_singular
+    excluded_object_class_singular: object_class_singular
+  requires:
+  - object_classes
+  - room_classes
+  - containment
+- id: pddl_end_adjacent_to_reference_avoid_category
+  description: Conjoin a relative destination choice with universal visit exclusions.
+  question_template: Finish in any {destination_room_class_singular} directly connected to the room containing the only {reference_object_class_singular}, without ever entering any {excluded_room_class_singular}.
+  overlap_class: related
+  tags:
+  - connectivity
+  - hierarchy
+  - negation
+  - final_location
+  parameters:
+    destination_room_class_singular: room_class_singular
+    reference_object_class_singular: object_class_singular
+    excluded_room_class_singular: room_class_singular
+  requires:
+  - object_classes
+  - room_classes
+  - containment
+  - room_connectivity
+- id: pddl_visit_nearby_locations_except_start
+  description: Expand a bounded navigation neighborhood into visit goals.
+  question_template: Visit every other location in the {place_layer_name} network within {hop_limit} connections of the location of the only {reference_object_class_singular}.
+  overlap_class: related
+  tags:
+  - connectivity
+  - reference_resolution
+  - universal
+  - visit
+  parameters:
+    place_layer_name: place_layer_name
+    hop_limit: positive_integer
+    reference_object_class_singular: object_class_singular
+  requires:
+  - object_classes
+  - containment
+  - selected_place_layer
+  - selected_place_connectivity
+- id: pddl_visit_one_per_room_end_at_reference
+  description: Require per-room choices plus an independently resolved final location.
+  question_template: Visit at least one {target_object_class_singular} in each {source_room_class_singular} that has any, and finish beside the only {reference_object_class_singular}.
+  overlap_class: related
+  tags:
+  - hierarchy
+  - quantifier_scope
+  - conjunction
+  - final_location
+  parameters:
+    target_object_class_singular: object_class_singular
+    source_room_class_singular: room_class_singular
+    reference_object_class_singular: object_class_singular
+  requires:
+  - object_classes
+  - room_classes
+  - containment
+- id: pddl_choose_room_choose_complete_task
+  description: Preserve a chosen room across both complete-task alternatives.
+  question_template: Choose one {source_room_class_singular} containing both {target_object_class_plural} and {reference_object_class_plural}. In that room, either inspect all its {target_object_class_plural} or visit all its {reference_object_class_plural}.
+  overlap_class: related
+  tags:
+  - hierarchy
+  - correlated_choice
+  - universal
+  - disjunction
+  parameters:
+    source_room_class_singular: room_class_singular
+    target_object_class_plural: object_class_plural
+    reference_object_class_plural: object_class_plural
+  requires:
+  - object_classes
+  - room_classes
+  - containment
+- id: pddl_move_target_to_minimum_hop_reference
+  description: Resolve a relocation destination by navigation rather than geometry.
+  question_template: Move the only {target_object_class_singular} to a location containing at least one {reference_object_class_singular}, choosing a reachable destination that takes the fewest connections from the {target_object_class_singular}'s current location in the {place_layer_name} network.
+  overlap_class: absent
+  tags:
+  - connectivity
+  - shortest_path
+  - manipulation
+  parameters:
+    target_object_class_singular: object_class_singular
+    reference_object_class_singular: object_class_singular
+    place_layer_name: place_layer_name
+  requires:
+  - object_classes
+  - containment
+  - selected_place_layer
+  - selected_place_connectivity
+  - place_centers
+- id: pddl_move_each_target_to_neighbor_location
+  description: Resolve a different allowed neighboring destination set for each source.
+  question_template: Move every {target_object_class_singular} in any {source_room_class_singular} to a location directly connected to its current location in the {place_layer_name} network. Each item may use a different destination.
+  overlap_class: related
+  tags:
+  - connectivity
+  - hierarchy
+  - quantifier_scope
+  - manipulation
+  parameters:
+    target_object_class_singular: object_class_singular
+    source_room_class_singular: room_class_singular
+    place_layer_name: place_layer_name
+  requires:
+  - object_classes
+  - room_classes
+  - containment
+  - selected_place_layer
+  - selected_place_connectivity
+- id: pddl_inspect_targets_in_allowed_room_component
+  description: Inspect targets in the allowed room-connectivity component of a class-resolved anchor.
+  question_template: Inspect all the {target_object_class_plural} in rooms reachable from the room containing the only {reference_object_class_singular} without passing through any {excluded_room_class_singular}.
+  overlap_class: absent
+  tags:
+  - connectivity
+  - constrained_reachability
+  - hierarchy
+  - universal
+  - inspect
+  parameters:
+    target_object_class_plural: object_class_plural
+    reference_object_class_singular: object_class_singular
+    excluded_room_class_singular: room_class_singular
+  requires:
+  - object_classes
+  - room_classes
+  - containment
+  - room_connectivity

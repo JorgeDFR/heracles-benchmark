@@ -28,7 +28,7 @@ RUN . /opt/ros/jazzy/setup.sh \
 RUN . /venv/bin/activate && pip install ./src/heracles_agents[all]
 
 WORKDIR /root
-COPY data/scene_graphs/example_dsg.json /data/scene_graphs/example_dsg.json
+COPY data/scene_graphs/spark_dsg_example.json /data/scene_graphs/spark_dsg_example.json
 COPY docker/main/run_hydra_visualization.sh run_hydra_visualization.sh
 
 RUN echo "source /opt/ros/jazzy/setup.bash" >> /root/.bashrc && \

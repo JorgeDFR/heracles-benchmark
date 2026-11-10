@@ -370,8 +370,17 @@ class BenchmarkManifest:
         return output
 
     @property
-    def expected_question_count(self) -> int:
+    def expected_question_count(self) -> int | dict[str, int]:
         value = self.benchmark.get("expected_question_count", 50)
+        if isinstance(value, dict):
+            if set(value) != set(TASK_SPECS) or any(
+                isinstance(count, bool) or not isinstance(count, int) or count <= 0
+                for count in value.values()
+            ):
+                raise ManifestError(
+                    "`benchmark.expected_question_count` must map qa and pddl to positive integers"
+                )
+            return value
         if isinstance(value, bool) or not isinstance(value, int) or value < 1:
             raise ManifestError(
                 "`benchmark.expected_question_count` must be a positive integer"
@@ -531,10 +540,12 @@ class BenchmarkManifest:
                 raise ManifestError(
                     f"Question count does not match metadata for `{task}`"
                 )
-            if len(questions) != self.expected_question_count:
+            counts = self.expected_question_count
+            required_count = counts[task] if isinstance(counts, dict) else counts
+            if len(questions) != required_count:
                 raise ManifestError(
                     f"Benchmark question file `{task}` must contain exactly "
-                    f"{self.expected_question_count} questions"
+                    f"{required_count} questions"
                 )
 
     def validate(self, selected_providers: Sequence[str] = ()) -> None:

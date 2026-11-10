@@ -1,0 +1,41 @@
+---
+questions:
+- uid: PDDL001
+  name: Visit object symbol
+  question_type: pddl_visit_object_symbol
+  overlap_class: direct
+  question: Pass by object O43 before the task is complete.
+  solution: (visited-object O43)
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - direct-symbol
+  - object
+  - visit
+- uid: PDDL002
+  name: End at object symbol
+  question_type: pddl_end_at_object_symbol
+  overlap_class: direct
+  question: Finish the mission at O101.
+  solution: (at-object O101)
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - direct-symbol
+  - object
+  - final-location
+- uid: PDDL003
+  name: Inspect object symbol
+  question_type: pddl_inspect_object_symbol
+  overlap_class: direct
+  question: Examine object O86 closely.
+  solution: (safe O86)
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - direct-symbol
+  - object
+  - inspect

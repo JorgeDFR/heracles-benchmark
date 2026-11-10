@@ -1,0 +1,2461 @@
+---
+schema_version: 1
+scene_id: habitat_apartment
+scene_graph:
+  path: data/scene_graphs/habitat_apartment.json
+  sha256: 21484377923396e6a3f28ae3dc01521a2f789e1435387cfbfcde402fe9035f04
+question_catalog:
+  path: data/questions/question_types_v2.yaml
+  sha256: beb28406d6a052b2c412dbda9c254cc20f3dbbb705ec62aa0e326d2edfbeb3ef
+generator:
+  path: scripts/generate_questions.py
+  version: 9
+  sha256: 272fa8bcae8ed7c185bff9434d8164d9df8e3a43dfad71b25a7adbdc086c3832
+  sampler_path: scripts/question_sampling.py
+  sampler_sha256: 4e1af2bcb4c9aab30307fd378f0e56d4202acb19dddefdc205274edca5212cd5
+  spark_dsg_version: 1.1.3
+  pyyaml_version: 6.0.3
+parameters:
+  seed: 7
+  qa_seed: 7
+  pddl_seed: 7
+  qa_question_count: 3
+  pddl_question_count: 3
+  avoid_question_files:
+  - path: external/heracles_agents/examples/questions/qa_questions.yaml
+    sha256: 4d545d319a799b71b84f632eaf0330a6640b95d43b1c252f8f911e7113ad1e09
+  - path: external/heracles_agents/examples/questions/pddl_questions.yaml
+    sha256: 4de9de91e4b27a50793a4724b985ebaf0991ed8feb6e95f962127882506bb5cc
+  - path: /home/coder/workspace/3dsg-cypher-agent/configs/question_templates/cypher_qa_3dsg.yaml
+    sha256: 9e8028a283e1b703cee6c677ad2cd676b98a46b16f0762f0ae863533a911e481
+  - path: /home/coder/workspace/3dsg-cypher-agent/configs/question_templates/cypher_pddl_3dsg.yaml
+    sha256: 82a57c4954466e9527746839bf8a9e9b819c061433838587dd2a86aca93a1692
+sampling:
+  families:
+    qa_class_count_in_room_class:
+      status: generated
+      attempts: 440
+      base_assignments: 440
+      preparation_rejections: {}
+      eligible_candidates: 11
+      search_complete: true
+      rejections:
+        fewer than two scoped target candidates: 422
+        room-category filter removes no target: 7
+      bindings:
+        target_object_class: sink
+        source_room_class: bathroom
+      difficulty_preferences: {}
+      resolved_references: []
+    qa_class_near_class:
+      status: generated
+      attempts: 2552
+      base_assignments: 325
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections:
+        insufficient spatial candidates: 2410
+        radius does not divide targets: 94
+      bindings:
+        target_object_class: mirror
+        reference_object_class: car
+        radius_m: 6.59
+      difficulty_preferences: {}
+      resolved_references: []
+    qa_closest_class_pairs_in_room_class:
+      status: generated
+      attempts: 18920
+      base_assignments: 18920
+      preparation_rejections: {}
+      eligible_candidates: 10
+      search_complete: true
+      rejections:
+        fewer than three eligible pairs: 18856
+        pair containment filter does not change the optimum: 54
+      bindings:
+        target_object_class: ceiling_light
+        source_room_class: kitchen
+        reference_object_class: chair
+      difficulty_preferences: {}
+      resolved_references: []
+    qa_counts_per_room:
+      status: generated
+      attempts: 440
+      base_assignments: 440
+      preparation_rejections: {}
+      eligible_candidates: 14
+      search_complete: true
+      rejections:
+        need multiple rooms with varying counts: 426
+      bindings:
+        target_object_class: shoe_cabinet
+        source_room_class: hallway
+      difficulty_preferences:
+        includes_zero_count: true
+        unequal_positive_counts: false
+      resolved_references: []
+    qa_rooms_with_both_classes:
+      status: generated
+      attempts: 18920
+      base_assignments: 18920
+      preparation_rejections: {}
+      eligible_candidates: 4
+      search_complete: true
+      rejections:
+        no contrast with single-class room selection: 18916
+      bindings:
+        target_object_class: chair
+        source_room_class: bedroom
+        reference_object_class: book
+      difficulty_preferences:
+        room_category_excludes_matching_room: false
+      resolved_references: []
+    qa_rooms_with_target_without_excluded:
+      status: generated
+      attempts: 444
+      base_assignments: 444
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections:
+        need rooms with target only and both classes: 396
+      bindings:
+        target_object_class: cabinet
+        excluded_object_class: kitchen_island
+      difficulty_preferences: {}
+      resolved_references: []
+    qa_rooms_with_exact_count:
+      status: generated
+      attempts: 67
+      base_assignments: 440
+      preparation_rejections:
+        no scene-derived numeric values: 375
+      eligible_candidates: 14
+      search_complete: true
+      rejections:
+        exact count needs matching and nonmatching rooms: 51
+      bindings:
+        target_object_class: bathtub
+        source_room_class: bathroom
+        required_count: 1
+      difficulty_preferences:
+        lower_and_higher_count_distractors: false
+      resolved_references: []
+    qa_classes_in_every_room:
+      status: generated
+      attempts: 10
+      base_assignments: 10
+      preparation_rejections: {}
+      eligible_candidates: 2
+      search_complete: true
+      rejections:
+        universal room coverage needs three rooms: 8
+      bindings:
+        source_room_class: bathroom
+      difficulty_preferences: {}
+      resolved_references: []
+    qa_objects_sharing_place:
+      status: generated
+      attempts: 18920
+      base_assignments: 18920
+      preparation_rejections: {}
+      eligible_candidates: 16
+      search_complete: true
+      rejections:
+        same-place restriction adds no contrast: 18904
+      bindings:
+        target_object_class: mirror
+        source_room_class: bathroom
+        reference_object_class: sink
+      difficulty_preferences: {}
+      resolved_references: []
+    qa_rooms_with_most_targets:
+      status: generated
+      attempts: 440
+      base_assignments: 440
+      preparation_rejections: {}
+      eligible_candidates: 11
+      search_complete: true
+      rejections:
+        need competing per-room counts: 427
+        total-count shortcut finds the same rooms: 2
+      bindings:
+        target_object_class: shower
+        source_room_class: bathroom
+      difficulty_preferences: {}
+      resolved_references: []
+    qa_rooms_with_highest_target_fraction:
+      status: generated
+      attempts: 440
+      base_assignments: 440
+      preparation_rejections: {}
+      eligible_candidates: 5
+      search_complete: true
+      rejections:
+        need three nonempty rooms with unequal proportions: 424
+        fraction and count have the same winner: 11
+      bindings:
+        target_object_class: wardrobe
+        source_room_class: bedroom
+      difficulty_preferences: {}
+      resolved_references: []
+    qa_classes_shared_between_room_classes:
+      status: generated
+      attempts: 90
+      base_assignments: 90
+      preparation_rejections: {}
+      eligible_candidates: 30
+      search_complete: true
+      rejections:
+        inventory intersection lacks contrast: 60
+      bindings:
+        source_room_class: utility
+        comparison_room_class: bedroom
+      difficulty_preferences: {}
+      resolved_references: []
+    qa_classes_exclusive_between_room_classes:
+      status: generated
+      attempts: 90
+      base_assignments: 90
+      preparation_rejections: {}
+      eligible_candidates: 9
+      search_complete: true
+      rejections:
+        inventory difference lacks contrast or comparison rooms: 81
+      bindings:
+        source_room_class: study
+        comparison_room_class: bathroom
+      difficulty_preferences: {}
+      resolved_references: []
+    qa_place_counts_in_content_selected_room:
+      status: generated
+      attempts: 47
+      base_assignments: 47
+      preparation_rejections: {}
+      eligible_candidates: 3
+      search_complete: true
+      rejections:
+        room reference needs disambiguation: 44
+      bindings:
+        source_room_class: bedroom
+        reference_object_class: plant
+      difficulty_preferences:
+        reference_scope_has_outside_distractor: true
+      resolved_references:
+      - O85
+      - R8
+    qa_targets_nearer_external_reference:
+      status: generated
+      attempts: 1892
+      base_assignments: 1892
+      preparation_rejections: {}
+      eligible_candidates: 16
+      search_complete: true
+      rejections:
+        need targets with closer external and closer-or-tied local references: 1876
+      bindings:
+        target_object_class: wardrobe
+        reference_object_class: nightstand
+      difficulty_preferences: {}
+      resolved_references: []
+    qa_nearest_targets_per_room:
+      status: generated
+      attempts: 15494
+      base_assignments: 15494
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections:
+        no rooms contain both classes: 15068
+        ranking has no competing targets: 378
+      bindings:
+        target_object_class: lamp
+        source_room_class: bedroom
+        reference_object_class: wardrobe
+      difficulty_preferences:
+        multiple_room_groups: true
+        multiple_competing_groups: true
+        room_local_reference_changes_optimum: false
+      resolved_references: []
+    qa_nearest_to_room_disambiguated_reference:
+      status: generated
+      attempts: 629
+      base_assignments: 629
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections:
+        insufficient reference disambiguation or targets: 530
+        global minimum is already local: 27
+        arbitrary references do not change the answer: 24
+      bindings:
+        target_object_class: desk
+        source_room_class: utility
+        reference_object_class: cabinet
+      difficulty_preferences:
+        reference_scope_has_outside_distractor: true
+      resolved_references:
+      - O41
+    qa_global_farthest_from_selected_room:
+      status: generated
+      attempts: 2021
+      base_assignments: 2021
+      preparation_rejections: {}
+      eligible_candidates: 18
+      search_complete: true
+      rejections:
+        need targets inside and outside the room: 1817
+        room reference needs disambiguation: 186
+      bindings:
+        target_object_class: bed
+        source_room_class: bedroom
+        reference_object_class: shelf
+      difficulty_preferences:
+        reference_scope_has_outside_distractor: true
+      resolved_references:
+      - O99
+      - R11
+    qa_targets_near_every_reference:
+      status: generated
+      attempts: 3223
+      base_assignments: 399
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections:
+        need competing targets and references: 3097
+        universal condition has no partial-match contrast: 78
+      bindings:
+        target_object_class: nightstand
+        reference_object_class: laptop
+        radius_m: 6.86
+      difficulty_preferences: {}
+      resolved_references: []
+    qa_targets_near_no_reference:
+      status: generated
+      attempts: 2343
+      base_assignments: 304
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections:
+        need competing targets and references: 2206
+        universal condition has no partial-match contrast: 89
+      bindings:
+        target_object_class: trash
+        reference_object_class: toilet
+        radius_m: 1.48
+      difficulty_preferences: {}
+      resolved_references: []
+    qa_mean_nearest_reference_distance:
+      status: generated
+      attempts: 398
+      base_assignments: 398
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections:
+        insufficient mean-of-minima candidates: 340
+        nearest references or distances do not vary: 10
+      bindings:
+        target_object_class: trash
+        reference_object_class: shower
+      difficulty_preferences: {}
+      resolved_references: []
+    qa_minimax_target:
+      status: generated
+      attempts: 976
+      base_assignments: 976
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections:
+        insufficient minimax candidates: 837
+        minimax equals minimum mean: 46
+        minimax equals nearest-to-any: 45
+      bindings:
+        target_object_class: toilet
+        reference_object_class: laptop
+      difficulty_preferences: {}
+      resolved_references: []
+    qa_top_targets_per_room:
+      status: generated
+      attempts: 48
+      base_assignments: 18920
+      preparation_rejections:
+        no scene-derived numeric values: 18908
+      eligible_candidates: 12
+      search_complete: true
+      rejections: {}
+      bindings:
+        target_object_class: chair
+        source_room_class: kitchen
+        reference_object_class: trash
+        top_k: 2
+      difficulty_preferences:
+        multiple_room_groups: false
+        multiple_competing_groups: false
+        room_local_reference_changes_optimum: false
+      resolved_references: []
+    qa_closest_pair_in_different_rooms:
+      status: generated
+      attempts: 325
+      base_assignments: 325
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections:
+        fewer than three eligible pairs: 146
+        pair containment filter does not change the optimum: 131
+      bindings:
+        target_object_class: coffee_table
+        reference_object_class: cabinet
+      difficulty_preferences: {}
+      resolved_references: []
+    qa_targets_within_place_hops:
+      status: generated
+      attempts: 1160
+      base_assignments: 142
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections:
+        hop filter needs selected and excluded targets: 967
+      bindings:
+        target_object_class: book
+        source_room_class: utility
+        reference_object_class: window
+        place_layer_name: mesh_place
+        hop_limit: 98
+      difficulty_preferences:
+        reference_scope_has_outside_distractor: true
+      resolved_references:
+      - O45
+      - P780
+    qa_target_count_within_place_hops:
+      status: generated
+      attempts: 1889
+      base_assignments: 230
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections:
+        hop filter needs selected and excluded targets: 1595
+        need three counted targets: 120
+      bindings:
+        target_object_class: sink
+        source_room_class: study
+        reference_object_class: lamp
+        place_layer_name: mesh_place
+        hop_limit: 65
+      difficulty_preferences:
+        reference_scope_has_outside_distractor: true
+      resolved_references:
+      - O35
+      - P716
+    qa_room_hops_between_content_anchors:
+      status: generated
+      attempts: 149
+      base_assignments: 149
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections:
+        need a connected nontrivial route: 80
+        route endpoints coincide: 21
+      bindings:
+        reference_object_class: bathtub
+        destination_object_class: television
+      difficulty_preferences: {}
+      resolved_references:
+      - O24
+      - O57
+      - R3
+      - R12
+    qa_shortest_room_route_avoiding_class:
+      status: generated
+      attempts: 75
+      base_assignments: 75
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections:
+        route endpoint is forbidden: 12
+        no route remains after excluding the category: 8
+        route endpoints coincide: 7
+      bindings:
+        reference_object_class: toolbox
+        excluded_room_class: lounge
+        destination_object_class: toy_box
+      difficulty_preferences:
+        positive_avoidance_detour: false
+      resolved_references:
+      - O49
+      - O101
+      - R1
+      - R11
+    qa_reachable_target_rooms_avoiding_class:
+      status: generated
+      attempts: 1110
+      base_assignments: 1110
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections:
+        exclusion disconnects no allowed target room: 951
+        starting room is forbidden: 111
+      bindings:
+        target_object_class: shelf
+        reference_object_class: kettle
+        excluded_room_class: hallway
+      difficulty_preferences: {}
+      resolved_references:
+      - O15
+      - R2
+    qa_critical_rooms_between_anchors:
+      status: generated
+      attempts: 57
+      base_assignments: 57
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections:
+        route endpoints coincide: 6
+        no mandatory intermediate room: 3
+      bindings:
+        reference_object_class: box
+        destination_object_class: kitchen_island
+      difficulty_preferences:
+        shortest_path_has_optional_intermediate: false
+      resolved_references:
+      - O7
+      - O51
+      - R1
+      - R2
+    qa_rooms_with_most_distinct_classes:
+      status: generated
+      attempts: 10
+      base_assignments: 10
+      preparation_rejections: {}
+      eligible_candidates: 3
+      search_complete: true
+      rejections:
+        need multiple rooms to compare diversity: 7
+      bindings:
+        source_room_class: hallway
+      difficulty_preferences:
+        unequal_room_diversity: true
+        diversity_differs_from_raw_count: false
+      resolved_references: []
+    qa_rooms_with_more_targets_than_references:
+      status: generated
+      attempts: 17689
+      base_assignments: 17689
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections:
+        need equal and reversed count contrasts: 17260
+        empty positive answer: 381
+      bindings:
+        target_object_class: alarm_clock
+        source_room_class: bedroom
+        reference_object_class: toy_box
+      difficulty_preferences: {}
+      resolved_references: []
+    qa_class_histogram_in_room_class:
+      status: generated
+      attempts: 10
+      base_assignments: 10
+      preparation_rejections: {}
+      eligible_candidates: 5
+      search_complete: true
+      rejections:
+        need three classes with unequal counts: 5
+      bindings:
+        source_room_class: kitchen
+      difficulty_preferences: {}
+      resolved_references: []
+    qa_rarest_classes_in_room_class:
+      status: generated
+      attempts: 10
+      base_assignments: 10
+      preparation_rejections: {}
+      eligible_candidates: 5
+      search_complete: true
+      rejections:
+        need three classes with unequal counts: 5
+      bindings:
+        source_room_class: garage
+      difficulty_preferences: {}
+      resolved_references: []
+    qa_targets_in_distance_band:
+      status: generated
+      attempts: 3939
+      base_assignments: 131
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections:
+        band needs candidates below and above: 3843
+        empty positive answer: 48
+      bindings:
+        target_object_class: mirror
+        reference_object_class: alarm_clock
+        outer_radius_m: 4.72
+        inner_radius_m: 4.7
+      difficulty_preferences: {}
+      resolved_references:
+      - O86
+    qa_targets_closer_to_first_reference:
+      status: generated
+      attempts: 260
+      base_assignments: 260
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections:
+        distance comparison needs selected and excluded targets: 212
+      bindings:
+        target_object_class: desk
+        reference_object_class: dresser
+        comparison_object_class: alarm_clock
+      difficulty_preferences: {}
+      resolved_references:
+      - O84
+      - O86
+    qa_targets_near_two_reference_classes:
+      status: generated
+      attempts: 10949
+      base_assignments: 746
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections:
+        need targets near both, either, and neither reference class: 10901
+      bindings:
+        target_object_class: lamp
+        reference_object_class: television
+        comparison_object_class: shoe_cabinet
+        radius_m: 5.15
+      difficulty_preferences: {}
+      resolved_references: []
+    qa_nearest_targets_outside_reference_room:
+      status: generated
+      attempts: 580
+      base_assignments: 580
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections:
+        need multiple eligible targets: 325
+        room exclusion does not change nearest targets: 207
+      bindings:
+        target_object_class: plant
+        reference_object_class: sofa
+      difficulty_preferences: {}
+      resolved_references:
+      - O20
+      - R3
+    qa_mutual_nearest_class_pairs:
+      status: generated
+      attempts: 646
+      base_assignments: 646
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections:
+        mutual nearest needs competing members of both classes: 576
+        no contrast with one-way or globally nearest matches: 22
+      bindings:
+        target_object_class: nightstand
+        reference_object_class: mirror
+      difficulty_preferences: {}
+      resolved_references: []
+    qa_closest_class_pairs_per_room:
+      status: generated
+      attempts: 9603
+      base_assignments: 9603
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections:
+        no rooms contain both classes: 9346
+        no competing within-room pairs: 209
+      bindings:
+        target_object_class: lamp
+        source_room_class: bedroom
+        reference_object_class: window
+      difficulty_preferences:
+        multiple_competing_groups: true
+        multiple_room_groups: true
+      resolved_references: []
+    qa_nearby_target_counts_per_reference:
+      status: generated
+      attempts: 30000
+      base_assignments: 2860
+      preparation_rejections: {}
+      eligible_candidates: 31
+      search_complete: false
+      rejections:
+        need three scoped references: 29488
+        need varying counts including zero: 328
+        room-category filter removes no reference: 153
+      bindings:
+        target_object_class: bookcase
+        source_room_class: kitchen
+        reference_object_class: chair
+        radius_m: 7.87
+      difficulty_preferences: {}
+      resolved_references: []
+    qa_rooms_adjacent_to_two_room_classes:
+      status: generated
+      attempts: 90
+      base_assignments: 90
+      preparation_rejections: {}
+      eligible_candidates: 20
+      search_complete: true
+      rejections:
+        adjacency intersection lacks single-category contrasts: 70
+      bindings:
+        source_room_class: exterior_path
+        comparison_room_class: hallway
+      difficulty_preferences: {}
+      resolved_references: []
+    qa_rooms_with_only_allowed_neighbors:
+      status: generated
+      attempts: 10
+      base_assignments: 10
+      preparation_rejections: {}
+      eligible_candidates: 3
+      search_complete: true
+      rejections:
+        need qualifying and mixed-neighbor rooms: 7
+      bindings:
+        source_room_class: exterior_path
+      difficulty_preferences: {}
+      resolved_references: []
+    qa_target_rooms_within_room_hops:
+      status: generated
+      attempts: 633
+      base_assignments: 154
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections:
+        bounded room-hop filter lacks contrast: 585
+      bindings:
+        target_object_class: shelf
+        reference_object_class: armchair
+        hop_limit: 3
+      difficulty_preferences: {}
+      resolved_references:
+      - O21
+      - R3
+    qa_common_place_hop_neighborhood:
+      status: generated
+      attempts: 165
+      base_assignments: 48
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections:
+        hop intersection lacks contrast: 117
+      bindings:
+        reference_object_class: oven
+        place_layer_name: mesh_place
+        comparison_object_class: dryer
+        hop_limit: 32
+      difficulty_preferences: {}
+      resolved_references:
+      - O2
+      - O40
+      - P198
+      - P790
+    qa_minimum_length_place_route:
+      status: generated
+      attempts: 48
+      base_assignments: 48
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections: {}
+      bindings:
+        reference_object_class: fridge
+        place_layer_name: mesh_place
+        destination_object_class: bathtub
+      difficulty_preferences:
+        weighted_differs_from_hop_optimum: false
+      resolved_references:
+      - O6
+      - O57
+      - P188
+      - P1448
+    qa_room_avoidance_detour:
+      status: generated
+      attempts: 100
+      base_assignments: 100
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections:
+        route endpoint is forbidden: 21
+        route endpoints coincide: 17
+        no route remains after excluding the category: 14
+      bindings:
+        reference_object_class: side_table
+        excluded_room_class: bathroom
+        destination_object_class: detergent
+      difficulty_preferences:
+        positive_avoidance_detour: false
+      resolved_references:
+      - O25
+      - O43
+      - R3
+      - R5
+    qa_room_components_after_category_removal:
+      status: generated
+      attempts: 10
+      base_assignments: 10
+      preparation_rejections: {}
+      eligible_candidates: 4
+      search_complete: true
+      rejections:
+        category removal does not change nontrivial components: 6
+      bindings:
+        excluded_room_class: stairs
+      difficulty_preferences: {}
+      resolved_references: []
+    qa_rooms_with_all_targets_near_references:
+      status: generated
+      attempts: 30000
+      base_assignments: 2835
+      preparation_rejections: {}
+      eligible_candidates: 1
+      search_complete: false
+      rejections:
+        need fully and partially covered target rooms: 29999
+      bindings:
+        target_object_class: nightstand
+        source_room_class: bedroom
+        reference_object_class: lamp
+        radius_m: 0.45
+      difficulty_preferences: {}
+      resolved_references: []
+    qa_highest_target_in_selected_room:
+      status: generated
+      attempts: 1075
+      base_assignments: 1075
+      preparation_rejections: {}
+      eligible_candidates: 26
+      search_complete: true
+      rejections:
+        need competing scoped height candidates: 1049
+      bindings:
+        target_object_class: car
+        reference_object_class: bicycle
+      difficulty_preferences:
+        different_local_heights: true
+        higher_target_outside_room: false
+      resolved_references:
+      - O50
+      - R1
+    pddl_visit_any_class_in_room_class:
+      status: generated
+      attempts: 440
+      base_assignments: 440
+      preparation_rejections: {}
+      eligible_candidates: 11
+      search_complete: true
+      rejections:
+        fewer than two scoped target candidates: 422
+        room-category filter removes no target: 7
+      bindings:
+        target_object_class: ceiling_light
+        source_room_class: hallway
+      difficulty_preferences: {}
+      resolved_references: []
+    pddl_inspect_closest_between_classes:
+      status: generated
+      attempts: 414
+      base_assignments: 414
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections:
+        insufficient spatial alternatives: 358
+        reference choice does not affect grounding: 8
+      bindings:
+        target_object_class: chair
+        reference_object_class: bed
+      difficulty_preferences: {}
+      resolved_references: []
+    pddl_inspect_every_target_in_room_class:
+      status: generated
+      attempts: 440
+      base_assignments: 440
+      preparation_rejections: {}
+      eligible_candidates: 11
+      search_complete: true
+      rejections:
+        fewer than two scoped target candidates: 422
+        room-category filter removes no target: 7
+      bindings:
+        target_object_class: cabinet
+        source_room_class: kitchen
+      difficulty_preferences: {}
+      resolved_references: []
+    pddl_visit_rooms_with_both_classes:
+      status: generated
+      attempts: 1082
+      base_assignments: 1082
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections:
+        room-content conjunction lacks contrast: 1034
+      bindings:
+        target_object_class: plant
+        reference_object_class: window
+      difficulty_preferences: {}
+      resolved_references: []
+    pddl_end_in_max_count_room:
+      status: generated
+      attempts: 440
+      base_assignments: 440
+      preparation_rejections: {}
+      eligible_candidates: 11
+      search_complete: true
+      rejections:
+        need competing per-room counts: 427
+        total-count shortcut finds the same rooms: 2
+      bindings:
+        target_object_class: laptop
+        source_room_class: bedroom
+      difficulty_preferences: {}
+      resolved_references: []
+    pddl_visit_one_target_per_room:
+      status: generated
+      attempts: 440
+      base_assignments: 440
+      preparation_rejections: {}
+      eligible_candidates: 14
+      search_complete: true
+      rejections:
+        need targets in multiple rooms: 426
+      bindings:
+        target_object_class: desk
+        source_room_class: bedroom
+      difficulty_preferences:
+        multiple_choices_in_every_room: false
+        target_outside_room_category: true
+      resolved_references: []
+    pddl_inspect_and_hold_same_choice:
+      status: generated
+      attempts: 440
+      base_assignments: 440
+      preparation_rejections: {}
+      eligible_candidates: 11
+      search_complete: true
+      rejections:
+        fewer than two scoped target candidates: 422
+        room-category filter removes no target: 7
+      bindings:
+        target_object_class: ceiling_light
+        source_room_class: hallway
+      difficulty_preferences: {}
+      resolved_references: []
+    pddl_inspect_choice_end_in_same_room:
+      status: generated
+      attempts: 440
+      base_assignments: 440
+      preparation_rejections: {}
+      eligible_candidates: 8
+      search_complete: true
+      rejections:
+        fewer than two scoped target candidates: 422
+        room-category filter removes no target: 7
+        object-room choices are independent or singular: 3
+      bindings:
+        target_object_class: sink
+        source_room_class: bathroom
+      difficulty_preferences: {}
+      resolved_references: []
+    pddl_visit_all_near_reference_class:
+      status: generated
+      attempts: 6297
+      base_assignments: 699
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections:
+        insufficient spatial candidates: 5427
+        radius does not divide targets: 523
+        need three universal visit targets: 299
+      bindings:
+        target_object_class: lamp
+        reference_object_class: shelf
+        radius_m: 6.78
+      difficulty_preferences: {}
+      resolved_references: []
+    pddl_inspect_near_target_far_from_excluded:
+      status: generated
+      attempts: 11255
+      base_assignments: 772
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections:
+        spatial inclusion/exclusion lacks independent effects: 11207
+      bindings:
+        target_object_class: bed
+        reference_object_class: dresser
+        excluded_object_class: car
+        radius_m: 8.0
+      difficulty_preferences: {}
+      resolved_references: []
+    pddl_move_unique_target_to_reference_place:
+      status: generated
+      attempts: 48
+      base_assignments: 48
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections: {}
+      bindings:
+        source_room_class: garage
+        target_object_class: shelf
+        destination_room_class: study
+        reference_object_class: plant
+      difficulty_preferences:
+        target_scope_has_outside_distractor: true
+        reference_scope_has_outside_distractor: true
+        scoped_references_have_outside_distractors: true
+      resolved_references:
+      - O37
+      - O48
+      - P742
+    pddl_move_any_target_beside_selected_reference:
+      status: generated
+      attempts: 15384
+      base_assignments: 15384
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections:
+        insufficient source/destination distractors: 15224
+        source-destination correlation is trivial: 109
+        goal exceeds 40 fact occurrences: 2
+        goal exceeds 30 explicit OR operands: 1
+      bindings:
+        target_object_class: laptop
+        reference_object_class: desk
+        destination_room_class: bedroom
+      difficulty_preferences: {}
+      resolved_references:
+      - P1272
+      - P1316
+    pddl_move_all_to_one_shared_destination:
+      status: generated
+      attempts: 30000
+      base_assignments: 30000
+      preparation_rejections: {}
+      eligible_candidates: 15
+      search_complete: false
+      rejections:
+        fewer than two scoped target candidates: 28777
+        destination scope needs alternatives and distractors: 734
+        room-category filter removes no target: 474
+      bindings:
+        target_object_class: window
+        source_room_class: lounge
+        reference_object_class: trash
+        destination_room_class: bathroom
+      difficulty_preferences: {}
+      resolved_references:
+      - P827
+      - P1453
+      - P1460
+    pddl_move_each_to_independent_destination:
+      status: generated
+      attempts: 30000
+      base_assignments: 30000
+      preparation_rejections: {}
+      eligible_candidates: 10
+      search_complete: false
+      rejections:
+        fewer than two scoped target candidates: 28775
+        destination scope needs alternatives and distractors: 741
+        room-category filter removes no target: 474
+      bindings:
+        target_object_class: book
+        source_room_class: bedroom
+        reference_object_class: ceiling_light
+        destination_room_class: hallway
+      difficulty_preferences: {}
+      resolved_references:
+      - P987
+      - P1664
+    pddl_move_each_to_nearest_reference_place:
+      status: generated
+      attempts: 7435
+      base_assignments: 7435
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections:
+        fewer than two scoped target candidates: 7129
+        need competing reference destinations: 122
+        room-category filter removes no target: 118
+        all objects have the same nearest destination: 16
+        nearest relocation is already satisfied: 2
+      bindings:
+        target_object_class: window
+        source_room_class: lounge
+        reference_object_class: ceiling_light
+      difficulty_preferences: {}
+      resolved_references:
+      - P987
+      - P1664
+    pddl_inspect_nearest_target_per_room:
+      status: generated
+      attempts: 17398
+      base_assignments: 17398
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections:
+        no rooms contain both classes: 16925
+        ranking has no competing targets: 425
+      bindings:
+        target_object_class: nightstand
+        source_room_class: bedroom
+        reference_object_class: bed
+      difficulty_preferences:
+        multiple_room_groups: true
+        multiple_competing_groups: true
+        room_local_reference_changes_optimum: false
+      resolved_references: []
+    pddl_visit_target_rooms_avoid_excluded_class:
+      status: generated
+      attempts: 188
+      base_assignments: 188
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections:
+        positive/negative room sets conflict or are empty: 125
+        target rooms lack an allowed connecting component or content contrast: 15
+      bindings:
+        target_object_class: laptop
+        excluded_room_class: exterior_path
+      difficulty_preferences: {}
+      resolved_references: []
+    pddl_end_in_room_without_excluded_object:
+      status: generated
+      attempts: 18920
+      base_assignments: 18920
+      preparation_rejections: {}
+      eligible_candidates: 19
+      search_complete: true
+      rejections:
+        negative content filter lacks candidates and contrast: 18871
+        room-category filter has no effect: 30
+      bindings:
+        target_object_class: window
+        excluded_object_class: toy_box
+        destination_room_class: bedroom
+      difficulty_preferences: {}
+      resolved_references: []
+    pddl_finish_holding_no_scoped_target:
+      status: generated
+      attempts: 440
+      base_assignments: 440
+      preparation_rejections: {}
+      eligible_candidates: 11
+      search_complete: true
+      rejections:
+        fewer than two scoped target candidates: 422
+        room-category filter removes no target: 7
+      bindings:
+        target_object_class: window
+        source_room_class: lounge
+      difficulty_preferences: {}
+      resolved_references: []
+    pddl_visit_choice_leave_same_object_unheld:
+      status: generated
+      attempts: 440
+      base_assignments: 440
+      preparation_rejections: {}
+      eligible_candidates: 11
+      search_complete: true
+      rejections:
+        fewer than two scoped target candidates: 422
+        room-category filter removes no target: 7
+      bindings:
+        target_object_class: desk
+        source_room_class: bedroom
+      difficulty_preferences: {}
+      resolved_references: []
+    pddl_alternative_universal_tasks:
+      status: generated
+      attempts: 30000
+      base_assignments: 30000
+      preparation_rejections: {}
+      eligible_candidates: 13
+      search_complete: false
+      rejections:
+        fewer than two scoped target candidates: 28770
+        alternative scope has no candidates or effect: 738
+        room-category filter removes no target: 479
+      bindings:
+        target_object_class: trash
+        source_room_class: bathroom
+        reference_object_class: lamp
+        destination_room_class: bedroom
+      difficulty_preferences: {}
+      resolved_references: []
+    pddl_inspections_with_destination_alternative:
+      status: generated
+      attempts: 19295
+      base_assignments: 19295
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections:
+        fewer than two scoped target candidates: 18505
+        destination alternatives lack independent candidates: 437
+        room-category filter removes no target: 305
+      bindings:
+        target_object_class: window
+        source_room_class: lounge
+        reference_object_class: sink
+        destination_room_class: hallway
+      difficulty_preferences: {}
+      resolved_references: []
+    pddl_choose_room_inspect_all_its_targets:
+      status: generated
+      attempts: 440
+      base_assignments: 440
+      preparation_rejections: {}
+      eligible_candidates: 14
+      search_complete: true
+      rejections:
+        need targets in multiple rooms: 426
+      bindings:
+        target_object_class: lamp
+        source_room_class: bedroom
+      difficulty_preferences:
+        multiple_choices_in_every_room: false
+        target_outside_room_category: true
+      resolved_references: []
+    pddl_visit_target_rooms_without_excluded:
+      status: generated
+      attempts: 18428
+      base_assignments: 18428
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections:
+        need multiple target-only rooms and an excluded target-containing room: 18380
+      bindings:
+        target_object_class: toilet
+        source_room_class: bathroom
+        excluded_object_class: bathtub
+      difficulty_preferences:
+        room_without_target_distractor: false
+      resolved_references: []
+    pddl_inspect_hop_reachable_targets:
+      status: generated
+      attempts: 994
+      base_assignments: 137
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections:
+        hop filter needs selected and excluded targets: 859
+      bindings:
+        target_object_class: toilet
+        source_room_class: study
+        reference_object_class: desk
+        place_layer_name: mesh_place
+        hop_limit: 83
+      difficulty_preferences:
+        reference_scope_has_outside_distractor: true
+      resolved_references:
+      - O31
+      - P683
+    pddl_end_at_minimum_hop_reference_place:
+      status: generated
+      attempts: 324
+      base_assignments: 324
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections:
+        need three reachable destination locations: 216
+        geometric and hop destinations coincide: 54
+        minimum route is trivial: 6
+      bindings:
+        target_object_class: wardrobe
+        source_room_class: study
+        reference_object_class: laptop
+        place_layer_name: mesh_place
+      difficulty_preferences:
+        reference_scope_has_outside_distractor: true
+      resolved_references:
+      - O34
+      - P683
+    pddl_hold_minimum_hop_target:
+      status: generated
+      attempts: 294
+      base_assignments: 294
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections:
+        need nontrivial competing navigation distances: 198
+        Euclidean-nearest target is also hop-optimal: 48
+      bindings:
+        target_object_class: chair
+        source_room_class: lounge
+        reference_object_class: cabinet
+        place_layer_name: mesh_place
+      difficulty_preferences:
+        reference_scope_has_outside_distractor: true
+      resolved_references:
+      - O23
+      - P641
+    pddl_inspect_minimax_target:
+      status: generated
+      attempts: 948
+      base_assignments: 948
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections:
+        insufficient minimax candidates: 812
+        minimax equals nearest-to-any: 45
+        minimax equals minimum mean: 43
+      bindings:
+        target_object_class: toilet
+        reference_object_class: wardrobe
+      difficulty_preferences: {}
+      resolved_references: []
+    pddl_move_one_target_per_source_room:
+      status: generated
+      attempts: 3272
+      base_assignments: 3272
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections:
+        need targets in multiple rooms: 3170
+        destination reference needs outside distractors: 54
+      bindings:
+        target_object_class: ceiling_light
+        source_room_class: hallway
+        destination_room_class: study
+        reference_object_class: chair
+      difficulty_preferences:
+        multiple_choices_in_every_room: false
+        target_outside_room_category: true
+        reference_scope_has_outside_distractor: true
+      resolved_references:
+      - O32
+      - P695
+    pddl_inspect_at_least_two_targets:
+      status: generated
+      attempts: 440
+      base_assignments: 440
+      preparation_rejections: {}
+      eligible_candidates: 3
+      search_complete: true
+      rejections:
+        fewer than two scoped target candidates: 422
+        cardinality task needs three to five targets: 8
+        room-category filter removes no target: 7
+      bindings:
+        target_object_class: trash
+        source_room_class: bathroom
+      difficulty_preferences: {}
+      resolved_references: []
+    pddl_inspect_targets_above_reference:
+      status: generated
+      attempts: 381
+      base_assignments: 381
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections:
+        height filter lacks selected/excluded targets: 333
+      bindings:
+        target_object_class: sink
+        reference_object_class: bookcase
+      difficulty_preferences: {}
+      resolved_references:
+      - O33
+    pddl_hold_target_closer_to_first_reference:
+      status: generated
+      attempts: 258
+      base_assignments: 258
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections:
+        distance comparison needs selected and excluded targets: 210
+      bindings:
+        target_object_class: plant
+        reference_object_class: shoe_cabinet
+        comparison_object_class: washer
+      difficulty_preferences: {}
+      resolved_references:
+      - O39
+      - O103
+    pddl_inspect_mutual_nearest_pair:
+      status: generated
+      attempts: 570
+      base_assignments: 570
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections:
+        mutual nearest needs competing members of both classes: 507
+        no contrast with one-way or globally nearest matches: 15
+      bindings:
+        target_object_class: bed
+        reference_object_class: book
+      difficulty_preferences: {}
+      resolved_references: []
+    pddl_inspect_closest_pair_in_room_class:
+      status: generated
+      attempts: 18920
+      base_assignments: 18920
+      preparation_rejections: {}
+      eligible_candidates: 10
+      search_complete: true
+      rejections:
+        fewer than three eligible pairs: 18856
+        pair containment filter does not change the optimum: 54
+      bindings:
+        target_object_class: chair
+        source_room_class: kitchen
+        reference_object_class: window
+      difficulty_preferences: {}
+      resolved_references: []
+    pddl_end_in_highest_target_fraction_room:
+      status: generated
+      attempts: 440
+      base_assignments: 440
+      preparation_rejections: {}
+      eligible_candidates: 5
+      search_complete: true
+      rejections:
+        need three nonempty rooms with unequal proportions: 424
+        fraction and count have the same winner: 11
+      bindings:
+        target_object_class: bed
+        destination_room_class: bedroom
+      difficulty_preferences: {}
+      resolved_references: []
+    pddl_visit_rooms_with_exact_target_count:
+      status: generated
+      attempts: 67
+      base_assignments: 440
+      preparation_rejections:
+        no scene-derived numeric values: 375
+      eligible_candidates: 14
+      search_complete: true
+      rejections:
+        exact count needs matching and nonmatching rooms: 51
+      bindings:
+        target_object_class: shower
+        source_room_class: bathroom
+        required_count: 1
+      difficulty_preferences:
+        lower_and_higher_count_distractors: false
+        multiple_exact_count_rooms: true
+      resolved_references: []
+    pddl_visit_adjacent_rooms_without_target:
+      status: generated
+      attempts: 305
+      base_assignments: 305
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections:
+        adjacency/content filters lack contrast: 257
+      bindings:
+        source_room_class: exterior_path
+        excluded_object_class: shelf
+      difficulty_preferences: {}
+      resolved_references: []
+    pddl_visit_connected_room_pair:
+      status: generated
+      attempts: 90
+      base_assignments: 90
+      preparation_rejections: {}
+      eligible_candidates: 4
+      search_complete: true
+      rejections:
+        room choices lack nontrivial connectivity correlation: 86
+      bindings:
+        source_room_class: hallway
+        destination_room_class: bathroom
+      difficulty_preferences: {}
+      resolved_references: []
+    pddl_inspect_one_target_in_each_room_category:
+      status: generated
+      attempts: 3960
+      base_assignments: 3960
+      preparation_rejections: {}
+      eligible_candidates: 4
+      search_complete: true
+      rejections:
+        need separate scoped choices and outside targets: 3956
+      bindings:
+        target_object_class: window
+        source_room_class: lounge
+        destination_room_class: bedroom
+      difficulty_preferences: {}
+      resolved_references: []
+    pddl_hold_either_class_in_room_class:
+      status: generated
+      attempts: 18920
+      base_assignments: 18920
+      preparation_rejections: {}
+      eligible_candidates: 24
+      search_complete: true
+      rejections:
+        class alternatives need scoped choices and distractors: 18896
+      bindings:
+        target_object_class: book
+        source_room_class: bedroom
+        alternative_object_class: chair
+      difficulty_preferences: {}
+      resolved_references: []
+    pddl_inspect_all_or_hold_and_end_in_same_room:
+      status: generated
+      attempts: 30000
+      base_assignments: 30000
+      preparation_rejections: {}
+      eligible_candidates: 19
+      search_complete: false
+      rejections:
+        fewer than two scoped target candidates: 28767
+        compound alternative lacks object-room correlation: 736
+        room-category filter removes no target: 478
+      bindings:
+        target_object_class: cabinet
+        source_room_class: kitchen
+        reference_object_class: toilet
+        destination_room_class: bathroom
+      difficulty_preferences: {}
+      resolved_references: []
+    pddl_keep_target_out_of_reference_places:
+      status: generated
+      attempts: 1075
+      base_assignments: 1075
+      preparation_rejections: {}
+      eligible_candidates: 5
+      search_complete: true
+      rejections:
+        forbidden places are singular or already avoided: 1070
+      bindings:
+        target_object_class: kettle
+        reference_object_class: cabinet
+      difficulty_preferences: {}
+      resolved_references:
+      - O15
+      - P193
+      - P202
+      - P641
+      - P808
+    pddl_inspect_choice_without_holding_excluded:
+      status: generated
+      attempts: 4460
+      base_assignments: 4460
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections:
+        fewer than two scoped target candidates: 4277
+        room-category filter removes no target: 72
+        need multiple holding exclusions: 63
+      bindings:
+        target_object_class: ceiling_light
+        source_room_class: hallway
+        excluded_object_class: wardrobe
+      difficulty_preferences: {}
+      resolved_references: []
+    pddl_end_adjacent_to_reference_avoid_category:
+      status: generated
+      attempts: 297
+      base_assignments: 297
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections:
+        no allowed adjacent destination or forbidden category: 249
+      bindings:
+        reference_object_class: laundry_basket
+        excluded_room_class: study
+        destination_room_class: hallway
+      difficulty_preferences:
+        multiple_adjacent_destinations: false
+        nonadjacent_destination_distractor: true
+      resolved_references:
+      - O44
+      - R5
+    pddl_visit_nearby_locations_except_start:
+      status: generated
+      attempts: 218
+      base_assignments: 25
+      preparation_rejections: {}
+      eligible_candidates: 25
+      search_complete: true
+      rejections:
+        goal exceeds 40 fact occurrences: 188
+        neighborhood has no bounded contrast: 5
+      bindings:
+        reference_object_class: dining_table
+        place_layer_name: mesh_place
+        hop_limit: 2
+      difficulty_preferences: {}
+      resolved_references:
+      - O8
+      - P394
+    pddl_visit_one_per_room_end_at_reference:
+      status: generated
+      attempts: 1473
+      base_assignments: 1473
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections:
+        need targets in multiple rooms: 1425
+      bindings:
+        target_object_class: ceiling_light
+        source_room_class: hallway
+        reference_object_class: detergent
+      difficulty_preferences:
+        multiple_choices_in_every_room: false
+        target_outside_room_category: true
+      resolved_references:
+      - O43
+    pddl_choose_room_choose_complete_task:
+      status: generated
+      attempts: 10936
+      base_assignments: 10936
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections:
+        need multiple rooms containing both classes: 10888
+      bindings:
+        target_object_class: shower
+        source_room_class: bathroom
+        reference_object_class: mirror
+      difficulty_preferences:
+        compound_alternatives_in_every_room: false
+      resolved_references: []
+    pddl_move_target_to_minimum_hop_reference:
+      status: generated
+      attempts: 276
+      base_assignments: 276
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections:
+        need three reachable reference destinations: 179
+        Euclidean and hop destinations coincide: 47
+        destination is already occupied: 2
+      bindings:
+        target_object_class: armchair
+        reference_object_class: nightstand
+        place_layer_name: mesh_place
+      difficulty_preferences: {}
+      resolved_references:
+      - O21
+      - P530
+      - P1145
+      - P1188
+      - P1209
+      - P1236
+      - P1287
+      - P1427
+    pddl_move_each_target_to_neighbor_location:
+      status: generated
+      attempts: 440
+      base_assignments: 440
+      preparation_rejections: {}
+      eligible_candidates: 9
+      search_complete: true
+      rejections:
+        fewer than two scoped target candidates: 422
+        room-category filter removes no target: 7
+        neighbor destination choices are insufficient or identical: 2
+      bindings:
+        target_object_class: cabinet
+        source_room_class: kitchen
+        place_layer_name: mesh_place
+      difficulty_preferences: {}
+      resolved_references:
+      - P193
+      - P202
+    pddl_inspect_targets_in_allowed_room_component:
+      status: generated
+      attempts: 1648
+      base_assignments: 1648
+      preparation_rejections: {}
+      eligible_candidates: 48
+      search_complete: false
+      rejections:
+        forbidden rooms disconnect no allowed targets: 1434
+        anchor room is forbidden: 166
+      bindings:
+        target_object_class: mirror
+        reference_object_class: fruit_bowl
+        excluded_room_class: bedroom
+      difficulty_preferences: {}
+      resolved_references:
+      - O16
+      - R2
+  diversity:
+    class_role_counts:
+      alternative_object_class:
+        chair: 1
+      comparison_object_class:
+        alarm_clock: 1
+        dryer: 1
+        shoe_cabinet: 1
+        washer: 1
+      comparison_room_class:
+        bathroom: 1
+        bedroom: 1
+        hallway: 1
+      destination_object_class:
+        bathtub: 1
+        detergent: 1
+        kitchen_island: 1
+        television: 1
+        toy_box: 1
+      destination_room_class:
+        bathroom: 3
+        bedroom: 5
+        hallway: 3
+        study: 2
+      excluded_object_class:
+        bathtub: 1
+        car: 1
+        kitchen_island: 1
+        shelf: 1
+        toy_box: 1
+        wardrobe: 1
+      excluded_room_class:
+        bathroom: 1
+        bedroom: 1
+        exterior_path: 1
+        hallway: 1
+        lounge: 1
+        stairs: 1
+        study: 1
+      reference_object_class:
+        alarm_clock: 1
+        armchair: 1
+        bathtub: 1
+        bed: 2
+        bicycle: 1
+        book: 2
+        bookcase: 1
+        box: 1
+        cabinet: 4
+        car: 1
+        ceiling_light: 2
+        chair: 3
+        desk: 2
+        detergent: 1
+        dining_table: 1
+        dresser: 2
+        fridge: 1
+        fruit_bowl: 1
+        kettle: 1
+        lamp: 3
+        laptop: 3
+        laundry_basket: 1
+        mirror: 2
+        nightstand: 2
+        oven: 1
+        plant: 2
+        shelf: 2
+        shoe_cabinet: 1
+        shower: 1
+        side_table: 1
+        sink: 2
+        sofa: 1
+        television: 1
+        toilet: 2
+        toolbox: 1
+        toy_box: 1
+        trash: 2
+        wardrobe: 2
+        window: 4
+      source_room_class:
+        bathroom: 11
+        bedroom: 15
+        exterior_path: 3
+        garage: 2
+        hallway: 8
+        kitchen: 8
+        lounge: 6
+        study: 4
+        utility: 3
+      target_object_class:
+        alarm_clock: 1
+        armchair: 1
+        bathtub: 1
+        bed: 4
+        book: 3
+        bookcase: 1
+        cabinet: 4
+        car: 1
+        ceiling_light: 6
+        chair: 5
+        coffee_table: 1
+        desk: 4
+        kettle: 1
+        lamp: 5
+        laptop: 3
+        mirror: 4
+        nightstand: 4
+        plant: 3
+        shelf: 3
+        shoe_cabinet: 1
+        shower: 3
+        sink: 4
+        toilet: 4
+        trash: 4
+        wardrobe: 3
+        window: 6
+    entity_counts:
+      O1: 3
+      O10: 1
+      O100: 3
+      O101: 1
+      O102: 2
+      O103: 1
+      O104: 5
+      O105: 5
+      O11: 2
+      O12: 2
+      O13: 2
+      O14: 1
+      O15: 2
+      O16: 1
+      O17: 1
+      O18: 1
+      O19: 1
+      O2: 1
+      O20: 1
+      O21: 2
+      O22: 1
+      O23: 1
+      O24: 1
+      O25: 1
+      O26: 1
+      O27: 2
+      O28: 1
+      O29: 5
+      O30: 5
+      O31: 3
+      O32: 2
+      O33: 1
+      O34: 2
+      O35: 2
+      O36: 1
+      O37: 3
+      O39: 1
+      O4: 3
+      O40: 1
+      O41: 2
+      O42: 2
+      O43: 2
+      O44: 1
+      O45: 1
+      O47: 1
+      O48: 1
+      O49: 1
+      O5: 2
+      O50: 1
+      O51: 1
+      O52: 1
+      O53: 2
+      O54: 2
+      O55: 4
+      O56: 2
+      O57: 2
+      O58: 3
+      O59: 3
+      O6: 1
+      O60: 3
+      O61: 3
+      O62: 1
+      O63: 2
+      O64: 3
+      O65: 2
+      O66: 2
+      O67: 1
+      O68: 1
+      O69: 3
+      O7: 1
+      O70: 2
+      O71: 5
+      O72: 1
+      O73: 1
+      O74: 4
+      O75: 2
+      O76: 4
+      O77: 2
+      O78: 2
+      O79: 4
+      O8: 1
+      O80: 2
+      O81: 1
+      O82: 5
+      O83: 1
+      O84: 1
+      O85: 1
+      O86: 2
+      O87: 2
+      O88: 1
+      O89: 3
+      O9: 2
+      O90: 1
+      O91: 1
+      O92: 2
+      O93: 2
+      O94: 2
+      O95: 2
+      O96: 4
+      O97: 2
+      O98: 1
+      O99: 1
+      P1145: 1
+      P1188: 1
+      P1209: 1
+      P1236: 1
+      P1272: 1
+      P1287: 1
+      P1316: 1
+      P1361: 1
+      P1427: 1
+      P1448: 1
+      P1453: 1
+      P1460: 1
+      P1664: 2
+      P188: 1
+      P189: 1
+      P190: 1
+      P191: 1
+      P192: 1
+      P193: 2
+      P194: 1
+      P198: 1
+      P201: 1
+      P202: 2
+      P203: 1
+      P205: 1
+      P2056: 1
+      P2057: 1
+      P2058: 1
+      P2059: 1
+      P206: 1
+      P2063: 1
+      P2064: 1
+      P2065: 1
+      P2066: 1
+      P207: 1
+      P2070: 1
+      P2071: 1
+      P2072: 1
+      P2073: 1
+      P2077: 1
+      P2078: 1
+      P2079: 1
+      P208: 1
+      P2080: 1
+      P2084: 1
+      P2085: 1
+      P2086: 1
+      P2087: 1
+      P209: 1
+      P210: 1
+      P211: 1
+      P2130: 1
+      P2131: 1
+      P2132: 1
+      P2133: 1
+      P2134: 1
+      P2137: 1
+      P2138: 1
+      P2139: 1
+      P218: 1
+      P219: 1
+      P220: 1
+      P222: 1
+      P223: 1
+      P224: 1
+      P225: 1
+      P226: 1
+      P227: 1
+      P228: 1
+      P229: 1
+      P230: 1
+      P234: 1
+      P235: 1
+      P236: 1
+      P237: 1
+      P238: 1
+      P239: 1
+      P243: 1
+      P244: 1
+      P245: 1
+      P246: 1
+      P247: 1
+      P248: 1
+      P252: 1
+      P253: 1
+      P254: 1
+      P255: 1
+      P256: 1
+      P257: 1
+      P261: 1
+      P262: 1
+      P263: 1
+      P264: 1
+      P265: 1
+      P266: 1
+      P270: 1
+      P271: 1
+      P272: 1
+      P273: 1
+      P274: 1
+      P275: 1
+      P279: 1
+      P280: 1
+      P281: 1
+      P282: 1
+      P283: 1
+      P284: 1
+      P294: 1
+      P295: 1
+      P296: 1
+      P297: 1
+      P298: 1
+      P299: 1
+      P300: 1
+      P301: 1
+      P302: 1
+      P303: 1
+      P304: 1
+      P305: 1
+      P306: 1
+      P316: 1
+      P317: 1
+      P318: 1
+      P319: 1
+      P320: 1
+      P321: 1
+      P322: 1
+      P323: 1
+      P324: 1
+      P325: 1
+      P326: 1
+      P327: 1
+      P328: 1
+      P335: 1
+      P336: 1
+      P337: 1
+      P338: 1
+      P339: 1
+      P340: 1
+      P341: 1
+      P348: 1
+      P349: 1
+      P350: 1
+      P351: 1
+      P352: 1
+      P353: 1
+      P354: 1
+      P361: 1
+      P362: 1
+      P363: 1
+      P364: 1
+      P365: 1
+      P366: 1
+      P367: 1
+      P370: 1
+      P371: 1
+      P372: 1
+      P373: 1
+      P374: 1
+      P375: 1
+      P376: 1
+      P377: 1
+      P378: 1
+      P381: 1
+      P382: 1
+      P383: 1
+      P384: 1
+      P385: 1
+      P386: 1
+      P387: 1
+      P388: 1
+      P389: 1
+      P392: 1
+      P393: 1
+      P394: 1
+      P395: 1
+      P396: 1
+      P397: 1
+      P398: 1
+      P399: 1
+      P400: 1
+      P403: 1
+      P404: 1
+      P405: 1
+      P406: 1
+      P407: 1
+      P408: 1
+      P409: 1
+      P410: 1
+      P411: 1
+      P414: 1
+      P415: 1
+      P416: 1
+      P417: 1
+      P418: 1
+      P419: 1
+      P420: 1
+      P421: 1
+      P422: 1
+      P428: 1
+      P429: 1
+      P430: 1
+      P431: 1
+      P432: 1
+      P433: 1
+      P440: 1
+      P441: 1
+      P442: 1
+      P443: 1
+      P444: 1
+      P445: 1
+      P446: 1
+      P453: 1
+      P454: 1
+      P455: 1
+      P456: 1
+      P457: 1
+      P458: 1
+      P459: 1
+      P463: 1
+      P464: 1
+      P465: 1
+      P466: 1
+      P467: 1
+      P468: 1
+      P469: 1
+      P482: 1
+      P483: 1
+      P484: 1
+      P485: 1
+      P486: 1
+      P487: 1
+      P488: 1
+      P530: 1
+      P641: 2
+      P683: 2
+      P695: 1
+      P716: 1
+      P742: 1
+      P771: 1
+      P772: 1
+      P773: 1
+      P780: 1
+      P781: 1
+      P782: 1
+      P783: 1
+      P790: 1
+      P791: 1
+      P792: 1
+      P793: 1
+      P801: 1
+      P802: 1
+      P803: 1
+      P808: 1
+      P811: 1
+      P812: 1
+      P813: 1
+      P827: 1
+      P856: 1
+      P857: 1
+      P858: 1
+      P859: 1
+      P860: 1
+      P861: 1
+      P862: 1
+      P863: 1
+      P864: 1
+      P865: 1
+      P866: 1
+      P867: 1
+      P868: 1
+      P869: 1
+      P870: 1
+      P871: 1
+      P872: 1
+      P873: 1
+      P874: 1
+      P875: 1
+      P876: 1
+      P877: 1
+      P878: 1
+      P879: 1
+      P880: 1
+      P881: 1
+      P882: 1
+      P883: 1
+      P884: 1
+      P885: 1
+      P886: 1
+      P887: 1
+      P888: 1
+      P889: 1
+      P890: 1
+      P891: 1
+      P892: 1
+      P893: 1
+      P894: 1
+      P895: 1
+      P896: 1
+      P897: 1
+      P898: 1
+      P899: 1
+      P900: 1
+      P901: 1
+      P902: 1
+      P903: 1
+      P904: 1
+      P905: 1
+      P906: 1
+      P907: 1
+      P908: 1
+      P909: 1
+      P910: 1
+      P911: 1
+      P912: 1
+      P913: 1
+      P914: 1
+      P915: 1
+      P916: 1
+      P987: 2
+      R1: 6
+      R10: 8
+      R11: 8
+      R12: 5
+      R13: 5
+      R14: 4
+      R15: 1
+      R16: 3
+      R2: 6
+      R3: 6
+      R4: 3
+      R5: 3
+      R6: 6
+      R7: 7
+      R8: 7
+      R9: 7
+    class_pair_counts:
+      alarm_clock / bedroom: 1
+      alarm_clock / desk: 1
+      alarm_clock / dresser: 1
+      alarm_clock / mirror: 1
+      alarm_clock / toy_box: 1
+      armchair / nightstand: 1
+      armchair / shelf: 1
+      bathroom / bathtub: 2
+      bathroom / bedroom: 1
+      bathroom / cabinet: 1
+      bathroom / detergent: 1
+      bathroom / hallway: 1
+      bathroom / kitchen: 1
+      bathroom / lamp: 1
+      bathroom / lounge: 1
+      bathroom / mirror: 2
+      bathroom / shower: 3
+      bathroom / side_table: 1
+      bathroom / sink: 3
+      bathroom / study: 1
+      bathroom / toilet: 2
+      bathroom / trash: 3
+      bathroom / window: 1
+      bathtub / fridge: 1
+      bathtub / television: 1
+      bathtub / toilet: 1
+      bed / bedroom: 3
+      bed / book: 1
+      bed / car: 1
+      bed / chair: 1
+      bed / dresser: 1
+      bed / nightstand: 1
+      bed / shelf: 1
+      bedroom / book: 3
+      bedroom / ceiling_light: 1
+      bedroom / chair: 2
+      bedroom / desk: 3
+      bedroom / fruit_bowl: 1
+      bedroom / hallway: 1
+      bedroom / lamp: 5
+      bedroom / laptop: 2
+      bedroom / lounge: 1
+      bedroom / mirror: 1
+      bedroom / nightstand: 2
+      bedroom / plant: 1
+      bedroom / shelf: 1
+      bedroom / toy_box: 2
+      bedroom / trash: 1
+      bedroom / utility: 1
+      bedroom / wardrobe: 2
+      bedroom / window: 3
+      bicycle / car: 1
+      book / ceiling_light: 1
+      book / chair: 2
+      book / hallway: 1
+      book / utility: 1
+      book / window: 1
+      bookcase / chair: 1
+      bookcase / kitchen: 1
+      bookcase / sink: 1
+      box / kitchen_island: 1
+      cabinet / chair: 1
+      cabinet / coffee_table: 1
+      cabinet / desk: 1
+      cabinet / kettle: 1
+      cabinet / kitchen: 3
+      cabinet / kitchen_island: 1
+      cabinet / lounge: 1
+      cabinet / toilet: 1
+      cabinet / utility: 1
+      car / dresser: 1
+      car / mirror: 1
+      ceiling_light / chair: 2
+      ceiling_light / detergent: 1
+      ceiling_light / hallway: 6
+      ceiling_light / kitchen: 1
+      ceiling_light / lounge: 1
+      ceiling_light / study: 1
+      ceiling_light / wardrobe: 1
+      ceiling_light / window: 1
+      chair / hallway: 1
+      chair / kitchen: 4
+      chair / lounge: 1
+      chair / study: 1
+      chair / trash: 1
+      chair / window: 1
+      desk / dresser: 1
+      desk / laptop: 1
+      desk / study: 1
+      desk / toilet: 1
+      desk / utility: 1
+      detergent / hallway: 1
+      detergent / side_table: 1
+      dryer / oven: 1
+      exterior_path / hallway: 1
+      exterior_path / laptop: 1
+      exterior_path / shelf: 1
+      fruit_bowl / mirror: 1
+      garage / plant: 1
+      garage / shelf: 1
+      garage / study: 1
+      hallway / kettle: 1
+      hallway / laundry_basket: 1
+      hallway / lounge: 1
+      hallway / shelf: 1
+      hallway / shoe_cabinet: 1
+      hallway / sink: 1
+      hallway / study: 2
+      hallway / wardrobe: 1
+      hallway / window: 1
+      kettle / shelf: 1
+      kitchen / toilet: 1
+      kitchen / trash: 1
+      kitchen / window: 1
+      lamp / nightstand: 1
+      lamp / shelf: 1
+      lamp / shoe_cabinet: 1
+      lamp / sink: 1
+      lamp / study: 1
+      lamp / television: 1
+      lamp / trash: 1
+      lamp / wardrobe: 1
+      lamp / window: 1
+      laptop / nightstand: 1
+      laptop / study: 1
+      laptop / toilet: 1
+      laptop / wardrobe: 1
+      laundry_basket / study: 1
+      lounge / sink: 1
+      lounge / toolbox: 1
+      lounge / toy_box: 1
+      lounge / trash: 1
+      lounge / window: 5
+      mirror / nightstand: 1
+      mirror / shower: 1
+      mirror / sink: 1
+      nightstand / wardrobe: 1
+      plant / shelf: 1
+      plant / shoe_cabinet: 1
+      plant / sofa: 1
+      plant / study: 1
+      plant / washer: 1
+      plant / window: 1
+      shelf / study: 1
+      shoe_cabinet / television: 1
+      shoe_cabinet / washer: 1
+      shower / trash: 1
+      sink / study: 1
+      sink / window: 1
+      study / toilet: 1
+      study / wardrobe: 1
+      toilet / trash: 1
+      toilet / wardrobe: 1
+      toolbox / toy_box: 1
+      toy_box / window: 1
+      trash / window: 1
+      utility / window: 1
+  settings:
+    seed: 7
+    pool_size: 48
+    max_attempts: 30000
+    max_base_assignments: 30000
+    selection_policy: difficulty_preferences_then_diversity
+coverage:
+  qa:
+    requested: 50
+    generated: 50
+    unavailable: 0
+    selected_for_smoke: 3
+  pddl:
+    requested: 50
+    generated: 50
+    unavailable: 0
+    selected_for_smoke: 3
+artifacts:
+  qa:
+    path: data/questions/v2/habitat_apartment/qa_questions.smoke.yaml
+    sha256: 85bb1251a90fc02ce2bc7aa1cb599f2b4a9e5eb263da28114dd126e5b00d0f05
+  pddl:
+    path: data/questions/v2/habitat_apartment/pddl_questions.smoke.yaml
+    sha256: 709d8f41038de1da3ce4cdba4c17b7cb997ae469752109618395441d148cc2c1

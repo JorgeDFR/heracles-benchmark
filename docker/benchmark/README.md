@@ -158,7 +158,7 @@ collected.
 For the default manifest, outputs are stored under:
 
 ```text
-<repo>/output/example_dsg/model_sweep/
+<repo>/output/habitat_apartment/model_sweep/
 ```
 
 That directory contains provider results, `report.html`,

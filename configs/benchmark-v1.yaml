@@ -2,14 +2,15 @@
 schema_version: 1
 
 benchmark:
-  name: example-dsg-model-sweep
-  scene_id: example_dsg
-  scene_graph: data/scene_graphs/example_dsg.json
+  name: habitat-apartment-v1
+  scene_id: habitat_apartment
+  scene_graph: data/scene_graphs/habitat_apartment.json
+  expected_question_count: 50
   questions:
-    qa: data/questions/example_dsg/qa_questions.yaml
-    pddl: data/questions/example_dsg/pddl_questions.yaml
-    metadata: data/questions/example_dsg/metadata.yaml
-  output_dir: output/example_dsg/model_sweep
+    qa: data/questions/v1/habitat_apartment/qa_questions.yaml
+    pddl: data/questions/v1/habitat_apartment/pddl_questions.yaml
+    metadata: data/questions/v1/habitat_apartment/metadata.yaml
+  output_dir: output/habitat_apartment/v1/model_sweep
 
 agent:
   temperature: 0.2
@@ -103,24 +104,12 @@ providers:
         parameters:
           reasoning:
             mode: disabled
-      - alias: deepseek-v4-pro
-        model: deepseek/deepseek-v4-pro
+      - alias: deepseek-v4.1-flash
+        model: deepseek/deepseek-v4.1-flash
         enabled: false
         capabilities:
           reasoning: required
-          reasoning_efforts: [high, xhigh]
-          temperature: true
-          seed: true
-        parameters:
-          reasoning:
-            mode: enabled
-            effort: high
-      - alias: deepseek-v4-flash
-        model: deepseek/deepseek-v4-flash
-        enabled: false
-        capabilities:
-          reasoning: required
-          reasoning_efforts: [high, xhigh]
+          reasoning_efforts: [low, high, max]
           temperature: true
           seed: true
         parameters:

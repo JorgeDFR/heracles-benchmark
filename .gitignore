@@ -27,3 +27,4 @@ output/*
 # Other files and folders
 .vscode/
 TODO.md
+temp/

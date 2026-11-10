@@ -1,21 +1,58 @@
+import unittest
 from copy import deepcopy
 from pathlib import Path
-import unittest
+
+import yaml
 
 from scripts.benchmark_manifest import BenchmarkManifest, ManifestError
-
 
 ROOT = Path(__file__).resolve().parents[1]
 
 
 class BenchmarkInferenceParametersTest(unittest.TestCase):
+    def test_version_specific_manifests_and_per_task_counts(self) -> None:
+        for version in ("v1", "v2"):
+            manifest = self.load_manifest()
+            manifest.raw = deepcopy(manifest.raw)
+            directory = f"data/questions/{version}/habitat_apartment"
+            manifest.raw["benchmark"]["questions"] = {
+                "qa": f"{directory}/qa_questions.yaml",
+                "pddl": f"{directory}/pddl_questions.yaml",
+                "metadata": f"{directory}/metadata.yaml",
+            }
+            metadata = yaml.safe_load((ROOT / directory / "metadata.yaml").read_text())
+            manifest.raw["benchmark"]["scene_id"] = metadata["scene_id"]
+            manifest.raw["benchmark"]["scene_graph"] = metadata["scene_graph"]["path"]
+            manifest.raw["benchmark"]["expected_question_count"] = {
+                task: metadata["coverage"][task]["generated"] for task in ("qa", "pddl")
+            }
+            manifest.validate()
+            self.assertTrue(
+                all(
+                    f"/questions/{version}/" in str(p)
+                    for p in manifest.question_paths.values()
+                )
+            )
+        manifest = self.load_manifest()
+        for value in ({"qa": 38}, {"qa": True, "pddl": 45}, {"qa": 0, "pddl": 45}):
+            manifest.raw["benchmark"]["expected_question_count"] = value
+            with self.assertRaisesRegex(
+                ManifestError, "map qa and pddl to positive integers"
+            ):
+                manifest.validate()
+
     def load_manifest(self, filename: str = "benchmark.yaml") -> BenchmarkManifest:
         return BenchmarkManifest.load(ROOT / "configs" / filename)
 
     def test_default_and_smoke_manifests_have_normalized_reasoning(self) -> None:
-        for filename in ("benchmark.yaml", "benchmark-smoke.yaml"):
+        for filename, scene_id in (
+            ("benchmark.yaml", "habitat_apartment"),
+            ("benchmark-smoke.yaml", "spark_dsg_example"),
+        ):
             manifest = self.load_manifest(filename)
             manifest.validate()
+            self.assertEqual(manifest.scene_id, scene_id)
+            self.assertEqual(manifest.scene_graph.stem, manifest.scene_id)
 
             parameters = manifest.inference_parameters
             self.assertEqual(parameters["temperature"], manifest.agent["temperature"])
@@ -30,16 +67,16 @@ class BenchmarkInferenceParametersTest(unittest.TestCase):
                 {"enabled", "disabled", "unsupported"},
             )
 
-    def test_generated_sweep_contains_effective_parameters_and_enforcement(self) -> None:
+    def test_generated_sweep_contains_effective_parameters_and_enforcement(
+        self,
+    ) -> None:
         manifest = self.load_manifest()
 
         experiment = manifest.experiment("openrouter", "qa")
         sweep = experiment["model_sweeps"]["openrouter-cypher"]
 
         self.assertTrue(
-            sweep["template"]["phases"]["main"]["client"][
-                "require_parameters"
-            ]
+            sweep["template"]["phases"]["main"]["client"]["require_parameters"]
         )
         self.assertEqual(
             sweep["models"][0]["parameters"],
@@ -82,22 +119,40 @@ class BenchmarkInferenceParametersTest(unittest.TestCase):
 
                 manifest.validate()
                 for task in ("qa", "pddl"):
-                    sweep = next(iter(manifest.experiment("openrouter", task)["model_sweeps"].values()))
-                    self.assertEqual(sweep["models"][0]["parameters"]["openrouter_provider"], slug)
-                    self.assertNotIn("openrouter_provider", sweep["models"][-1]["parameters"])
+                    sweep = next(
+                        iter(
+                            manifest.experiment("openrouter", task)[
+                                "model_sweeps"
+                            ].values()
+                        )
+                    )
+                    self.assertEqual(
+                        sweep["models"][0]["parameters"]["openrouter_provider"], slug
+                    )
+                    self.assertNotIn(
+                        "openrouter_provider", sweep["models"][-1]["parameters"]
+                    )
 
     def test_invalid_openrouter_provider_is_rejected(self) -> None:
         for slug in ("", "  ", True, 1, [], {}):
             with self.subTest(slug=slug):
                 manifest = self.load_manifest()
-                manifest.raw["providers"]["openrouter"]["models"][0]["parameters"]["openrouter_provider"] = slug
-                with self.assertRaisesRegex(ManifestError, "openrouter_provider.*non-empty string"):
+                manifest.raw["providers"]["openrouter"]["models"][0]["parameters"][
+                    "openrouter_provider"
+                ] = slug
+                with self.assertRaisesRegex(
+                    ManifestError, "openrouter_provider.*non-empty string"
+                ):
                     manifest.validate()
 
     def test_openrouter_provider_is_rejected_for_ollama(self) -> None:
         manifest = self.load_manifest()
-        manifest.raw["providers"]["ollama"]["models"][0]["parameters"]["openrouter_provider"] = "deepinfra"
-        with self.assertRaisesRegex(ManifestError, "unsupported parameter.*openrouter_provider"):
+        manifest.raw["providers"]["ollama"]["models"][0]["parameters"][
+            "openrouter_provider"
+        ] = "deepinfra"
+        with self.assertRaisesRegex(
+            ManifestError, "unsupported parameter.*openrouter_provider"
+        ):
             manifest.validate()
 
     def test_invalid_reasoning_combination_is_rejected(self) -> None:
@@ -134,9 +189,7 @@ class BenchmarkInferenceParametersTest(unittest.TestCase):
         manifest = self.load_manifest()
         manifest.raw = deepcopy(manifest.raw)
         model = manifest.raw["providers"]["openrouter"]["models"][0]
-        model["parameters"] = {
-            "reasoning": {"mode": "disabled", "effort": None}
-        }
+        model["parameters"] = {"reasoning": {"mode": "disabled", "effort": None}}
 
         with self.assertRaisesRegex(ManifestError, "mandatory reasoning"):
             manifest.validate()

@@ -1,0 +1,118 @@
+---
+schema_version: 1
+
+benchmark:
+  name: habitat-apartment-v2
+  scene_id: habitat_apartment
+  scene_graph: data/scene_graphs/habitat_apartment.json
+  expected_question_count: 50
+  questions:
+    qa: data/questions/v2/habitat_apartment/qa_questions.yaml
+    pddl: data/questions/v2/habitat_apartment/pddl_questions.yaml
+    metadata: data/questions/v2/habitat_apartment/metadata.yaml
+  output_dir: output/habitat_apartment/v2/model_sweep
+
+agent:
+  temperature: 0.2
+  seed: 123
+  reasoning:
+    mode: enabled
+    effort: model_default
+  max_iterations: 5
+
+providers:
+  ollama:
+    enabled: true
+    models:
+      - alias: gemma-4-12b
+        model: gemma4:12b
+        enabled: true
+        capabilities:
+          reasoning: optional
+          reasoning_efforts: null
+          temperature: true
+          seed: true
+        parameters:
+          reasoning:
+            mode: disabled
+      - alias: gemma-4-26b
+        model: gemma4:26b
+        enabled: false
+        capabilities:
+          reasoning: optional
+          reasoning_efforts: null
+          temperature: true
+          seed: true
+        parameters:
+          reasoning:
+            mode: disabled
+    local_metrics:
+      enabled: true
+      target_provider: ollama
+      ollama_container_name: ollama
+      docker_host: tcp://docker-socket-proxy:2375
+      ollama_host: http://ollama:11434
+      sample_interval_seconds: 0.1
+      gpu_baseline_seconds: 5
+      unload_models_before_baseline: true
+      baseline_adjust_gpu: true
+      # Baseline, one cold preload, then this many resident warmups precede measurement.
+      warmup_enabled: true
+      warmup_requests: 1
+      warmup_prompt: Reply with OK.
+      warmup_keep_alive: -1
+      warmup_verify_resident: true
+
+  openrouter:
+    enabled: true
+    # Fail routing when an endpoint would silently ignore supplied parameters.
+    require_parameters: true
+    models:
+      - alias: gpt-oss-120b
+        model: openai/gpt-oss-120b
+        enabled: true
+        capabilities:
+          reasoning: required
+          reasoning_efforts: [low, medium, high]
+          temperature: true
+          seed: true
+        parameters:
+          # Optional provider/endpoint pin; omitted or null keeps automatic routing.
+          # openrouter_provider: deepinfra
+          reasoning:
+            mode: enabled
+            effort: medium
+      - alias: gemma-4-31b-it
+        model: google/gemma-4-31b-it
+        enabled: false
+        capabilities:
+          reasoning: optional
+          reasoning_efforts: null
+          temperature: true
+          seed: true
+        parameters:
+          reasoning:
+            mode: disabled
+      - alias: gemma-4-26b-a4b-it
+        model: google/gemma-4-26b-a4b-it
+        enabled: false
+        capabilities:
+          reasoning: optional
+          reasoning_efforts: null
+          temperature: true
+          seed: true
+        parameters:
+          reasoning:
+            mode: disabled
+      - alias: deepseek-v4.1-flash
+        model: deepseek/deepseek-v4.1-flash
+        enabled: false
+        capabilities:
+          reasoning: required
+          reasoning_efforts: [low, high, max]
+          temperature: true
+          seed: true
+        parameters:
+          reasoning:
+            mode: enabled
+            effort: high

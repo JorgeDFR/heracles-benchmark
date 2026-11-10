@@ -1,0 +1,44 @@
+---
+questions:
+- uid: QA001
+  name: Class count in room class
+  question_type: qa_class_count_in_room_class
+  overlap_class: direct
+  question: How many sinks are in the bathrooms?
+  solution: '3'
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - hierarchy
+  - count
+  - class
+- uid: QA002
+  name: Class near class
+  question_type: qa_class_near_class
+  overlap_class: direct
+  question: Which mirrors are at most 6.59 meters from at least one car?
+  solution: <O60>
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - spatial
+  - radius
+  - existential
+- uid: QA003
+  name: Closest class pairs in room class
+  question_type: qa_closest_class_pairs_in_room_class
+  overlap_class: related
+  question: Among pairs consisting of one ceiling light and one chair in the same kitchen, which are closest
+    together? Include all ties.
+  solution: <[O11, O19]>
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+    unordered_pairs: true
+  tags:
+  - spatial
+  - pairs
+  - hierarchy
+  - ties

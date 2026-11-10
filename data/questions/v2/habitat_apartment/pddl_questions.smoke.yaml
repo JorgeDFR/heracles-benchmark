@@ -1,0 +1,41 @@
+---
+questions:
+- uid: PDDL001
+  name: Visit any class in room class
+  question_type: pddl_visit_any_class_in_room_class
+  overlap_class: direct
+  question: Visit any ceiling light in any hallway.
+  solution: (or (visited-object O104) (visited-object O105))
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - hierarchy
+  - existential
+  - visit
+- uid: PDDL002
+  name: Inspect closest between classes
+  question_type: pddl_inspect_closest_between_classes
+  overlap_class: direct
+  question: Inspect any chair attaining the smallest distance to any bed in the scene.
+  solution: (safe O95)
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - spatial
+  - extrema
+  - inspect
+- uid: PDDL003
+  name: Inspect every target in room class
+  question_type: pddl_inspect_every_target_in_room_class
+  overlap_class: related
+  question: Inspect all the cabinets in all the kitchens.
+  solution: (and (safe O1) (safe O4))
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - hierarchy
+  - universal
+  - inspect

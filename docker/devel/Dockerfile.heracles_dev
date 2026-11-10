@@ -6,7 +6,7 @@ RUN apt-get update \
 
 COPY external/heracles/heracles /heracles
 COPY external/heracles_agents /heracles_agents
-COPY data/scene_graphs/example_dsg.json /data/scene_graphs/example_dsg.json
+COPY data/scene_graphs/spark_dsg_example.json /data/scene_graphs/spark_dsg_example.json
 
 RUN pip install --no-cache-dir -e /heracles_agents[all] \
     && pip install --no-cache-dir --force-reinstall --no-deps /heracles

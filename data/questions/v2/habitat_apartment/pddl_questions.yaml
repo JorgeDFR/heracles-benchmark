@@ -1,0 +1,742 @@
+---
+questions:
+- uid: PDDL001
+  name: Visit any class in room class
+  question_type: pddl_visit_any_class_in_room_class
+  overlap_class: direct
+  question: Visit any ceiling light in any hallway.
+  solution: (or (visited-object O104) (visited-object O105))
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - hierarchy
+  - existential
+  - visit
+- uid: PDDL002
+  name: Inspect closest between classes
+  question_type: pddl_inspect_closest_between_classes
+  overlap_class: direct
+  question: Inspect any chair attaining the smallest distance to any bed in the scene.
+  solution: (safe O95)
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - spatial
+  - extrema
+  - inspect
+- uid: PDDL003
+  name: Inspect every target in room class
+  question_type: pddl_inspect_every_target_in_room_class
+  overlap_class: related
+  question: Inspect all the cabinets in all the kitchens.
+  solution: (and (safe O1) (safe O4))
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - hierarchy
+  - universal
+  - inspect
+- uid: PDDL004
+  name: Visit rooms with both classes
+  question_type: pddl_visit_rooms_with_both_classes
+  overlap_class: related
+  question: Visit every room containing at least one plant and at least one window.
+  solution: (and (visited-region R3) (visited-region R4) (visited-region R8))
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - hierarchy
+  - conjunction
+  - universal
+  - visit
+- uid: PDDL005
+  name: End in max count room
+  question_type: pddl_end_in_max_count_room
+  overlap_class: related
+  question: Finish in any bedroom tied for the most laptops.
+  solution: (in-region R9)
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - hierarchy
+  - aggregation
+  - extrema
+  - final_location
+- uid: PDDL006
+  name: Visit one target per room
+  question_type: pddl_visit_one_target_per_room
+  overlap_class: related
+  question: Visit at least one desk in each bedroom that has any.
+  solution: (and (visited-object O94) (visited-object O89))
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - hierarchy
+  - quantifier_scope
+  - conjunction
+  - disjunction
+- uid: PDDL007
+  name: Inspect and hold same choice
+  question_type: pddl_inspect_and_hold_same_choice
+  overlap_class: related
+  question: Choose any ceiling light in any hallway, inspect it, and finish holding that same item.
+  solution: (or (and (safe O104) (holding O104)) (and (safe O105) (holding O105)))
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - hierarchy
+  - correlated_choice
+  - inspect
+  - manipulation
+- uid: PDDL008
+  name: Inspect choice end in same room
+  question_type: pddl_inspect_choice_end_in_same_room
+  overlap_class: related
+  question: Choose any sink in any bathroom, inspect it, and finish in that same room.
+  solution: (or (and (safe O54) (in-region R6)) (and (safe O59) (in-region R12)) (and (safe O64) (in-region
+    R13)))
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - hierarchy
+  - correlated_choice
+  - inspect
+  - final_location
+- uid: PDDL009
+  name: Visit all near reference class
+  question_type: pddl_visit_all_near_reference_class
+  overlap_class: related
+  question: Visit all the lamps within 6.78 meters of at least one shelf.
+  solution: (and (visited-object O35) (visited-object O69) (visited-object O71) (visited-object O76) (visited-object
+    O82))
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - spatial
+  - universal
+  - existential
+  - visit
+- uid: PDDL010
+  name: Inspect near target far from excluded
+  question_type: pddl_inspect_near_target_far_from_excluded
+  overlap_class: related
+  question: Inspect all the beds within 8.00 meters of at least one dresser and more than 8.00 meters
+    from every car.
+  solution: (and (safe O67) (safe O80))
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - spatial
+  - anti_join
+  - universal
+  - inspect
+- uid: PDDL011
+  name: Move unique target to reference place
+  question_type: pddl_move_unique_target_to_reference_place
+  overlap_class: related
+  question: Move the only shelf found across all garages to the same mapped location as the only plant
+    found across all studies.
+  solution: (object-in-place O48 P742)
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - hierarchy
+  - reference_resolution
+  - manipulation
+- uid: PDDL012
+  name: Move any target beside selected reference
+  question_type: pddl_move_any_target_beside_selected_reference
+  overlap_class: related
+  question: Choose any desk in any bedroom and move any laptop that shares no room with it to its mapped
+    location.
+  solution: (or (object-in-place O34 P1272) (object-in-place O34 P1316) (object-in-place O91 P1316))
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - hierarchy
+  - correlated_choice
+  - manipulation
+- uid: PDDL013
+  name: Move all to one shared destination
+  question_type: pddl_move_all_to_one_shared_destination
+  overlap_class: related
+  question: Move all the windows in all the lounges to one shared mapped location containing at least
+    one trash can inside any bathroom. You may choose the destination.
+  solution: (or (and (object-in-place O29 P827) (object-in-place O30 P827)) (and (object-in-place O29
+    P1453) (object-in-place O30 P1453)) (and (object-in-place O29 P1460) (object-in-place O30 P1460)))
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - hierarchy
+  - quantifier_scope
+  - manipulation
+  - shared_destination
+- uid: PDDL014
+  name: Move each to independent destination
+  question_type: pddl_move_each_to_independent_destination
+  overlap_class: related
+  question: Move all the books in all the bedrooms to mapped locations containing at least one ceiling
+    light inside any hallway. Each item may use a different destination.
+  solution: (and (or (object-in-place O96 P987) (object-in-place O96 P1664)) (or (object-in-place O100
+    P987) (object-in-place O100 P1664)))
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - hierarchy
+  - quantifier_scope
+  - manipulation
+  - independent_destinations
+- uid: PDDL015
+  name: Move each to nearest reference place
+  question_type: pddl_move_each_to_nearest_reference_place
+  overlap_class: related
+  question: Move each window in any lounge to the mapped location of its nearest ceiling light. Use the
+    original positions to find nearest matches. Any tied match is allowed.
+  solution: (and (object-in-place O29 P987) (object-in-place O30 P1664))
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - spatial
+  - hierarchy
+  - correlated_choice
+  - manipulation
+- uid: PDDL016
+  name: Inspect nearest target per room
+  question_type: pddl_inspect_nearest_target_per_room
+  overlap_class: related
+  question: In every bedroom containing both nightstands and beds, inspect any of its nightstands tied
+    for closest to any of its beds.
+  solution: (and (safe O78) (safe O81) (or (safe O68) (safe O70)) (or (safe O73) (safe O75)))
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - hierarchy
+  - grouped_extrema
+  - quantifier_scope
+  - inspect
+- uid: PDDL017
+  name: Visit target rooms avoid excluded class
+  question_type: pddl_visit_target_rooms_avoid_excluded_class
+  overlap_class: related
+  question: Visit every room containing at least one laptop, without ever entering any exterior path.
+  solution: (and (and (visited-region R4) (visited-region R9)) (not (visited-region R16)))
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - hierarchy
+  - universal
+  - negation
+  - visit
+- uid: PDDL018
+  name: End in room without excluded object
+  question_type: pddl_end_in_room_without_excluded_object
+  overlap_class: related
+  question: Finish in any bedroom containing at least one window but no toy boxes.
+  solution: (or (in-region R8) (in-region R9) (in-region R10))
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - hierarchy
+  - anti_join
+  - final_location
+- uid: PDDL019
+  name: Finish holding no scoped target
+  question_type: pddl_finish_holding_no_scoped_target
+  overlap_class: related
+  question: Finish without holding any of the windows originally in any lounge.
+  solution: (and (not (holding O29)) (not (holding O30)))
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - hierarchy
+  - negation
+  - universal
+  - manipulation
+- uid: PDDL020
+  name: Visit choice leave same object unheld
+  question_type: pddl_visit_choice_leave_same_object_unheld
+  overlap_class: related
+  question: Choose any desk in any bedroom to visit, and finish without holding that same item.
+  solution: (or (and (visited-object O89) (not (holding O89))) (and (visited-object O94) (not (holding
+    O94))))
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - hierarchy
+  - correlated_choice
+  - negation
+  - visit
+- uid: PDDL021
+  name: Alternative universal tasks
+  question_type: pddl_alternative_universal_tasks
+  overlap_class: related
+  question: Either inspect all the trash cans in all the bathrooms, or visit all the lamps in all the
+    bedrooms. Either whole task is sufficient.
+  solution: (or (and (safe O56) (safe O61) (safe O66)) (and (visited-object O69) (visited-object O71)
+    (visited-object O74) (visited-object O76) (visited-object O79) (visited-object O82)))
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - hierarchy
+  - universal
+  - conjunction
+  - disjunction
+- uid: PDDL022
+  name: Inspections with destination alternative
+  question_type: pddl_inspections_with_destination_alternative
+  overlap_class: related
+  question: Inspect all the windows in all the lounges, and finish either in any hallway or beside any
+    sink.
+  solution: (and (and (safe O29) (safe O30)) (or (or (in-region R7) (in-region R14)) (or (at-object O5)
+    (at-object O42) (at-object O54) (at-object O59) (at-object O64))))
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - hierarchy
+  - universal
+  - conjunction
+  - disjunction
+  - final_location
+- uid: PDDL023
+  name: Choose room inspect all its targets
+  question_type: pddl_choose_room_inspect_all_its_targets
+  overlap_class: related
+  question: Choose one bedroom containing at least one lamp. Inspect all its lamps and finish in that
+    same room.
+  solution: (or (and (safe O79) (in-region R10)) (and (safe O82) (in-region R11)) (and (and (safe O69)
+    (safe O71)) (in-region R8)) (and (and (safe O74) (safe O76)) (in-region R9)))
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - hierarchy
+  - correlated_choice
+  - quantifier_scope
+  - final_location
+- uid: PDDL024
+  name: Visit target rooms without excluded
+  question_type: pddl_visit_target_rooms_without_excluded
+  overlap_class: related
+  question: Visit every bathroom containing at least one toilet and no bathtubs.
+  solution: (and (visited-region R6) (visited-region R13))
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - hierarchy
+  - anti_join
+  - negation
+  - universal
+  - visit
+- uid: PDDL025
+  name: Inspect hop reachable targets
+  question_type: pddl_inspect_hop_reachable_targets
+  overlap_class: related
+  question: Inspect all the toilets at locations in the 2D network within 83 connections of the location
+    of the only desk found across all studies.
+  solution: (and (safe O53) (safe O58))
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - hierarchy
+  - connectivity
+  - universal
+  - inspect
+- uid: PDDL026
+  name: End at minimum hop reference place
+  question_type: pddl_end_at_minimum_hop_reference_place
+  overlap_class: absent
+  question: Finish at any location containing at least one wardrobe in the 2D network that takes the fewest
+    connections to reach from the location of the only laptop found across all studies.
+  solution: (at-place P1361)
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - connectivity
+  - shortest_path
+  - extrema
+  - final_location
+- uid: PDDL027
+  name: Hold minimum hop target
+  question_type: pddl_hold_minimum_hop_target
+  overlap_class: absent
+  question: Finish holding any chair whose location in the 2D network takes the fewest connections to
+    reach from the location of the only cabinet found across all lounges.
+  solution: (holding O32)
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - connectivity
+  - shortest_path
+  - manipulation
+- uid: PDDL028
+  name: Inspect minimax target
+  question_type: pddl_inspect_minimax_target
+  overlap_class: absent
+  question: Inspect any toilet with the smallest distance to its farthest wardrobe.
+  solution: (safe O58)
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - spatial
+  - minimax
+  - inspect
+- uid: PDDL029
+  name: Move one target per source room
+  question_type: pddl_move_one_target_per_source_room
+  overlap_class: related
+  question: From each hallway containing at least one ceiling light, move at least one of its ceiling
+    lights to the mapped location of the only chair found across all studies.
+  solution: (and (object-in-place O105 P695) (object-in-place O104 P695))
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - hierarchy
+  - quantifier_scope
+  - manipulation
+- uid: PDDL030
+  name: Inspect at least two targets
+  question_type: pddl_inspect_at_least_two_targets
+  overlap_class: absent
+  question: Ensure at least two distinct trash cans originally in any bathroom have been inspected.
+  solution: (or (and (safe O56) (safe O61)) (and (safe O56) (safe O66)) (and (safe O61) (safe O66)))
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - hierarchy
+  - cardinality
+  - conjunction
+  - disjunction
+  - inspect
+- uid: PDDL031
+  name: Inspect targets above reference
+  question_type: pddl_inspect_targets_above_reference
+  overlap_class: absent
+  question: Inspect all the sinks whose centers are higher than the center of the only bookcase.
+  solution: (and (safe O5) (safe O42) (safe O59) (safe O64))
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - spatial
+  - height
+  - universal
+  - inspect
+- uid: PDDL032
+  name: Hold target closer to first reference
+  question_type: pddl_hold_target_closer_to_first_reference
+  overlap_class: related
+  question: Finish holding any plant closer to the only shoe cabinet than to the only washer.
+  solution: (or (holding O28) (holding O37))
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - spatial
+  - distance_comparison
+  - manipulation
+- uid: PDDL033
+  name: Inspect mutual nearest pair
+  question_type: pddl_inspect_mutual_nearest_pair
+  overlap_class: absent
+  question: Choose one pair consisting of one bed and one book that are each other's nearest match from
+    the other kind, and inspect both. Tied nearest matches are allowed.
+  solution: (or (and (safe O27) (safe O72)) (and (safe O77) (safe O96)) (and (safe O80) (safe O100)))
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - spatial
+  - mutual_nearest
+  - correlated_choice
+  - inspect
+- uid: PDDL034
+  name: Inspect closest pair in room class
+  question_type: pddl_inspect_closest_pair_in_room_class
+  overlap_class: related
+  question: Among pairs consisting of one chair and one window in the same kitchen, choose any closest
+    pair and inspect both members.
+  solution: (and (safe O9) (safe O18))
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - spatial
+  - hierarchy
+  - pairs
+  - correlated_choice
+  - inspect
+- uid: PDDL035
+  name: End in highest target fraction room
+  question_type: pddl_end_in_highest_target_fraction_room
+  overlap_class: absent
+  question: Finish in any nonempty bedroom where beds make up the largest proportion of the contents.
+  solution: (or (in-region R10) (in-region R11))
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - hierarchy
+  - ratio
+  - extrema
+  - final_location
+- uid: PDDL036
+  name: Visit rooms with exact target count
+  question_type: pddl_visit_rooms_with_exact_target_count
+  overlap_class: related
+  question: Visit every bathroom containing exactly 1 shower.
+  solution: (and (visited-region R6) (visited-region R13))
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - hierarchy
+  - exact_cardinality
+  - universal
+  - visit
+- uid: PDDL037
+  name: Visit adjacent rooms without target
+  question_type: pddl_visit_adjacent_rooms_without_target
+  overlap_class: related
+  question: Visit every room that contains no shelves and is directly connected to at least one exterior
+    path.
+  solution: (and (visited-region R2) (visited-region R7))
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - connectivity
+  - hierarchy
+  - anti_join
+  - universal
+  - visit
+- uid: PDDL038
+  name: Visit connected room pair
+  question_type: pddl_visit_connected_room_pair
+  overlap_class: related
+  question: Choose any directly connected pair consisting of one hallway and one bathroom. Visit the former
+    and finish in the latter.
+  solution: (or (and (visited-region R14) (in-region R12)) (and (visited-region R7) (in-region R6)))
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - connectivity
+  - correlated_choice
+  - visit
+  - final_location
+- uid: PDDL039
+  name: Inspect one target in each room category
+  question_type: pddl_inspect_one_target_in_each_room_category
+  overlap_class: related
+  question: Inspect at least one window in any lounge and at least one in any bedroom.
+  solution: (and (or (safe O29) (safe O30)) (or (safe O87) (safe O92) (safe O97) (safe O102)))
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - hierarchy
+  - quantifier_scope
+  - conjunction
+  - disjunction
+  - inspect
+- uid: PDDL040
+  name: Hold either class in room class
+  question_type: pddl_hold_either_class_in_room_class
+  overlap_class: related
+  question: From the bedrooms, choose either one book or one chair, and finish holding it.
+  solution: (or (holding O90) (holding O95) (holding O96) (holding O100))
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - hierarchy
+  - class_union
+  - disjunction
+  - manipulation
+- uid: PDDL041
+  name: Inspect all or hold and end in same room
+  question_type: pddl_inspect_all_or_hold_and_end_in_same_room
+  overlap_class: related
+  question: Either inspect all the cabinets in all the kitchens, or choose any toilet in any bathroom,
+    finish holding it, and finish in that same room.
+  solution: (or (and (safe O1) (safe O4)) (or (and (holding O53) (in-region R6)) (and (holding O58) (in-region
+    R12)) (and (holding O63) (in-region R13))))
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - hierarchy
+  - universal
+  - correlated_choice
+  - disjunction
+  - manipulation
+- uid: PDDL042
+  name: Keep target out of reference places
+  question_type: pddl_keep_target_out_of_reference_places
+  overlap_class: related
+  question: Ensure the only kettle does not end up at the same mapped location as any cabinet.
+  solution: (and (not (object-in-place O15 P193)) (not (object-in-place O15 P202)) (not (object-in-place
+    O15 P641)) (not (object-in-place O15 P808)))
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - hierarchy
+  - negation
+  - universal
+  - manipulation
+- uid: PDDL043
+  name: Inspect choice without holding excluded
+  question_type: pddl_inspect_choice_without_holding_excluded
+  overlap_class: related
+  question: Inspect any ceiling light in any hallway, and finish without holding any wardrobe.
+  solution: (and (or (safe O104) (safe O105)) (and (not (holding O83)) (not (holding O88)) (not (holding
+    O93)) (not (holding O98))))
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - hierarchy
+  - conjunction
+  - disjunction
+  - negation
+  - inspect
+  - manipulation
+- uid: PDDL044
+  name: End adjacent to reference avoid category
+  question_type: pddl_end_adjacent_to_reference_avoid_category
+  overlap_class: related
+  question: Finish in any hallway directly connected to the room containing the only laundry basket, without
+    ever entering any study.
+  solution: (and (in-region R7) (not (visited-region R4)))
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - connectivity
+  - hierarchy
+  - negation
+  - final_location
+- uid: PDDL045
+  name: Visit nearby locations except start
+  question_type: pddl_visit_nearby_locations_except_start
+  overlap_class: related
+  question: Visit every other location in the 2D network within 2 connections of the location of the only
+    dining table.
+  solution: (and (visited-place P370) (visited-place P371) (visited-place P372) (visited-place P381) (visited-place
+    P382) (visited-place P383) (visited-place P392) (visited-place P393) (visited-place P403) (visited-place
+    P404) (visited-place P405) (visited-place P414) (visited-place P415) (visited-place P416))
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - connectivity
+  - reference_resolution
+  - universal
+  - visit
+- uid: PDDL046
+  name: Visit one per room end at reference
+  question_type: pddl_visit_one_per_room_end_at_reference
+  overlap_class: related
+  question: Visit at least one ceiling light in each hallway that has any, and finish beside the only
+    detergent.
+  solution: (and (and (visited-object O105) (visited-object O104)) (at-object O43))
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - hierarchy
+  - quantifier_scope
+  - conjunction
+  - final_location
+- uid: PDDL047
+  name: Choose room choose complete task
+  question_type: pddl_choose_room_choose_complete_task
+  overlap_class: related
+  question: Choose one bathroom containing both showers and mirrors. In that room, either inspect all
+    its showers or visit all its mirrors.
+  solution: (or (or (safe O62) (visited-object O65)) (or (safe O52) (visited-object O55)))
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - hierarchy
+  - correlated_choice
+  - universal
+  - disjunction
+- uid: PDDL048
+  name: Move target to minimum hop reference
+  question_type: pddl_move_target_to_minimum_hop_reference
+  overlap_class: absent
+  question: Move the only armchair to a location containing at least one nightstand, choosing a reachable
+    destination that takes the fewest connections from the armchair's current location in the 2D network.
+  solution: (object-in-place O21 P1287)
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - connectivity
+  - shortest_path
+  - manipulation
+- uid: PDDL049
+  name: Move each target to neighbor location
+  question_type: pddl_move_each_target_to_neighbor_location
+  overlap_class: related
+  question: Move every cabinet in any kitchen to a location directly connected to its current location
+    in the 2D network. Each item may use a different destination.
+  solution: (and (or (object-in-place O1 P192) (object-in-place O1 P194) (object-in-place O1 P209) (object-in-place
+    O1 P210) (object-in-place O1 P211)) (or (object-in-place O4 P201) (object-in-place O4 P203) (object-in-place
+    O4 P218) (object-in-place O4 P219) (object-in-place O4 P220)))
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - connectivity
+  - hierarchy
+  - quantifier_scope
+  - manipulation
+- uid: PDDL050
+  name: Inspect targets in allowed room component
+  question_type: pddl_inspect_targets_in_allowed_room_component
+  overlap_class: absent
+  question: Inspect all the mirrors in rooms reachable from the room containing the only fruit bowl without
+    passing through any bedroom.
+  solution: (and (safe O55) (safe O60))
+  correctness_comparator:
+    comparison_type: PDDL
+    relation: equal
+  tags:
+  - connectivity
+  - constrained_reachability
+  - hierarchy
+  - universal
+  - inspect

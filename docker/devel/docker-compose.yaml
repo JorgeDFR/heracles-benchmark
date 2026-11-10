@@ -77,7 +77,7 @@ services:
     networks: [heracles_net]
     stdin_open: true
     tty: true
-    entrypoint: [ipython, -i, /heracles/examples/load_scene_graph.py, --, --scene_graph, /data/scene_graphs/example_dsg.json]
+    entrypoint: [ipython, -i, /heracles/examples/load_scene_graph.py, --, --scene_graph, /data/scene_graphs/spark_dsg_example.json]
 
   # Developing container for test heracles_agents example scripts
   heracles_dev:

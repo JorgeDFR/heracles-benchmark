@@ -1,0 +1,709 @@
+---
+questions:
+- uid: QA001
+  name: Class count in room class
+  question_type: qa_class_count_in_room_class
+  overlap_class: direct
+  question: How many sinks are in the bathrooms?
+  solution: '3'
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - hierarchy
+  - count
+  - class
+- uid: QA002
+  name: Class near class
+  question_type: qa_class_near_class
+  overlap_class: direct
+  question: Which mirrors are at most 6.59 meters from at least one car?
+  solution: <O60>
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - spatial
+  - radius
+  - existential
+- uid: QA003
+  name: Closest class pairs in room class
+  question_type: qa_closest_class_pairs_in_room_class
+  overlap_class: related
+  question: Among pairs consisting of one ceiling light and one chair in the same kitchen, which are closest
+    together? Include all ties.
+  solution: <[O11, O19]>
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+    unordered_pairs: true
+  tags:
+  - spatial
+  - pairs
+  - hierarchy
+  - ties
+- uid: QA004
+  name: Counts per room
+  question_type: qa_counts_per_room
+  overlap_class: related
+  question: How many shoe cabinets are in each hallway? Include zero counts.
+  solution: '{R14: 0, R7: 1}'
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - hierarchy
+  - grouped_count
+  - zero
+- uid: QA005
+  name: Rooms with both classes
+  question_type: qa_rooms_with_both_classes
+  overlap_class: related
+  question: Which bedrooms contain at least one chair and at least one book?
+  solution: <R10>
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - hierarchy
+  - intersection
+  - existential
+- uid: QA006
+  name: Rooms with target without excluded
+  question_type: qa_rooms_with_target_without_excluded
+  overlap_class: related
+  question: Which rooms contain at least one cabinet but no kitchen islands?
+  solution: <R3, R5>
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - hierarchy
+  - anti_join
+  - negation
+- uid: QA007
+  name: Rooms with exact count
+  question_type: qa_rooms_with_exact_count
+  overlap_class: related
+  question: Which bathrooms contain exactly 1 bathtub?
+  solution: <R12>
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - hierarchy
+  - grouped_count
+  - exact_cardinality
+- uid: QA008
+  name: Classes in every room
+  question_type: qa_classes_in_every_room
+  overlap_class: absent
+  question: Which kinds of objects can be found in every bathroom?
+  solution: <mirror, sink, toilet, trash>
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - hierarchy
+  - universal
+  - relational_division
+- uid: QA009
+  name: Objects sharing place
+  question_type: qa_objects_sharing_place
+  overlap_class: related
+  question: Which mirrors share a mapped location with at least one sink inside any bathroom?
+  solution: <O55>
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - hierarchy
+  - shared_parent
+  - class
+- uid: QA010
+  name: Rooms with most targets
+  question_type: qa_rooms_with_most_targets
+  overlap_class: related
+  question: Which bathrooms have the most showers? Include all ties.
+  solution: <R6, R13>
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - hierarchy
+  - aggregation
+  - extrema
+- uid: QA011
+  name: Rooms with highest target fraction
+  question_type: qa_rooms_with_highest_target_fraction
+  overlap_class: absent
+  question: In which nonempty bedrooms do wardrobes make up the largest proportion of the contents? Include
+    all ties.
+  solution: <R10, R11>
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - hierarchy
+  - ratio
+  - extrema
+- uid: QA012
+  name: Classes shared between room classes
+  question_type: qa_classes_shared_between_room_classes
+  overlap_class: related
+  question: Which kinds of objects occur in both the utilities and the bedrooms?
+  solution: <window>
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - hierarchy
+  - class_inventory
+  - intersection
+- uid: QA013
+  name: Classes exclusive between room classes
+  question_type: qa_classes_exclusive_between_room_classes
+  overlap_class: related
+  question: Which kinds of objects occur in the studies but in none of the bathrooms?
+  solution: <bookcase, chair, desk, lamp, laptop, plant, window>
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - hierarchy
+  - class_inventory
+  - difference
+- uid: QA014
+  name: Place counts in content selected room
+  question_type: qa_place_counts_in_content_selected_room
+  overlap_class: related
+  question: How many mapped locations are directly inside the bedroom containing the only plant found
+    across all bedrooms? Count both 2D and 3D locations.
+  solution: '67'
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - hierarchy
+  - reference_resolution
+  - place_union
+  - count
+- uid: QA015
+  name: Targets nearer external reference
+  question_type: qa_targets_nearer_external_reference
+  overlap_class: related
+  question: Which wardrobes are closer to a nightstand outside their room than to the nearest nightstand
+    inside it? Only consider wardrobes whose room contains at least one nightstand.
+  solution: <O93>
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - hierarchy
+  - spatial
+  - correlated_minima
+  - room_scope
+- uid: QA016
+  name: Nearest targets per room
+  question_type: qa_nearest_targets_per_room
+  overlap_class: related
+  question: For each bedroom containing both lamps and wardrobes, which of its lamps are closest to any
+    of its wardrobes? Include all ties.
+  solution: '{R10: <O79>, R11: <O82>, R8: <O71>, R9: <O74>}'
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - hierarchy
+  - spatial
+  - grouped_extrema
+- uid: QA017
+  name: Nearest to room disambiguated reference
+  question_type: qa_nearest_to_room_disambiguated_reference
+  overlap_class: related
+  question: Which desks anywhere in the scene are closest to the only cabinet found across all utilities?
+    Include all ties.
+  solution: <O31>
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - reference_resolution
+  - hierarchy
+  - spatial
+  - global_scope
+- uid: QA018
+  name: Global farthest from selected room
+  question_type: qa_global_farthest_from_selected_room
+  overlap_class: related
+  question: Which beds anywhere in the scene are farthest from the center of the bedroom containing the
+    only shelf found across all bedrooms? Include all ties.
+  solution: <O77>
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - reference_resolution
+  - spatial
+  - farthest
+  - global_scope
+- uid: QA019
+  name: Targets near every reference
+  question_type: qa_targets_near_every_reference
+  overlap_class: related
+  question: Which nightstands are at most 6.86 meters from every laptop?
+  solution: <O75>
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - spatial
+  - universal
+  - radius
+- uid: QA020
+  name: Targets near no reference
+  question_type: qa_targets_near_no_reference
+  overlap_class: related
+  question: Which trash cans are more than 1.48 meters from every toilet?
+  solution: <O17, O36, O61>
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - spatial
+  - anti_join
+  - radius
+- uid: QA021
+  name: Mean nearest reference distance
+  question_type: qa_mean_nearest_reference_distance
+  overlap_class: absent
+  question: What is the average distance in meters from each trash can to its nearest shower?
+  solution: '4.58'
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - spatial
+  - nested_aggregation
+  - mean
+- uid: QA022
+  name: Minimax target
+  question_type: qa_minimax_target
+  overlap_class: absent
+  question: Which toilets have the smallest distance to their farthest laptop? Include all ties.
+  solution: <O63>
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - spatial
+  - nested_aggregation
+  - minimax
+- uid: QA023
+  name: Top targets per room
+  question_type: qa_top_targets_per_room
+  overlap_class: related
+  question: For each kitchen containing both chairs and trash cans, which are its 2 chairs closest to
+    any of its trash cans? Include ties at the cutoff.
+  solution: '{R2: <O12, O13>}'
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - hierarchy
+  - spatial
+  - grouped_ranking
+- uid: QA024
+  name: Closest pair in different rooms
+  question_type: qa_closest_pair_in_different_rooms
+  overlap_class: related
+  question: Which pairs consisting of one coffee table and one cabinet are closest together, if both belong
+    to rooms but share no room? Include all ties.
+  solution: <[O22, O41]>
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+    unordered_pairs: true
+  tags:
+  - spatial
+  - pairs
+  - hierarchy
+  - anti_join
+- uid: QA025
+  name: Targets within place hops
+  question_type: qa_targets_within_place_hops
+  overlap_class: related
+  question: Which books are at locations in the 2D network within 98 connections of the location of the
+    only window found across all utilities?
+  solution: <O27, O96>
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - hierarchy
+  - connectivity
+  - reference_resolution
+- uid: QA026
+  name: Target count within place hops
+  question_type: qa_target_count_within_place_hops
+  overlap_class: related
+  question: How many sinks are at locations in the 2D network within 65 connections of the location of
+    the only lamp found across all studies?
+  solution: '3'
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - hierarchy
+  - connectivity
+  - count
+- uid: QA027
+  name: Room hops between content anchors
+  question_type: qa_room_hops_between_content_anchors
+  overlap_class: absent
+  question: How many room connections are needed on a shortest route from the room containing the only
+    bathtub to the room containing the only television?
+  solution: '4'
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - reference_resolution
+  - connectivity
+  - shortest_path
+- uid: QA028
+  name: Shortest room route avoiding class
+  question_type: qa_shortest_room_route_avoiding_class
+  overlap_class: absent
+  question: What is one shortest room-by-room route from the room containing the only toolbox to the room
+    containing the only toy box, without entering any lounge? Include both endpoints.
+  solution: '[R1, R16, R7, R15, R14, R11]'
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - connectivity
+  - constrained_path
+  - negation
+- uid: QA029
+  name: Reachable target rooms avoiding class
+  question_type: qa_reachable_target_rooms_avoiding_class
+  overlap_class: related
+  question: From the room containing the only kettle, which other rooms containing at least one shelf
+    can be reached without entering any hallway?
+  solution: <R1>
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - connectivity
+  - hierarchy
+  - constrained_reachability
+- uid: QA030
+  name: Critical rooms between anchors
+  question_type: qa_critical_rooms_between_anchors
+  overlap_class: absent
+  question: Which intermediate rooms must every route pass through between the room containing the only
+    box and the room containing the only kitchen island?
+  solution: <R16>
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - connectivity
+  - vertex_cut
+  - universal_paths
+- uid: QA031
+  name: Rooms with most distinct classes
+  question_type: qa_rooms_with_most_distinct_classes
+  overlap_class: related
+  question: Which hallways contain the most different kinds of objects? Include all ties.
+  solution: <R7>
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - hierarchy
+  - distinct_count
+  - extrema
+- uid: QA032
+  name: Rooms with more targets than references
+  question_type: qa_rooms_with_more_targets_than_references
+  overlap_class: related
+  question: Which bedrooms contain more alarm clocks than toy boxes?
+  solution: <R8>
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - hierarchy
+  - grouped_count
+  - comparison
+- uid: QA033
+  name: Class histogram in room class
+  question_type: qa_class_histogram_in_room_class
+  overlap_class: related
+  question: How many of each kind of thing are there across all the kitchens?
+  solution: '{cabinet: 2, ceiling_light: 1, chair: 6, cooktop: 1, dining_table: 1, fridge: 1, fruit_bowl:
+    1, kettle: 1, kitchen_island: 1, oven: 1, sink: 1, trash: 1, window: 1}'
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - hierarchy
+  - histogram
+  - grouped_count
+- uid: QA034
+  name: Rarest classes in room class
+  question_type: qa_rarest_classes_in_room_class
+  overlap_class: related
+  question: Which kinds of objects are least common across all the garages? Include all ties and ignore
+    kinds that do not occur there.
+  solution: <bicycle, box, shelf, toolbox>
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - hierarchy
+  - grouped_count
+  - minima
+- uid: QA035
+  name: Targets in distance band
+  question_type: qa_targets_in_distance_band
+  overlap_class: related
+  question: Which mirrors are more than 4.70 but at most 4.72 meters from the only alarm clock?
+  solution: <O65>
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - spatial
+  - distance_band
+  - reference_resolution
+- uid: QA036
+  name: Targets closer to first reference
+  question_type: qa_targets_closer_to_first_reference
+  overlap_class: related
+  question: Which desks are closer to the only dresser than to the only alarm clock?
+  solution: <O31, O89>
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - spatial
+  - distance_comparison
+  - reference_resolution
+- uid: QA037
+  name: Targets near two reference classes
+  question_type: qa_targets_near_two_reference_classes
+  overlap_class: related
+  question: Which lamps are within 5.15 meters of at least one television and at least one shoe cabinet?
+  solution: <O26, O74>
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - spatial
+  - intersection
+  - existential
+- uid: QA038
+  name: Nearest targets outside reference room
+  question_type: qa_nearest_targets_outside_reference_room
+  overlap_class: related
+  question: Which plants are closest to the only sofa, excluding anything that shares a room with it?
+    Include all ties.
+  solution: <O37>
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - spatial
+  - hierarchy
+  - anti_join
+  - extrema
+- uid: QA039
+  name: Mutual nearest class pairs
+  question_type: qa_mutual_nearest_class_pairs
+  overlap_class: absent
+  question: Which pairs of one nightstand and one mirror are each other's nearest match from the other
+    kind? Include tied nearest matches.
+  solution: <[O55, O70], [O60, O78]>
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+    unordered_pairs: true
+  tags:
+  - spatial
+  - pairs
+  - mutual_nearest
+- uid: QA040
+  name: Closest class pairs per room
+  question_type: qa_closest_class_pairs_per_room
+  overlap_class: related
+  question: For each bedroom containing both lamps and windows, which pairs consisting of one of each
+    are closest together? Include all ties.
+  solution: '{R10: <[O79, O97]>, R11: <[O82, O102]>, R8: <[O71, O87]>, R9: <[O76, O92]>}'
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+    unordered_pairs: true
+  tags:
+  - spatial
+  - hierarchy
+  - grouped_extrema
+  - pairs
+- uid: QA041
+  name: Nearby target counts per reference
+  question_type: qa_nearby_target_counts_per_reference
+  overlap_class: related
+  question: For each chair in any kitchen, how many bookcases anywhere in the scene are within 7.87 meters
+    of it?
+  solution: '{O10: 1, O11: 1, O12: 1, O13: 1, O14: 1, O9: 0}'
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - spatial
+  - hierarchy
+  - grouped_count
+- uid: QA042
+  name: Rooms adjacent to two room classes
+  question_type: qa_rooms_adjacent_to_two_room_classes
+  overlap_class: related
+  question: Which rooms are directly connected to at least one exterior path and at least one hallway?
+  solution: <R2>
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - connectivity
+  - intersection
+  - existential
+- uid: QA043
+  name: Rooms with only allowed neighbors
+  question_type: qa_rooms_with_only_allowed_neighbors
+  overlap_class: related
+  question: Which rooms have at least one direct neighbor and are connected only to exterior paths?
+  solution: <R1>
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - connectivity
+  - universal
+  - class
+- uid: QA044
+  name: Target rooms within room hops
+  question_type: qa_target_rooms_within_room_hops
+  overlap_class: related
+  question: Which other rooms containing at least one shelf are within 3 room connections of the room
+    containing the only armchair?
+  solution: <R1>
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - connectivity
+  - hierarchy
+  - bounded_reachability
+- uid: QA045
+  name: Common place hop neighborhood
+  question_type: qa_common_place_hop_neighborhood
+  overlap_class: related
+  question: Which locations in the 2D network are within 32 connections of both the location of the only
+    oven and the location of the only dryer?
+  solution: <P189, P190, P191, P205, P206, P207, P208, P222, P223, P224, P225, P226, P227, P228, P229,
+    P230, P234, P235, P236, P237, P238, P239, P243, P244, P245, P246, P247, P248, P252, P253, P254, P255,
+    P256, P257, P261, P262, P263, P264, P265, P266, P270, P271, P272, P273, P274, P275, P279, P280, P281,
+    P282, P283, P284, P294, P295, P296, P297, P298, P299, P300, P301, P302, P303, P304, P305, P306, P316,
+    P317, P318, P319, P320, P321, P322, P323, P324, P325, P326, P327, P328, P335, P336, P337, P338, P339,
+    P340, P341, P348, P349, P350, P351, P352, P353, P354, P361, P362, P363, P364, P365, P366, P367, P373,
+    P374, P375, P376, P377, P378, P384, P385, P386, P387, P388, P389, P395, P396, P397, P398, P399, P400,
+    P406, P407, P408, P409, P410, P411, P417, P418, P419, P420, P421, P422, P428, P429, P430, P431, P432,
+    P433, P440, P441, P442, P443, P444, P445, P446, P453, P454, P455, P456, P457, P458, P459, P463, P464,
+    P465, P466, P467, P468, P469, P482, P483, P484, P485, P486, P487, P488, P771, P772, P773, P781, P782,
+    P783, P791, P792, P793, P801, P802, P803, P811, P812, P813, P856, P857, P858, P859, P860, P861, P862,
+    P863, P864, P865, P866, P867, P868, P869, P870, P871, P872, P873, P874, P875, P876, P877, P878, P879,
+    P880, P881, P882, P883, P884, P885, P886, P887, P888, P889, P890, P891, P892, P893, P894, P895, P896,
+    P897, P898, P899, P900, P901, P902, P903, P904, P905, P906, P907, P908, P909, P910, P911, P912, P913,
+    P914, P915, P916, P2056, P2057, P2058, P2059, P2063, P2064, P2065, P2066, P2070, P2071, P2072, P2073,
+    P2077, P2078, P2079, P2080, P2084, P2085, P2086, P2087, P2130, P2131, P2132, P2133, P2134, P2137,
+    P2138, P2139>
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - connectivity
+  - intersection
+  - reference_resolution
+- uid: QA046
+  name: Minimum length place route
+  question_type: qa_minimum_length_place_route
+  overlap_class: absent
+  question: What is the length in meters of a shortest route through the 2D network between the locations
+    of the only fridge and the only bathtub? Measure each connection by the distance between its endpoints.
+  solution: '16.55'
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - connectivity
+  - weighted_shortest_path
+  - distance
+- uid: QA047
+  name: Room avoidance detour
+  question_type: qa_room_avoidance_detour
+  overlap_class: absent
+  question: How many extra room connections does a shortest route need between the rooms containing the
+    only side table and the only detergent when all bathrooms must be avoided?
+  solution: '0'
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - connectivity
+  - constrained_path
+  - distance_difference
+- uid: QA048
+  name: Room components after category removal
+  question_type: qa_room_components_after_category_removal
+  overlap_class: absent
+  question: If all stairses are removed from the room-connectivity map, how many disconnected groups of
+    rooms remain? Count isolated rooms as separate groups.
+  solution: '2'
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - connectivity
+  - components
+  - removal
+- uid: QA049
+  name: Rooms with all targets near references
+  question_type: qa_rooms_with_all_targets_near_references
+  overlap_class: related
+  question: Which bedrooms contain at least one nightstand and have every one of their nightstands within
+    0.45 meters of at least one of their lamps?
+  solution: <R9, R10, R11>
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - hierarchy
+  - spatial
+  - quantifier_scope
+  - universal
+- uid: QA050
+  name: Highest target in selected room
+  question_type: qa_highest_target_in_selected_room
+  overlap_class: absent
+  question: Which cars have the highest centers in the room containing the only bicycle? Include all ties.
+  solution: <O47>
+  correctness_comparator:
+    comparison_type: SLDP
+    relation: equal
+  tags:
+  - hierarchy
+  - spatial
+  - height
+  - extrema

@@ -5,7 +5,10 @@ questions:
   question_type: qa_object_class_inventory
   overlap_class: direct
   question: Give the complete set of object categories represented in this map.
-  solution: <appliance, bag, bed, bicycle, box, decor, food, light, seating, sign, storage, trash>
+  solution: <alarm_clock, armchair, bathtub, bed, bicycle, book, bookcase, box, cabinet, car, ceiling_light,
+    chair, coffee_table, cooktop, desk, detergent, dining_table, dresser, dryer, fridge, fruit_bowl, kettle,
+    kitchen_island, lamp, laptop, laundry_basket, mirror, nightstand, oven, plant, shelf, shoe_cabinet,
+    shower, side_table, sink, sofa, television, toilet, toolbox, toy_box, trash, wardrobe, washer, window>
   correctness_comparator:
     comparison_type: SLDP
     relation: equal
@@ -17,7 +20,7 @@ questions:
   question_type: qa_object_total
   overlap_class: direct
   question: How many object nodes does the scene contain?
-  solution: '65'
+  solution: '105'
   correctness_comparator:
     comparison_type: SLDP
     relation: equal
@@ -29,7 +32,7 @@ questions:
   question_type: qa_room_total
   overlap_class: direct
   question: What is the total number of mapped rooms?
-  solution: '5'
+  solution: '16'
   correctness_comparator:
     comparison_type: SLDP
     relation: equal
@@ -41,7 +44,7 @@ questions:
   question_type: qa_place_total
   overlap_class: direct
   question: Count all navigable place nodes, combining the 2D and 3D place layers.
-  solution: '96'
+  solution: '2190'
   correctness_comparator:
     comparison_type: SLDP
     relation: equal
@@ -53,7 +56,7 @@ questions:
   question_type: qa_room_class_inventory
   overlap_class: related
   question: Which distinct room categories occur in the scene?
-  solution: <hallway, lounge>
+  solution: <bathroom, bedroom, exterior_path, garage, hallway, kitchen, lounge, stairs, study, utility>
   correctness_comparator:
     comparison_type: SLDP
     relation: equal
@@ -65,8 +68,8 @@ questions:
   name: Object ids for class
   question_type: qa_object_ids_for_class
   overlap_class: related
-  question: Return the IDs of every object categorized as food in the map.
-  solution: <O8>
+  question: Return the IDs of every object categorized as mirror in the map.
+  solution: <O55, O60, O65>
   correctness_comparator:
     comparison_type: SLDP
     relation: equal
@@ -78,8 +81,8 @@ questions:
   name: Object count for class
   question_type: qa_object_count_for_class
   overlap_class: direct
-  question: How many seat objects are represented?
-  solution: '22'
+  question: How many shelf objects are represented?
+  solution: '2'
   correctness_comparator:
     comparison_type: SLDP
     relation: equal
@@ -91,9 +94,8 @@ questions:
   name: Object centers for class
   question_type: qa_object_centers_for_class
   overlap_class: direct
-  question: Report all 3D center points for the ornament objects.
-  solution: <POINT(-19.03 -3.96 0.58), POINT(-19.09 -4.18 0.56), POINT(-21.19 -21.22 0.62), POINT(3.66
-    -1.63 0.85), POINT(6.39 -4.99 -0.49)>
+  question: Report all 3D center points for the laptop objects.
+  solution: <POINT(15.05 9.40 0.77), POINT(16.10 1.35 3.57)>
   correctness_comparator:
     comparison_type: SLDP
     relation: equal
@@ -105,8 +107,8 @@ questions:
   name: Object class lookup
   question_type: qa_object_class_lookup
   overlap_class: direct
-  question: What semantic category is assigned to O251?
-  solution: seating
+  question: What semantic category is assigned to O90?
+  solution: chair
   correctness_comparator:
     comparison_type: SLDP
     relation: equal
@@ -118,8 +120,8 @@ questions:
   name: Object center lookup
   question_type: qa_object_center_lookup
   overlap_class: direct
-  question: Provide the recorded 3D center coordinates for scene object O17.
-  solution: POINT(-18.86 -4.15 0.05)
+  question: Provide the recorded 3D center coordinates for scene object O48.
+  solution: POINT(0.25 3.00 0.95)
   correctness_comparator:
     comparison_type: SLDP
     relation: equal
@@ -130,8 +132,8 @@ questions:
   name: Rooms for class
   question_type: qa_rooms_for_class
   overlap_class: related
-  question: List the room IDs categorized as passage.
-  solution: <R2, R3, R4, R5>
+  question: List the room IDs categorized as stairs.
+  solution: <R15>
   correctness_comparator:
     comparison_type: SLDP
     relation: equal
@@ -143,8 +145,8 @@ questions:
   name: Room center lookup
   question_type: qa_room_center_lookup
   overlap_class: related
-  question: Give the center point recorded for room R2.
-  solution: POINT(-14.76 -4.98 -0.53)
+  question: Give the center point recorded for room R12.
+  solution: POINT(9.65 4.95 2.80)
   correctness_comparator:
     comparison_type: SLDP
     relation: equal
@@ -155,8 +157,8 @@ questions:
   name: Parent place of object
   question_type: qa_parent_place_of_object
   overlap_class: direct
-  question: Which place nodes directly contain O36?
-  solution: <P8638>
+  question: Which place nodes directly contain O4?
+  solution: <P202>
   correctness_comparator:
     comparison_type: SLDP
     relation: equal
@@ -168,8 +170,8 @@ questions:
   name: Parent room of object
   question_type: qa_parent_room_of_object
   overlap_class: related
-  question: Following containment through places, which rooms contain O3?
-  solution: <R1>
+  question: Following containment through places, which rooms contain O53?
+  solution: <R6>
   correctness_comparator:
     comparison_type: SLDP
     relation: equal
@@ -181,8 +183,8 @@ questions:
   name: Parent room of place
   question_type: qa_parent_room_of_place
   overlap_class: related
-  question: Name every room that is a parent of place P3167.
-  solution: <R2>
+  question: Name every room that is a parent of place P1204.
+  solution: <R9>
   correctness_comparator:
     comparison_type: SLDP
     relation: equal
@@ -194,8 +196,8 @@ questions:
   name: Objects in room
   question_type: qa_objects_in_room
   overlap_class: direct
-  question: Which object IDs descend from room R4?
-  solution: <O95, O300>
+  question: Which object IDs descend from room R2?
+  solution: <O1, O2, O3, O4, O5, O6, O7, O8, O9, O10, O11, O12, O13, O14, O15, O16, O17, O18, O19>
   correctness_comparator:
     comparison_type: SLDP
     relation: equal
@@ -207,8 +209,8 @@ questions:
   name: Object classes in room
   question_type: qa_object_classes_in_room
   overlap_class: direct
-  question: What kinds of objects can be found inside R4?
-  solution: <light, sign>
+  question: What kinds of objects can be found inside R14?
+  solution: <ceiling_light>
   correctness_comparator:
     comparison_type: SLDP
     relation: equal
@@ -220,8 +222,8 @@ questions:
   name: Object count in room
   question_type: qa_object_count_in_room
   overlap_class: direct
-  question: Count the distinct object nodes contained under room R1.
-  solution: '27'
+  question: Count the distinct object nodes contained under room R2.
+  solution: '19'
   correctness_comparator:
     comparison_type: SLDP
     relation: equal
@@ -233,8 +235,8 @@ questions:
   name: Class objects in room
   question_type: qa_class_objects_in_room
   overlap_class: direct
-  question: Identify each signage located in R1.
-  solution: <O3, O255, O264, O283>
+  question: Identify each chair located in R2.
+  solution: <O9, O10, O11, O12, O13, O14>
   correctness_comparator:
     comparison_type: SLDP
     relation: equal
@@ -246,7 +248,7 @@ questions:
   name: Class count in room
   question_type: qa_class_count_in_room
   overlap_class: related
-  question: How many sign objects belong to R4?
+  question: How many bookcase objects belong to R4?
   solution: '1'
   correctness_comparator:
     comparison_type: SLDP
@@ -259,9 +261,37 @@ questions:
   name: Places in room
   question_type: qa_places_in_room
   overlap_class: related
-  question: Enumerate the place nodes immediately below R2.
-  solution: <P2541, P3095, P3105, P3166, P3167, P3195, P4389, P6219, P6255, P6397, P6567, P6665, P6726,
-    P7279, P7281, P7488, P9420, P9421, P67045, P67046, P67673, P67676>
+  question: Enumerate the place nodes immediately below R16.
+  solution: <P1711, P1712, P1713, P1714, P1715, P1716, P1717, P1718, P1719, P1720, P1721, P1722, P1723,
+    P1724, P1725, P1726, P1727, P1728, P1729, P1730, P1731, P1732, P1733, P1734, P1735, P1736, P1737,
+    P1738, P1739, P1740, P1741, P1742, P1743, P1744, P1745, P1746, P1747, P1748, P1749, P1750, P1751,
+    P1752, P1753, P1754, P1755, P1756, P1757, P1758, P1759, P1760, P1761, P1762, P1763, P1764, P1765,
+    P1766, P1767, P1768, P1769, P1770, P1771, P1772, P1773, P1774, P1775, P1776, P1777, P1778, P1779,
+    P1780, P1781, P1782, P1783, P1784, P1785, P1786, P1787, P1788, P1789, P1790, P1791, P1792, P1793,
+    P1794, P1795, P1796, P1797, P1798, P1799, P1800, P1801, P1802, P1803, P1804, P1805, P1806, P1807,
+    P1808, P1809, P1810, P1811, P1812, P1813, P1814, P1815, P1816, P1817, P1818, P1819, P1820, P1821,
+    P1822, P1823, P1824, P1825, P1826, P1827, P1828, P1829, P1830, P1831, P1832, P1833, P1834, P1835,
+    P1836, P1837, P1838, P1839, P1840, P1841, P1842, P1843, P1844, P1845, P1846, P1847, P1848, P1849,
+    P1850, P1851, P1852, P1853, P1854, P1855, P1856, P1857, P1858, P1859, P1860, P1861, P1862, P1863,
+    P1864, P1865, P1866, P1867, P1868, P1869, P1870, P1871, P1872, P1873, P1874, P1875, P1876, P1877,
+    P1878, P1879, P1880, P1881, P1882, P1883, P1884, P1885, P1886, P1887, P1888, P1889, P1890, P1891,
+    P1892, P1893, P1894, P1895, P1896, P1897, P1898, P1899, P1900, P1901, P1902, P1903, P1904, P1905,
+    P1906, P1907, P1908, P1909, P1910, P1911, P1912, P1913, P1914, P1915, P1916, P1917, P1918, P1919,
+    P1920, P1921, P1922, P1923, P1924, P1925, P1926, P1927, P1928, P1929, P1930, P1931, P1932, P1933,
+    P1934, P1935, P1936, P1937, P1938, P1939, P1940, P1941, P1942, P1943, P1944, P1945, P1946, P1947,
+    P1948, P1949, P1950, P1951, P1952, P1953, P1954, P1955, P1956, P1957, P1958, P1959, P1960, P1961,
+    P1962, P1963, P1964, P1965, P1966, P1967, P1968, P1969, P1970, P1971, P1972, P1973, P1974, P1975,
+    P1976, P1977, P1978, P1979, P1980, P1981, P1982, P1983, P1984, P1985, P1986, P1987, P1988, P1989,
+    P1990, P1991, P1992, P1993, P1994, P1995, P1996, P1997, P1998, P1999, P2000, P2001, P2002, P2003,
+    P2004, P2005, P2006, P2007, P2008, P2009, P2010, P2011, P2012, P2013, P2014, P2015, P2016, P2017,
+    P2018, P2019, P2020, P2021, P2022, P2023, P2024, P2025, P2026, P2027, P2028, P2029, P2030, P2031,
+    P2032, P2033, P2034, P2035, P2036, P2037, P2038, P2039, P2040, P2041, P2042, P2043, P2044, P2045,
+    P2046, P2047, P2048, P2049, P2050, P2051, P2052, P2053, P2054, P2055, P2056, P2057, P2058, P2059,
+    P2060, P2061, P2062, P2063, P2064, P2065, P2066, P2067, P2068, P2069, P2070, P2071, P2072, P2073,
+    P2074, P2075, P2076, P2077, P2078, P2079, P2080, P2081, P2082, P2083, P2084, P2085, P2086, P2087,
+    P2088, P2089, P2090, P2091, P2092, P2093, P2094, P2095, P2096, P2097, P2098, P2099, P2100, P2101,
+    P2102, P2103, P2104, P2105, P2106, P2107, P2108, P2109, P2110, P2111, P2112, P2113, P2114, P2115,
+    P2116, P2117, P2118, P2119, P2120, P2121, P2122, P2123, P2126, P2129, P2132>
   correctness_comparator:
     comparison_type: SLDP
     relation: equal
@@ -273,8 +303,8 @@ questions:
   name: Place count in room
   question_type: qa_place_count_in_room
   overlap_class: related
-  question: How many direct place children does R1 have?
-  solution: '22'
+  question: How many direct place children does R14 have?
+  solution: '237'
   correctness_comparator:
     comparison_type: SLDP
     relation: equal
@@ -286,8 +316,8 @@ questions:
   name: Objects in place
   question_type: qa_objects_in_place
   overlap_class: direct
-  question: List the objects attached directly to place P6219.
-  solution: <O17, O19>
+  question: List the objects attached directly to place P841.
+  solution: <O53>
   correctness_comparator:
     comparison_type: SLDP
     relation: equal
@@ -299,8 +329,8 @@ questions:
   name: Object classes in place
   question_type: qa_object_classes_in_place
   overlap_class: direct
-  question: Which object categories are directly contained by P21172?
-  solution: <decor, trash>
+  question: Which object categories are directly contained by P1152?
+  solution: <bed>
   correctness_comparator:
     comparison_type: SLDP
     relation: equal
@@ -312,8 +342,8 @@ questions:
   name: Object count in place
   question_type: qa_object_count_in_place
   overlap_class: direct
-  question: How many object children are assigned to P59110?
-  solution: '12'
+  question: How many object children are assigned to P808?
+  solution: '2'
   correctness_comparator:
     comparison_type: SLDP
     relation: equal
@@ -325,8 +355,8 @@ questions:
   name: Rooms containing class
   question_type: qa_rooms_containing_class
   overlap_class: direct
-  question: Which rooms contain at least one storage fixture?
-  solution: <R1, R2, R5>
+  question: Which rooms contain at least one detergent?
+  solution: <R5>
   correctness_comparator:
     comparison_type: SLDP
     relation: equal
@@ -338,7 +368,7 @@ questions:
   name: Room count containing class
   question_type: qa_room_count_containing_class
   overlap_class: related
-  question: In how many rooms does a device appear?
+  question: In how many rooms does a laundry basket appear?
   solution: '1'
   correctness_comparator:
     comparison_type: SLDP
@@ -351,8 +381,8 @@ questions:
   name: Room neighbors
   question_type: qa_room_neighbors
   overlap_class: direct
-  question: Which rooms share a direct connectivity edge with R5?
-  solution: <R3, R4>
+  question: Which rooms share a direct connectivity edge with R7?
+  solution: <R2, R3, R4, R5, R6, R15, R16>
   correctness_comparator:
     comparison_type: SLDP
     relation: equal
@@ -363,7 +393,7 @@ questions:
   name: Room degree
   question_type: qa_room_degree
   overlap_class: direct
-  question: How many distinct rooms are directly connected to R4?
+  question: How many distinct rooms are directly connected to R2?
   solution: '2'
   correctness_comparator:
     comparison_type: SLDP
@@ -377,7 +407,7 @@ questions:
   question_type: qa_most_connected_rooms
   overlap_class: direct
   question: Return every room tied for the greatest number of direct room connections.
-  solution: <R2>
+  solution: <R7>
   correctness_comparator:
     comparison_type: SLDP
     relation: equal
@@ -390,7 +420,7 @@ questions:
   question_type: qa_least_connected_rooms
   overlap_class: direct
   question: Which rooms are tied at the minimum room-connectivity degree?
-  solution: <R1>
+  solution: <R1, R3, R4, R5, R6, R9, R10, R11, R12, R13>
   correctness_comparator:
     comparison_type: SLDP
     relation: equal
@@ -402,8 +432,8 @@ questions:
   name: Room shortest path
   question_type: qa_room_shortest_path
   overlap_class: absent
-  question: Give one shortest room-by-room route from R1 to R3, including both ends.
-  solution: '[R1, R2, R3]'
+  question: Give one shortest room-by-room route from R15 to R3, including both ends.
+  solution: '[R15, R7, R3]'
   correctness_comparator:
     comparison_type: SLDP
     relation: equal
@@ -415,7 +445,7 @@ questions:
   name: Room hop distance
   question_type: qa_room_hop_distance
   overlap_class: absent
-  question: How many room edges separate R1 from R3 along a shortest route?
+  question: How many room edges separate R10 from R15 along a shortest route?
   solution: '2'
   correctness_comparator:
     comparison_type: SLDP
@@ -428,8 +458,8 @@ questions:
   name: Place neighbors
   question_type: qa_place_neighbors
   overlap_class: related
-  question: Return the immediate navigation neighbors of place P2410.
-  solution: <P754, P1568, P1833, P2441, P2541>
+  question: Return the immediate navigation neighbors of place P756.
+  solution: <P755, P762, P763>
   correctness_comparator:
     comparison_type: SLDP
     relation: equal
@@ -440,8 +470,8 @@ questions:
   name: Place degree
   question_type: qa_place_degree
   overlap_class: related
-  question: How many distinct same-layer place nodes are directly connected to P9420?
-  solution: '6'
+  question: How many distinct same-layer place nodes are directly connected to P191?
+  solution: '2'
   correctness_comparator:
     comparison_type: SLDP
     relation: equal
@@ -453,9 +483,13 @@ questions:
   name: Places within hops
   question_type: qa_places_within_hops
   overlap_class: direct
-  question: Which other places are reachable from P1833 in at most 2 place edges?
-  solution: <P754, P1350, P1396, P1568, P2410, P2441, P2541, P56525, P56710, P57510, P58431, P58432, P59110,
-    P60843, P75035, P75286>
+  question: Which other places are reachable from P304 in at most 6 place edges?
+  solution: <P234, P235, P236, P237, P238, P239, P243, P244, P245, P246, P247, P248, P252, P253, P254,
+    P255, P256, P257, P261, P262, P263, P264, P265, P266, P270, P271, P272, P273, P274, P275, P279, P280,
+    P281, P282, P283, P284, P298, P299, P300, P301, P302, P303, P305, P306, P320, P321, P322, P323, P324,
+    P325, P326, P327, P328, P335, P336, P337, P338, P339, P340, P341, P348, P349, P350, P351, P352, P353,
+    P354, P361, P362, P363, P364, P365, P366, P367, P373, P374, P375, P376, P377, P378, P384, P385, P386,
+    P387, P388, P389, P861, P862, P866, P867, P871, P872, P2133, P2134>
   correctness_comparator:
     comparison_type: SLDP
     relation: equal
@@ -467,9 +501,8 @@ questions:
   name: Place shortest path
   question_type: qa_place_shortest_path
   overlap_class: absent
-  question: Trace one minimum-hop place route from P6726 to P29521.
-  solution: '[P6726, P6397, P6219, P3095, P3167, P3166, P3105, P3107, P68067, P68306, P26753, P27669,
-    P27795, P29521]'
+  question: Trace one minimum-hop place route from P1517 to P1539.
+  solution: '[P1517, P1528, P1539]'
   correctness_comparator:
     comparison_type: SLDP
     relation: equal
@@ -481,8 +514,8 @@ questions:
   name: Objects in neighbor places
   question_type: qa_objects_in_neighbor_places
   overlap_class: related
-  question: Which objects belong to places directly adjacent to P22515?
-  solution: <O55, O58>
+  question: Which objects belong to places directly adjacent to P928?
+  solution: <O103>
   correctness_comparator:
     comparison_type: SLDP
     relation: equal
@@ -494,8 +527,8 @@ questions:
   name: Nearest object
   question_type: qa_nearest_object
   overlap_class: direct
-  question: Using center-to-center distance, which object is nearest to O282?
-  solution: <O269>
+  question: Using center-to-center distance, which object is nearest to O54?
+  solution: <O52>
   correctness_comparator:
     comparison_type: SLDP
     relation: equal
@@ -507,8 +540,8 @@ questions:
   name: Farthest object
   question_type: qa_farthest_object
   overlap_class: direct
-  question: Considering every other object, which is most distant from O55 by center-to-center distance?
-  solution: <O237>
+  question: Considering every other object, which is most distant from O61 by center-to-center distance?
+  solution: <O51>
   correctness_comparator:
     comparison_type: SLDP
     relation: equal
@@ -520,8 +553,8 @@ questions:
   name: Nearest different class object
   question_type: qa_nearest_different_class_object
   overlap_class: direct
-  question: What is the closest object to O43 that has a different semantic class?
-  solution: <O36>
+  question: What is the closest object to O91 that has a different semantic class?
+  solution: <O89>
   correctness_comparator:
     comparison_type: SLDP
     relation: equal
@@ -533,11 +566,12 @@ questions:
   name: Closest cross class pair
   question_type: qa_closest_cross_class_pair
   overlap_class: related
-  question: Which pairs consisting of a notice and a carton are tied for the smallest center distance?
-  solution: <[O59, O63]>
+  question: Which pairs consisting of a cabinet and a plant are tied for the smallest center distance?
+  solution: <[O23, O28]>
   correctness_comparator:
     comparison_type: SLDP
     relation: equal
+    unordered_pairs: true
   tags:
   - spatial
   - distance
@@ -547,7 +581,7 @@ questions:
   question_type: qa_nearest_place_to_object
   overlap_class: direct
   question: Which navigable place is closest to object O66 by center-to-center distance?
-  solution: <P22249>
+  solution: <P1460>
   correctness_comparator:
     comparison_type: SLDP
     relation: equal
@@ -559,8 +593,8 @@ questions:
   name: Nearest room to object
   question_type: qa_nearest_room_to_object
   overlap_class: direct
-  question: Which room is closest to O36 by center-to-center distance?
-  solution: <R3>
+  question: Which room is closest to O39 by center-to-center distance?
+  solution: <R5>
   correctness_comparator:
     comparison_type: SLDP
     relation: equal
@@ -573,10 +607,11 @@ questions:
   question_type: qa_closest_room_pair
   overlap_class: direct
   question: Which room pairs are tied for the smallest distance between recorded centers?
-  solution: <[R4, R5]>
+  solution: <[R1, R16]>
   correctness_comparator:
     comparison_type: SLDP
     relation: equal
+    unordered_pairs: true
   tags:
   - spatial
   - distance
@@ -585,8 +620,8 @@ questions:
   name: Highest object of class
   question_type: qa_highest_object_of_class
   overlap_class: absent
-  question: Which notice reaches the greatest center height?
-  solution: <O95>
+  question: Which toilet reaches the greatest center height?
+  solution: <O58, O63>
   correctness_comparator:
     comparison_type: SLDP
     relation: equal
@@ -598,8 +633,8 @@ questions:
   name: Lowest object of class
   question_type: qa_lowest_object_of_class
   overlap_class: absent
-  question: Which storage unit has the lowest center z-coordinate?
-  solution: <O66>
+  question: Which trash can has the lowest center z-coordinate?
+  solution: <O56>
   correctness_comparator:
     comparison_type: SLDP
     relation: equal
@@ -611,8 +646,8 @@ questions:
   name: Nearest object to room
   question_type: qa_nearest_object_to_room
   overlap_class: related
-  question: Which object is nearest to the center of R3?
-  solution: <O43>
+  question: Which object is nearest to the center of R16?
+  solution: <O47>
   correctness_comparator:
     comparison_type: SLDP
     relation: equal
@@ -624,8 +659,8 @@ questions:
   name: Farthest object from room
   question_type: qa_farthest_object_from_room
   overlap_class: related
-  question: Find the object farthest from room center R1.
-  solution: <O79>
+  question: Find the object farthest from room center R14.
+  solution: <O51>
   correctness_comparator:
     comparison_type: SLDP
     relation: equal
@@ -637,8 +672,8 @@ questions:
   name: Objects within radius
   question_type: qa_objects_within_radius
   overlap_class: direct
-  question: Which other objects have centers no more than 0.76 meters from O18?
-  solution: <O17, O19, O29, O30>
+  question: Which other objects have centers no more than 3.00 meters from O36?
+  solution: <O31, O32, O33, O34, O35, O37, O38>
   correctness_comparator:
     comparison_type: SLDP
     relation: equal

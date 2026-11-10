@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Generate deterministic QA and PDDL benchmark questions from a Spark DSG.
 
-The generator creates one grounded question for each type declared in
-``data/questions/question_types.yaml``: 50 scene-graph QA questions and 50 PDDL
+The generator creates one grounded question for each supported type declared in
+``data/questions/question_types_v2.yaml``: 50 scene-graph QA questions and 50 PDDL
 goals. Entity choices and wording are reproducible for a given random seed.
 """
 
@@ -11,14 +11,11 @@ from __future__ import annotations
 import argparse
 import hashlib
 import importlib.metadata
-import math
-import random
 import re
 import sys
 from collections import deque
 from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
-from itertools import combinations
 from pathlib import Path
 from string import Formatter
 from typing import Any
@@ -35,10 +32,20 @@ except ModuleNotFoundError:  # Report a concise, actionable error from main().
 
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_SCENE = ROOT / "data" / "scene_graphs" / "example_dsg.json"
-DEFAULT_CATALOG = ROOT / "data" / "questions" / "question_types.yaml"
+DEFAULT_SCENE = ROOT / "data" / "scene_graphs" / "spark_dsg_example.json"
+DEFAULT_CATALOG = ROOT / "data" / "questions" / "question_types_v2.yaml"
 DEFAULT_QUESTION_ROOT = ROOT / "data" / "questions"
-GENERATOR_VERSION = 4
+GENERATOR_VERSION = 9
+PAIR_QA_FAMILIES = frozenset(
+    {
+        "qa_closest_cross_class_pair",
+        "qa_closest_room_pair",
+        "qa_closest_class_pairs_in_room_class",
+        "qa_closest_pair_in_different_rooms",
+        "qa_mutual_nearest_class_pairs",
+        "qa_closest_class_pairs_per_room",
+    }
+)
 OVERLAP_CLASSES = frozenset({"direct", "related", "absent"})
 LOCAL_ID_MASK = (1 << 56) - 1
 
@@ -54,20 +61,6 @@ LABELSPACE_KEYS = {
     "object": ("_l2p0", "objects", "object_labelspace"),
     "mesh_place": ("_l3p1", "mesh", "mesh_places"),
     "room": ("room_labelspace", "_l4p0", "rooms"),
-}
-
-SYNONYMS = {
-    "trash": ("waste bin", "trash can", "rubbish bin"),
-    "storage": ("storage unit", "cabinet", "storage fixture"),
-    "seating": ("seat", "piece of seating", "seating object"),
-    "decor": ("decoration", "decorative item", "ornament"),
-    "appliance": ("appliance", "electrical appliance", "device"),
-    "light": ("light fixture", "lamp", "light"),
-    "sign": ("signage", "sign", "notice"),
-    "box": ("container", "box", "carton"),
-    "bicycle": ("bike", "bicycle", "cycle"),
-    "hallway": ("corridor", "hallway", "passage"),
-    "lounge": ("sitting room", "lounge", "common room"),
 }
 
 
@@ -171,10 +164,6 @@ def pddl_group(operator: str, clauses: Iterable[str], *, always: bool = False) -
     return f"({operator} {' '.join(materialized)})"
 
 
-def euclidean(left: Entity, right: Entity) -> float:
-    return math.dist(left.position, right.position)
-
-
 class Scene:
     """Small, version-tolerant index over the Spark DSG Python API."""
 
@@ -189,6 +178,26 @@ class Scene:
             places_3d + places_2d, key=lambda item: symbol_key(item.symbol)
         )
         self.rooms = self._read_layer("room")
+        self._index()
+
+    @classmethod
+    def from_entities(
+        cls, entities: Iterable[Entity], metadata: dict | None = None
+    ) -> Scene:
+        """Build an index from a typed scene adapter or an in-memory test graph."""
+        scene = cls.__new__(cls)
+        scene.graph = None
+        scene._metadata = metadata or {}
+        entities = list(entities)
+        scene.objects = [e for e in entities if e.kind == "object"]
+        scene.places = [e for e in entities if e.kind in {"place", "mesh_place"}]
+        scene.rooms = [e for e in entities if e.kind == "room"]
+        for values in (scene.objects, scene.places, scene.rooms):
+            values.sort(key=lambda e: symbol_key(e.symbol))
+        scene._index()
+        return scene
+
+    def _index(self) -> None:
         self.entities = {
             entity.symbol: entity for entity in self.objects + self.places + self.rooms
         }
@@ -285,26 +294,41 @@ class Scene:
         return self.entities[symbol]
 
     def rooms_for_object(self, object_symbol: str) -> list[str]:
-        obj = next(
-            (item for item in self.objects if item.symbol == object_symbol), None
-        )
-        if not obj:
+        obj = self.entities.get(object_symbol)
+        if obj is None or obj.kind != "object":
             return []
-        places = {item.symbol: item for item in self.places}
-        return sorted_symbols(
-            room_symbol
-            for place_symbol in obj.parents
-            if place_symbol in places
-            for room_symbol in places[place_symbol].parents
-        )
+        return self.rooms_for_entity(object_symbol)
+
+    def rooms_for_entity(self, symbol: str) -> list[str]:
+        obj = self.entities.get(symbol)
+        if obj is None:
+            return []
+        rooms: set[str] = set()
+        visited: set[str] = set()
+        frontier = list(obj.parents)
+        while frontier:
+            symbol = frontier.pop()
+            if symbol in visited or symbol not in self.entities:
+                continue
+            visited.add(symbol)
+            parent = self.entities[symbol]
+            if parent.kind == "room":
+                rooms.add(symbol)
+            elif parent.kind in {"place", "mesh_place"}:
+                frontier.extend(parent.parents)
+        return sorted_symbols(rooms)
 
     def adjacency(self, kind: str) -> dict[str, set[str]]:
         entities = self.rooms if kind == "room" else self.places
         valid = {entity.symbol for entity in entities}
-        return {
-            entity.symbol: set(entity.neighbors).intersection(valid)
-            for entity in entities
-        }
+        adjacency = {entity.symbol: set() for entity in entities}
+        by_id = {entity.symbol: entity for entity in entities}
+        for entity in entities:
+            for neighbor in set(entity.neighbors).intersection(valid):
+                if neighbor != entity.symbol and by_id[neighbor].kind == entity.kind:
+                    adjacency[entity.symbol].add(neighbor)
+                    adjacency[neighbor].add(entity.symbol)
+        return adjacency
 
     def unique_shortest_paths(self, kind: str, start: str) -> dict[str, list[str]]:
         """Find all destinations having a unique shortest path from ``start``."""
@@ -337,1048 +361,15 @@ class Scene:
         return paths
 
 
-class Choices:
-    def __init__(self, scene: Scene, seed: int):
-        self.scene = scene
-        self.rng = random.Random(seed)
-
-    def one(self, values: Sequence[Any], reason: str) -> Any:
-        if not values:
-            raise GenerationError(f"Scene has no candidate for {reason}")
-        return self.rng.choice(list(values))
-
-    def two(self, values: Sequence[Any], reason: str) -> tuple[Any, Any]:
-        if len(values) < 2:
-            raise GenerationError(f"Scene needs at least two candidates for {reason}")
-        first, second = self.rng.sample(list(values), 2)
-        return first, second
-
-    def class_name(self, *, multiple: bool = False) -> str:
-        classes = [
-            name
-            for name, entities in self.scene.objects_by_class.items()
-            if not multiple or len(entities) > 1
-        ]
-        return self.one(classes, "an object semantic class")
-
-    def room_class(self, *, multiple: bool = False) -> str:
-        classes = [
-            name
-            for name, entities in self.scene.rooms_by_class.items()
-            if not multiple or len(entities) > 1
-        ]
-        return self.one(classes, "a room semantic class")
-
-    def vocabulary(self, semantic_class: str) -> str:
-        return self.rng.choice(SYNONYMS.get(semantic_class.lower(), (semantic_class,)))
-
-
-def extrema(
-    reference: Entity,
-    candidates: Iterable[Entity],
-    *,
-    farthest: bool = False,
-) -> list[Entity]:
-    scored = [(euclidean(reference, candidate), candidate) for candidate in candidates]
-    if not scored:
-        raise GenerationError("A distance question has no comparison candidates")
-    target = (max if farthest else min)(score for score, _ in scored)
-    return [
-        candidate
-        for score, candidate in scored
-        if math.isclose(score, target, abs_tol=1e-9)
-    ]
-
-
-def axis_extrema(
-    candidates: Sequence[Entity], axis: int, maximum: bool
-) -> list[Entity]:
-    if not candidates:
-        raise GenerationError("An extrema question has no candidates")
-    target = (max if maximum else min)(entity.position[axis] for entity in candidates)
-    return [
-        entity
-        for entity in candidates
-        if math.isclose(entity.position[axis], target, abs_tol=1e-9)
-    ]
-
-
-def pddl_for_entities(
-    predicate: str,
-    entities: Iterable[Entity],
-    *,
-    operator: str = "or",
-    force_operator: bool = False,
-) -> str:
-    clauses = [pddl_fact(predicate, entity.symbol) for entity in entities]
-    return pddl_group(operator, clauses, always=force_operator)
-
-
-def pair_with_path(scene: Scene, kind: str) -> tuple[Entity, Entity, list[str]]:
-    entities = scene.rooms if kind == "room" else scene.places
-    candidates = []
-    for index, left in enumerate(entities):
-        paths = scene.unique_shortest_paths(kind, left.symbol)
-        for right in entities[index + 1 :]:
-            path = paths.get(right.symbol)
-            if path and len(path) > 1:
-                candidates.append((left, right, path))
-    if not candidates:
-        raise GenerationError(f"Scene has no connected pair of {kind} nodes")
-    # Favor a nontrivial graph route and use symbols for deterministic tie-breaking.
-    return max(candidates, key=lambda item: (len(item[2]), symbol_key(item[0].symbol)))
-
-
-def qa_questions(scene: Scene, choices: Choices) -> dict[str, Question]:
-    q: dict[str, Question] = {}
-    obj = choices.one(scene.objects, "an object")
-    room = choices.one(scene.rooms, "a room")
-    class_name = choices.class_name()
-    class_word = choices.vocabulary(class_name)
-    room_class = choices.room_class()
-
-    q["qa_object_class_inventory"] = Question(
-        {},
-        sldp_set(sorted(scene.objects_by_class)),
-    )
-    q["qa_object_total"] = Question(
-        {}, str(len(scene.objects))
-    )
-    q["qa_room_total"] = Question(
-        {}, str(len(scene.rooms))
-    )
-    q["qa_place_total"] = Question(
-        {},
-        str(len(scene.places)),
-    )
-    q["qa_room_class_inventory"] = Question(
-        {},
-        sldp_set(sorted(scene.rooms_by_class)),
-    )
-    q["qa_object_ids_for_class"] = Question(
-        {"class_word": class_word},
-        sldp_set(entity.symbol for entity in scene.objects_by_class[class_name]),
-    )
-    count_class = choices.class_name()
-    q["qa_object_count_for_class"] = Question(
-        {"count_class": choices.vocabulary(count_class)},
-        str(len(scene.objects_by_class[count_class])),
-    )
-    center_class = choices.class_name()
-    q["qa_object_centers_for_class"] = Question(
-        {"center_class": choices.vocabulary(center_class)},
-        sldp_set(
-            format_point(entity.position)
-            for entity in scene.objects_by_class[center_class]
-        ),
-    )
-    q["qa_object_class_lookup"] = Question(
-        {"obj": obj.symbol},
-        obj.semantic_class or "unknown",
-    )
-    center_obj = choices.one(scene.objects, "an object center lookup")
-    q["qa_object_center_lookup"] = Question(
-        {"center_obj": center_obj.symbol},
-        format_point(center_obj.position),
-    )
-    q["qa_rooms_for_class"] = Question(
-        {"room_class": choices.vocabulary(room_class)},
-        sldp_set(entity.symbol for entity in scene.rooms_by_class[room_class]),
-    )
-    q["qa_room_center_lookup"] = Question(
-        {"room": room.symbol},
-        format_point(room.position),
-    )
-
-    objects_with_place = [entity for entity in scene.objects if entity.parents]
-    child_obj = choices.one(objects_with_place, "an object with a parent place")
-    q["qa_parent_place_of_object"] = Question(
-        {"child_obj": child_obj.symbol},
-        sldp_set(sorted_symbols(child_obj.parents)),
-    )
-    objects_with_room = [
-        entity for entity in scene.objects if scene.rooms_for_object(entity.symbol)
-    ]
-    room_obj = choices.one(objects_with_room, "an object contained in a room")
-    q["qa_parent_room_of_object"] = Question(
-        {"room_obj": room_obj.symbol},
-        sldp_set(scene.rooms_for_object(room_obj.symbol)),
-    )
-    places_with_room = [entity for entity in scene.places if entity.parents]
-    room_place = choices.one(places_with_room, "a place contained in a room")
-    q["qa_parent_room_of_place"] = Question(
-        {"room_place": room_place.symbol},
-        sldp_set(sorted_symbols(room_place.parents)),
-    )
-
-    rooms_with_objects = [r for r in scene.rooms if scene.objects_by_room[r.symbol]]
-    populated_room = choices.one(rooms_with_objects, "a room containing objects")
-    populated_ids = scene.objects_by_room[populated_room.symbol]
-    q["qa_objects_in_room"] = Question(
-        {"populated_room": populated_room.symbol},
-        sldp_set(populated_ids),
-    )
-    class_room = choices.one(rooms_with_objects, "a room containing object classes")
-    classes_in_room = sorted(
-        {
-            scene.entity(symbol).semantic_class
-            for symbol in scene.objects_by_room[class_room.symbol]
-        }
-        - {None}
-    )
-    q["qa_object_classes_in_room"] = Question(
-        {"class_room": class_room.symbol},
-        sldp_set(classes_in_room),
-    )
-    count_room = choices.one(scene.rooms, "a room object count")
-    q["qa_object_count_in_room"] = Question(
-        {"count_room": count_room.symbol},
-        str(len(scene.objects_by_room[count_room.symbol])),
-    )
-    room_class_pairs = [
-        (r, class_value)
-        for r in rooms_with_objects
-        for class_value in sorted(
-            {
-                scene.entity(symbol).semantic_class
-                for symbol in scene.objects_by_room[r.symbol]
-            }
-            - {None}
-        )
-    ]
-    filtered_room, filtered_class = choices.one(room_class_pairs, "a room/class pair")
-    filtered_ids = [
-        symbol
-        for symbol in scene.objects_by_room[filtered_room.symbol]
-        if scene.entity(symbol).semantic_class == filtered_class
-    ]
-    q["qa_class_objects_in_room"] = Question(
-        {
-            "filtered_class": choices.vocabulary(filtered_class),
-            "filtered_room": filtered_room.symbol,
-        },
-        sldp_set(filtered_ids),
-    )
-    count_pair = choices.one(room_class_pairs, "a room/class count pair")
-    count_ids = [
-        symbol
-        for symbol in scene.objects_by_room[count_pair[0].symbol]
-        if scene.entity(symbol).semantic_class == count_pair[1]
-    ]
-    q["qa_class_count_in_room"] = Question(
-        {
-            "count_pair_1": choices.vocabulary(count_pair[1]),
-            "count_pair_0": count_pair[0].symbol,
-        },
-        str(len(count_ids)),
-    )
-    q["qa_places_in_room"] = Question(
-        {"room": room.symbol},
-        sldp_set(scene.places_by_room[room.symbol]),
-    )
-    place_count_room = choices.one(scene.rooms, "a room place count")
-    q["qa_place_count_in_room"] = Question(
-        {"place_count_room": place_count_room.symbol},
-        str(len(scene.places_by_room[place_count_room.symbol])),
-    )
-
-    populated_places = [p for p in scene.places if scene.objects_by_place[p.symbol]]
-    populated_place = choices.one(populated_places, "a place containing objects")
-    q["qa_objects_in_place"] = Question(
-        {"populated_place": populated_place.symbol},
-        sldp_set(scene.objects_by_place[populated_place.symbol]),
-    )
-    class_place = choices.one(populated_places, "a place containing object classes")
-    q["qa_object_classes_in_place"] = Question(
-        {"class_place": class_place.symbol},
-        sldp_set(
-            sorted(
-                {
-                    scene.entity(symbol).semantic_class
-                    for symbol in scene.objects_by_place[class_place.symbol]
-                }
-                - {None}
-            )
-        ),
-    )
-    count_place = choices.one(scene.places, "a place object count")
-    q["qa_object_count_in_place"] = Question(
-        {"count_place": count_place.symbol},
-        str(len(scene.objects_by_place[count_place.symbol])),
-    )
-    classes_in_rooms = [
-        name
-        for name in scene.objects_by_class
-        if any(
-            scene.rooms_for_object(entity.symbol)
-            for entity in scene.objects_by_class[name]
-        )
-    ]
-    containing_class = choices.one(
-        classes_in_rooms, "an object class assigned to rooms"
-    )
-    containing_rooms = sorted_symbols(
-        room_symbol
-        for entity in scene.objects_by_class[containing_class]
-        for room_symbol in scene.rooms_for_object(entity.symbol)
-    )
-    q["qa_rooms_containing_class"] = Question(
-        {"containing_class": choices.vocabulary(containing_class)},
-        sldp_set(containing_rooms),
-    )
-    room_count_class = choices.one(
-        classes_in_rooms, "an object class for room counting"
-    )
-    room_count_symbols = {
-        room_symbol
-        for entity in scene.objects_by_class[room_count_class]
-        for room_symbol in scene.rooms_for_object(entity.symbol)
-    }
-    q["qa_room_count_containing_class"] = Question(
-        {"room_count_class": choices.vocabulary(room_count_class)},
-        str(len(room_count_symbols)),
-    )
-
-    room_adjacency = scene.adjacency("room")
-    connected_rooms = [r for r in scene.rooms if room_adjacency[r.symbol]]
-    neighbor_room = choices.one(connected_rooms, "a room with a neighbor")
-    q["qa_room_neighbors"] = Question(
-        {"neighbor_room": neighbor_room.symbol},
-        sldp_set(sorted_symbols(room_adjacency[neighbor_room.symbol])),
-    )
-    degree_room = choices.one(scene.rooms, "a room degree")
-    q["qa_room_degree"] = Question(
-        {"degree_room": degree_room.symbol},
-        str(len(room_adjacency[degree_room.symbol])),
-    )
-    max_degree = max(map(len, room_adjacency.values()))
-    min_degree = min(map(len, room_adjacency.values()))
-    q["qa_most_connected_rooms"] = Question(
-        {},
-        sldp_set(
-            sorted_symbols(
-                symbol
-                for symbol, links in room_adjacency.items()
-                if len(links) == max_degree
-            )
-        ),
-    )
-    q["qa_least_connected_rooms"] = Question(
-        {},
-        sldp_set(
-            sorted_symbols(
-                symbol
-                for symbol, links in room_adjacency.items()
-                if len(links) == min_degree
-            )
-        ),
-    )
-    path_left, path_right, room_path = pair_with_path(scene, "room")
-    q["qa_room_shortest_path"] = Question(
-        {"path_left": path_left.symbol, "path_right": path_right.symbol},
-        sldp_list(room_path),
-    )
-    q["qa_room_hop_distance"] = Question(
-        {"path_left": path_left.symbol, "path_right": path_right.symbol},
-        str(len(room_path) - 1),
-    )
-
-    place_adjacency = scene.adjacency("place")
-    connected_places = [p for p in scene.places if place_adjacency[p.symbol]]
-    neighbor_place = choices.one(connected_places, "a connected place")
-    q["qa_place_neighbors"] = Question(
-        {"neighbor_place": neighbor_place.symbol},
-        sldp_set(sorted_symbols(place_adjacency[neighbor_place.symbol])),
-    )
-    degree_place = choices.one(scene.places, "a place degree")
-    q["qa_place_degree"] = Question(
-        {"degree_place": degree_place.symbol},
-        str(len(place_adjacency[degree_place.symbol])),
-    )
-    hop_place = choices.one(connected_places, "a hop-query place")
-    hop_budget = choices.one([2, 3], "a hop budget")
-    reached = {hop_place.symbol}
-    frontier = {hop_place.symbol}
-    for _ in range(hop_budget):
-        frontier = (
-            set().union(*(place_adjacency[symbol] for symbol in frontier)) - reached
-        )
-        reached.update(frontier)
-    reached.discard(hop_place.symbol)
-    q["qa_places_within_hops"] = Question(
-        {"hop_place": hop_place.symbol, "hop_budget": hop_budget},
-        sldp_set(sorted_symbols(reached)),
-    )
-    place_left, place_right, place_path = pair_with_path(scene, "place")
-    q["qa_place_shortest_path"] = Question(
-        {"place_left": place_left.symbol, "place_right": place_right.symbol},
-        sldp_list(place_path),
-    )
-    neighbor_object_places = [
-        p
-        for p in connected_places
-        if any(
-            scene.objects_by_place[neighbor] for neighbor in place_adjacency[p.symbol]
-        )
-    ]
-    object_neighbor_place = choices.one(
-        neighbor_object_places, "a place neighboring an object-bearing place"
-    )
-    neighbor_objects = sorted_symbols(
-        object_symbol
-        for neighbor in place_adjacency[object_neighbor_place.symbol]
-        for object_symbol in scene.objects_by_place[neighbor]
-    )
-    q["qa_objects_in_neighbor_places"] = Question(
-        {"object_neighbor_place": object_neighbor_place.symbol},
-        sldp_set(neighbor_objects),
-    )
-
-    reference = choices.one(scene.objects, "an object distance reference")
-    other_objects = [candidate for candidate in scene.objects if candidate != reference]
-    q["qa_nearest_object"] = Question(
-        {"reference": reference.symbol},
-        sldp_set(entity.symbol for entity in extrema(reference, other_objects)),
-    )
-    far_reference = choices.one(scene.objects, "an object far-distance reference")
-    q["qa_farthest_object"] = Question(
-        {"far_reference": far_reference.symbol},
-        sldp_set(
-            entity.symbol
-            for entity in extrema(
-                far_reference,
-                [
-                    candidate
-                    for candidate in scene.objects
-                    if candidate != far_reference
-                ],
-                farthest=True,
-            )
-        ),
-    )
-    mixed_refs = [
-        entity
-        for entity in scene.objects
-        if any(other.semantic_class != entity.semantic_class for other in scene.objects)
-    ]
-    mixed_ref = choices.one(mixed_refs, "a different-class distance reference")
-    different = [
-        entity
-        for entity in scene.objects
-        if entity.semantic_class != mixed_ref.semantic_class
-    ]
-    q["qa_nearest_different_class_object"] = Question(
-        {"mixed_ref": mixed_ref.symbol},
-        sldp_set(entity.symbol for entity in extrema(mixed_ref, different)),
-    )
-    class_a, class_b = choices.two(list(scene.objects_by_class), "two object classes")
-    cross_pairs = [
-        (euclidean(left, right), left, right)
-        for left in scene.objects_by_class[class_a]
-        for right in scene.objects_by_class[class_b]
-    ]
-    cross_distance = min(item[0] for item in cross_pairs)
-    closest_cross_pairs = [
-        sldp_list(sorted_symbols((left.symbol, right.symbol)))
-        for distance_value, left, right in cross_pairs
-        if math.isclose(distance_value, cross_distance, abs_tol=1e-9)
-    ]
-    class_a_word = choices.vocabulary(class_a)
-    class_b_word = choices.vocabulary(class_b)
-    q["qa_closest_cross_class_pair"] = Question(
-        {
-            "class_a_word_phrase": indefinite(class_a_word),
-            "class_b_word_phrase": indefinite(class_b_word),
-        },
-        sldp_set(sorted(closest_cross_pairs)),
-    )
-    place_ref = choices.one(scene.objects, "an object for nearest-place lookup")
-    q["qa_nearest_place_to_object"] = Question(
-        {"place_ref": place_ref.symbol},
-        sldp_set(entity.symbol for entity in extrema(place_ref, scene.places)),
-    )
-    room_ref = choices.one(scene.objects, "an object for nearest-room lookup")
-    q["qa_nearest_room_to_object"] = Question(
-        {"room_ref": room_ref.symbol},
-        sldp_set(entity.symbol for entity in extrema(room_ref, scene.rooms)),
-    )
-    room_pairs = [
-        (euclidean(left, right), left, right)
-        for left, right in combinations(scene.rooms, 2)
-    ]
-    if not room_pairs:
-        raise GenerationError(
-            "Scene needs two rooms for the closest-room-pair question"
-        )
-    room_pair_distance = min(value for value, _, _ in room_pairs)
-    closest_room_pairs = [
-        sldp_list(sorted_symbols((left.symbol, right.symbol)))
-        for value, left, right in room_pairs
-        if math.isclose(value, room_pair_distance, abs_tol=1e-9)
-    ]
-    q["qa_closest_room_pair"] = Question(
-        {},
-        sldp_set(sorted(closest_room_pairs)),
-    )
-    height_class = choices.class_name()
-    q["qa_highest_object_of_class"] = Question(
-        {"height_class": choices.vocabulary(height_class)},
-        sldp_set(
-            entity.symbol
-            for entity in axis_extrema(scene.objects_by_class[height_class], 2, True)
-        ),
-    )
-    low_class = choices.class_name()
-    q["qa_lowest_object_of_class"] = Question(
-        {"low_class": choices.vocabulary(low_class)},
-        sldp_set(
-            entity.symbol
-            for entity in axis_extrema(scene.objects_by_class[low_class], 2, False)
-        ),
-    )
-    near_room = choices.one(scene.rooms, "a room for nearest-object lookup")
-    q["qa_nearest_object_to_room"] = Question(
-        {"near_room": near_room.symbol},
-        sldp_set(entity.symbol for entity in extrema(near_room, scene.objects)),
-    )
-    far_room = choices.one(scene.rooms, "a room for farthest-object lookup")
-    q["qa_farthest_object_from_room"] = Question(
-        {"far_room": far_room.symbol},
-        sldp_set(
-            entity.symbol for entity in extrema(far_room, scene.objects, farthest=True)
-        ),
-    )
-    radius_ref = choices.one(scene.objects, "a radius-query object")
-    distances = sorted(
-        euclidean(radius_ref, candidate)
-        for candidate in scene.objects
-        if candidate != radius_ref
-    )
-    if not distances:
-        raise GenerationError("Scene needs two objects for the radius question")
-    rank = min(4, len(distances)) - 1
-    # Ground against the exact threshold printed in the question.  The extra
-    # centimeter keeps the selected rank inside after two-decimal rounding.
-    radius = round(distances[rank] + 0.01, 2)
-    radius_objects = sorted_symbols(
-        candidate.symbol
-        for candidate in scene.objects
-        if candidate != radius_ref and euclidean(radius_ref, candidate) <= radius
-    )
-    q["qa_objects_within_radius"] = Question(
-        {"radius": format_number(radius), "radius_ref": radius_ref.symbol},
-        sldp_set(radius_objects),
-    )
-    return q
-
-
-def pddl_questions(scene: Scene, choices: Choices) -> dict[str, Question]:
-    q: dict[str, Question] = {}
-    obj = choices.one(scene.objects, "a PDDL object")
-    obj2 = choices.one(
-        [item for item in scene.objects if item != obj], "a second PDDL object"
-    )
-    room = choices.one(scene.rooms, "a PDDL room")
-    place = choices.one(scene.places, "a PDDL place")
-
-    q["pddl_visit_object_symbol"] = Question(
-        {"obj": obj.symbol},
-        pddl_fact("visited-object", obj.symbol),
-    )
-    q["pddl_end_at_object_symbol"] = Question(
-        {"obj2": obj2.symbol}, pddl_fact("at-object", obj2.symbol)
-    )
-    inspect_obj = choices.one(scene.objects, "an inspection object")
-    q["pddl_inspect_object_symbol"] = Question(
-        {"inspect_obj": inspect_obj.symbol},
-        pddl_fact("safe", inspect_obj.symbol),
-    )
-    hold_obj = choices.one(scene.objects, "a pickup object")
-    q["pddl_hold_object_symbol"] = Question(
-        {"hold_obj": hold_obj.symbol},
-        pddl_fact("holding", hold_obj.symbol),
-    )
-    q["pddl_visit_room_symbol"] = Question(
-        {"room": room.symbol},
-        pddl_fact("visited-region", room.symbol),
-    )
-    end_room = choices.one(scene.rooms, "a final room")
-    q["pddl_end_in_room_symbol"] = Question(
-        {"end_room": end_room.symbol},
-        pddl_fact("in-region", end_room.symbol),
-    )
-    q["pddl_visit_place_symbol"] = Question(
-        {"place": place.symbol},
-        pddl_fact("visited-place", place.symbol),
-    )
-    end_place = choices.one(scene.places, "a final place")
-    q["pddl_end_at_place_symbol"] = Question(
-        {"end_place": end_place.symbol},
-        pddl_fact("at-place", end_place.symbol),
-    )
-
-    hold_class = choices.class_name(multiple=True)
-    hold_members = scene.objects_by_class[hold_class]
-    q["pddl_hold_object_class"] = Question(
-        {"hold_class": choices.vocabulary(hold_class)},
-        pddl_for_entities("holding", hold_members, force_operator=True),
-    )
-    visit_class = choices.class_name(multiple=True)
-    q["pddl_visit_object_class"] = Question(
-        {"visit_class": choices.vocabulary(visit_class)},
-        pddl_for_entities(
-            "visited-object",
-            scene.objects_by_class[visit_class],
-            force_operator=True,
-        ),
-    )
-    end_class = choices.class_name(multiple=True)
-    end_class_word = choices.vocabulary(end_class)
-    q["pddl_end_at_object_class"] = Question(
-        {"end_class_word_phrase": indefinite(end_class_word)},
-        pddl_for_entities(
-            "at-object", scene.objects_by_class[end_class], force_operator=True
-        ),
-    )
-    inspect_class = choices.class_name(multiple=True)
-    q["pddl_inspect_object_class"] = Question(
-        {"inspect_class": choices.vocabulary(inspect_class)},
-        pddl_for_entities(
-            "safe", scene.objects_by_class[inspect_class], force_operator=True
-        ),
-    )
-    visit_room_class = choices.room_class(multiple=True)
-    visit_room_word = choices.vocabulary(visit_room_class)
-    q["pddl_visit_room_class"] = Question(
-        {"visit_room_word_phrase": indefinite(visit_room_word)},
-        pddl_for_entities(
-            "visited-region",
-            scene.rooms_by_class[visit_room_class],
-            force_operator=True,
-        ),
-    )
-    end_room_class = choices.room_class(multiple=True)
-    q["pddl_end_in_room_class"] = Question(
-        {"end_room_class": choices.vocabulary(end_room_class)},
-        pddl_for_entities(
-            "in-region",
-            scene.rooms_by_class[end_room_class],
-            force_operator=True,
-        ),
-    )
-
-    objects_with_room = [
-        item for item in scene.objects if len(scene.rooms_for_object(item.symbol)) == 1
-    ]
-    hierarchy_obj = choices.one(objects_with_room, "an object in a room")
-    hierarchy_room = scene.rooms_for_object(hierarchy_obj.symbol)[0]
-    q["pddl_visit_room_containing_object"] = Question(
-        {"hierarchy_obj": hierarchy_obj.symbol},
-        pddl_fact("visited-region", hierarchy_room),
-    )
-    hierarchy_end_obj = choices.one(objects_with_room, "another object in a room")
-    q["pddl_end_in_room_containing_object"] = Question(
-        {"hierarchy_end_obj": hierarchy_end_obj.symbol},
-        pddl_fact("in-region", scene.rooms_for_object(hierarchy_end_obj.symbol)[0]),
-    )
-    objects_with_place = [
-        item
-        for item in scene.objects
-        if len(item.parents) == 1 and item.parent in scene.entities
-    ]
-    parent_obj = choices.one(objects_with_place, "an object with a place")
-    q["pddl_visit_parent_place"] = Question(
-        {"parent_obj": parent_obj.symbol},
-        pddl_fact("visited-place", parent_obj.parent or ""),
-    )
-    parent_end_obj = choices.one(objects_with_place, "an object with a final place")
-    q["pddl_end_at_parent_place"] = Question(
-        {"parent_end_obj": parent_end_obj.symbol},
-        pddl_fact("at-place", parent_end_obj.parent or ""),
-    )
-
-    near_ref = choices.one(scene.objects, "a nearest-object reference")
-    near_targets = extrema(
-        near_ref, [item for item in scene.objects if item != near_ref]
-    )
-    q["pddl_visit_nearest_object"] = Question(
-        {"near_ref": near_ref.symbol},
-        pddl_for_entities("visited-object", near_targets),
-    )
-    inspect_ref = choices.one(scene.objects, "a nearest inspection reference")
-    inspect_targets = extrema(
-        inspect_ref, [item for item in scene.objects if item != inspect_ref]
-    )
-    q["pddl_inspect_nearest_object"] = Question(
-        {"inspect_ref": inspect_ref.symbol},
-        pddl_for_entities("safe", inspect_targets),
-    )
-    nearest_class = choices.class_name(multiple=True)
-    nearest_class_ref = choices.one(
-        [item for item in scene.objects if item.semantic_class != nearest_class],
-        "a reference outside a target class",
-    )
-    nearest_class_targets = extrema(
-        nearest_class_ref, scene.objects_by_class[nearest_class]
-    )
-    q["pddl_hold_nearest_class_object"] = Question(
-        {
-            "nearest_class": choices.vocabulary(nearest_class),
-            "nearest_class_ref": nearest_class_ref.symbol,
-        },
-        pddl_for_entities("holding", nearest_class_targets),
-    )
-    far_ref = choices.one(scene.objects, "a farthest-object reference")
-    far_targets = extrema(
-        far_ref, [item for item in scene.objects if item != far_ref], farthest=True
-    )
-    q["pddl_visit_farthest_object"] = Question(
-        {"far_ref": far_ref.symbol},
-        pddl_for_entities("visited-object", far_targets),
-    )
-    far_end_ref = choices.one(scene.objects, "a farthest final reference")
-    far_end_targets = extrema(
-        far_end_ref,
-        [item for item in scene.objects if item != far_end_ref],
-        farthest=True,
-    )
-    q["pddl_end_at_farthest_object"] = Question(
-        {"far_end_ref": far_end_ref.symbol},
-        pddl_for_entities("at-object", far_end_targets),
-    )
-    high_class = choices.class_name()
-    q["pddl_inspect_highest_class_object"] = Question(
-        {"high_class": choices.vocabulary(high_class)},
-        pddl_for_entities(
-            "safe", axis_extrema(scene.objects_by_class[high_class], 2, True)
-        ),
-    )
-    low_class = choices.class_name()
-    q["pddl_visit_lowest_class_object"] = Question(
-        {"low_class": choices.vocabulary(low_class)},
-        pddl_for_entities(
-            "visited-object", axis_extrema(scene.objects_by_class[low_class], 2, False)
-        ),
-    )
-    nearest_room_ref = choices.one(scene.objects, "a nearest-room reference")
-    nearest_rooms = extrema(nearest_room_ref, scene.rooms)
-    q["pddl_visit_nearest_room"] = Question(
-        {"nearest_room_ref": nearest_room_ref.symbol},
-        pddl_for_entities("visited-region", nearest_rooms),
-    )
-    nearest_end_ref = choices.one(scene.objects, "a nearest final-room reference")
-    q["pddl_end_in_nearest_room"] = Question(
-        {"nearest_end_ref": nearest_end_ref.symbol},
-        pddl_for_entities("in-region", extrema(nearest_end_ref, scene.rooms)),
-    )
-
-    room_adjacency = scene.adjacency("room")
-    max_degree = max(map(len, room_adjacency.values()))
-    min_degree = min(map(len, room_adjacency.values()))
-    q["pddl_visit_most_connected_room"] = Question(
-        {},
-        pddl_group(
-            "or",
-            [
-                pddl_fact("visited-region", symbol)
-                for symbol, links in room_adjacency.items()
-                if len(links) == max_degree
-            ],
-        ),
-    )
-    q["pddl_end_in_least_connected_room"] = Question(
-        {},
-        pddl_group(
-            "or",
-            [
-                pddl_fact("in-region", symbol)
-                for symbol, links in room_adjacency.items()
-                if len(links) == min_degree
-            ],
-        ),
-    )
-    rooms_with_neighbors = [item for item in scene.rooms if room_adjacency[item.symbol]]
-    adjacent_ref = choices.one(rooms_with_neighbors, "a room with adjacent rooms")
-    q["pddl_visit_adjacent_rooms"] = Question(
-        {"adjacent_ref": adjacent_ref.symbol},
-        pddl_group(
-            "and",
-            [
-                pddl_fact("visited-region", symbol)
-                for symbol in sorted_symbols(room_adjacency[adjacent_ref.symbol])
-            ],
-            always=True,
-        ),
-    )
-
-    either_a, either_b = choices.two(scene.objects, "an object disjunction")
-    q["pddl_visit_either_object"] = Question(
-        {"either_a": either_a.symbol, "either_b": either_b.symbol},
-        pddl_group(
-            "or",
-            [
-                pddl_fact("visited-object", either_a.symbol),
-                pddl_fact("visited-object", either_b.symbol),
-            ],
-        ),
-    )
-    cross_obj = choices.one(scene.objects, "a cross-layer object")
-    cross_room = choices.one(scene.rooms, "a cross-layer room")
-    q["pddl_visit_object_or_room"] = Question(
-        {"cross_obj": cross_obj.symbol, "cross_room": cross_room.symbol},
-        pddl_group(
-            "or",
-            [
-                pddl_fact("visited-object", cross_obj.symbol),
-                pddl_fact("visited-region", cross_room.symbol),
-            ],
-        ),
-    )
-    both_obj = choices.one(scene.objects, "a conjunctive object")
-    both_room = choices.one(scene.rooms, "a conjunctive room")
-    q["pddl_visit_object_and_room"] = Question(
-        {"both_obj": both_obj.symbol, "both_room": both_room.symbol},
-        pddl_group(
-            "and",
-            [
-                pddl_fact("visited-object", both_obj.symbol),
-                pddl_fact("visited-region", both_room.symbol),
-            ],
-        ),
-    )
-    inspect_hold = choices.one(scene.objects, "an inspect-and-hold object")
-    q["pddl_inspect_and_hold_object"] = Question(
-        {"inspect_hold": inspect_hold.symbol},
-        pddl_group(
-            "and",
-            [
-                pddl_fact("safe", inspect_hold.symbol),
-                pddl_fact("holding", inspect_hold.symbol),
-            ],
-        ),
-    )
-
-    order_a, order_b = choices.two(scene.objects, "an ordered object pair")
-    q["pddl_visit_then_end_at_object"] = Question(
-        {"order_a": order_a.symbol, "order_b": order_b.symbol},
-        pddl_group(
-            "and",
-            [
-                pddl_fact("visited-object", order_a.symbol),
-                pddl_fact("at-object", order_b.symbol),
-            ],
-        ),
-    )
-    order_room = choices.one(scene.rooms, "an ordered first room")
-    order_object = choices.one(scene.objects, "an ordered final object")
-    q["pddl_visit_room_then_end_at_object"] = Question(
-        {"order_room": order_room.symbol, "order_object": order_object.symbol},
-        pddl_group(
-            "and",
-            [
-                pddl_fact("visited-region", order_room.symbol),
-                pddl_fact("at-object", order_object.symbol),
-            ],
-        ),
-    )
-    first_object = choices.one(scene.objects, "an ordered first object")
-    final_room = choices.one(scene.rooms, "an ordered final room")
-    q["pddl_visit_object_then_end_in_room"] = Question(
-        {"first_object": first_object.symbol, "final_room": final_room.symbol},
-        pddl_group(
-            "and",
-            [
-                pddl_fact("visited-object", first_object.symbol),
-                pddl_fact("in-region", final_room.symbol),
-            ],
-        ),
-    )
-    first_place = choices.one(scene.places, "an ordered first place")
-    place_final_room = choices.one(scene.rooms, "a place-to-room final room")
-    q["pddl_visit_place_then_end_in_room"] = Question(
-        {"first_place": first_place.symbol, "place_final_room": place_final_room.symbol},
-        pddl_group(
-            "and",
-            [
-                pddl_fact("visited-place", first_place.symbol),
-                pddl_fact("in-region", place_final_room.symbol),
-            ],
-        ),
-    )
-    first_room = choices.one(scene.rooms, "a room-to-place first room")
-    final_place = choices.one(scene.places, "a room-to-place final place")
-    q["pddl_visit_room_then_end_at_place"] = Question(
-        {"first_room": first_room.symbol, "final_place": final_place.symbol},
-        pddl_group(
-            "and",
-            [
-                pddl_fact("visited-region", first_room.symbol),
-                pddl_fact("at-place", final_place.symbol),
-            ],
-        ),
-    )
-    place_a, place_b = choices.two(scene.places, "an ordered place pair")
-    q["pddl_visit_then_end_at_place"] = Question(
-        {"place_a": place_a.symbol, "place_b": place_b.symbol},
-        pddl_group(
-            "and",
-            [
-                pddl_fact("visited-place", place_a.symbol),
-                pddl_fact("at-place", place_b.symbol),
-            ],
-        ),
-    )
-    inspect_order_obj = choices.one(scene.objects, "an inspection/order object")
-    inspect_order_place = choices.one(scene.places, "an inspection/order place")
-    q["pddl_inspect_then_end_at_place"] = Question(
-        {
-            "inspect_order_obj": inspect_order_obj.symbol,
-            "inspect_order_place": inspect_order_place.symbol,
-        },
-        pddl_group(
-            "and",
-            [
-                pddl_fact("safe", inspect_order_obj.symbol),
-                pddl_fact("at-place", inspect_order_place.symbol),
-            ],
-        ),
-    )
-    carry_obj = choices.one(scene.objects, "a carried object")
-    carry_room = choices.one(scene.rooms, "a carrying destination room")
-    q["pddl_hold_then_end_in_room"] = Question(
-        {"carry_obj": carry_obj.symbol, "carry_room": carry_room.symbol},
-        pddl_group(
-            "and",
-            [
-                pddl_fact("holding", carry_obj.symbol),
-                pddl_fact("in-region", carry_room.symbol),
-            ],
-        ),
-    )
-
-    move_obj = choices.one(objects_with_place, "an object to relocate")
-    move_place = choices.one(
-        [item for item in scene.places if item.symbol != move_obj.parent],
-        "a relocation destination",
-    )
-    q["pddl_move_object_to_place"] = Question(
-        {"move_obj": move_obj.symbol, "move_place": move_place.symbol},
-        pddl_fact("object-in-place", move_obj.symbol, move_place.symbol),
-    )
-    move_class = choices.class_name(multiple=True)
-    move_class_place = choices.one(scene.places, "a class relocation destination")
-    q["pddl_move_class_object_to_place"] = Question(
-        {
-            "move_class": choices.vocabulary(move_class),
-            "move_class_place": move_class_place.symbol,
-        },
-        pddl_group(
-            "or",
-            [
-                pddl_fact("object-in-place", member.symbol, move_class_place.symbol)
-                for member in scene.objects_by_class[move_class]
-            ],
-            always=True,
-        ),
-    )
-    place_adjacency = scene.adjacency("place")
-    move_neighbor_candidates = [
-        item
-        for item in objects_with_place
-        if place_adjacency.get(item.parent or "", set())
-    ]
-    neighbor_move_obj = choices.one(
-        move_neighbor_candidates, "an object whose place has a neighbor"
-    )
-    neighbor_destination = choices.one(
-        sorted_symbols(place_adjacency[neighbor_move_obj.parent or ""]),
-        "a neighboring destination place",
-    )
-    q["pddl_move_object_to_neighbor_place"] = Question(
-        {
-            "neighbor_move_obj": neighbor_move_obj.symbol,
-            "neighbor_destination": neighbor_destination,
-        },
-        pddl_fact(
-            "object-in-place",
-            neighbor_move_obj.symbol,
-            neighbor_destination,
-        ),
-    )
-
-    avoid_obj = choices.one(scene.objects, "an object not to hold")
-    q["pddl_do_not_hold_object"] = Question(
-        {"avoid_obj": avoid_obj.symbol},
-        f"(not {pddl_fact('holding', avoid_obj.symbol)})",
-    )
-    visit_free_obj = choices.one(scene.objects, "an object to visit without carrying")
-    q["pddl_visit_without_holding"] = Question(
-        {"visit_free_obj": visit_free_obj.symbol},
-        pddl_group(
-            "and",
-            [
-                pddl_fact("visited-object", visit_free_obj.symbol),
-                f"(not {pddl_fact('holding', visit_free_obj.symbol)})",
-            ],
-        ),
-    )
-    target_room = choices.one(rooms_with_neighbors, "a room with an avoidable neighbor")
-    avoided_room = choices.one(
-        sorted_symbols(room_adjacency[target_room.symbol]), "an adjacent room to avoid"
-    )
-    q["pddl_visit_room_avoid_neighbor"] = Question(
-        {"target_room": target_room.symbol, "avoided_room": avoided_room},
-        pddl_group(
-            "and",
-            [
-                pddl_fact("visited-region", target_room.symbol),
-                f"(not {pddl_fact('visited-region', avoided_room)})",
-            ],
-        ),
-    )
-    alternative_class = choices.class_name(multiple=True)
-    alternative_obj = choices.one(scene.objects, "an alternative inspection object")
-    holding_alternatives = pddl_for_entities(
-        "holding",
-        scene.objects_by_class[alternative_class],
-        force_operator=True,
-    )
-    q["pddl_hold_class_or_inspect_object"] = Question(
-        {
-            "alternative_class_phrase": indefinite(choices.vocabulary(alternative_class)),
-            "alternative_obj": alternative_obj.symbol,
-        },
-        pddl_group(
-            "or", [holding_alternatives, pddl_fact("safe", alternative_obj.symbol)]
-        ),
-    )
-    combined_class = choices.class_name(multiple=True)
-    combined_room = choices.one(scene.rooms, "a final room for a class visit")
-    q["pddl_visit_class_and_end_in_room"] = Question(
-        {
-            "combined_class_phrase": indefinite(choices.vocabulary(combined_class)),
-            "combined_room": combined_room.symbol,
-        },
-        pddl_group(
-            "and",
-            [
-                pddl_for_entities(
-                    "visited-object",
-                    scene.objects_by_class[combined_class],
-                    force_operator=True,
-                ),
-                pddl_fact("in-region", combined_room.symbol),
-            ],
-        ),
-    )
-    return q
-
-
 def load_catalog(path: Path) -> dict[str, list[dict[str, Any]]]:
+    from scripts.question_sampling import CAPABILITIES, PARAMETER_TYPES
+
     with path.open("r", encoding="utf-8") as stream:
         catalog = yaml.safe_load(stream)
     if not isinstance(catalog, dict):
         raise GenerationError("Question type catalog must be a YAML mapping")
+    if set(catalog) != {"qa", "pddl"}:
+        raise GenerationError("Catalog must contain only qa and pddl lists")
     for family in ("qa", "pddl"):
         entries = catalog.get(family)
         if not isinstance(entries, list) or len(entries) != 50:
@@ -1386,7 +377,9 @@ def load_catalog(path: Path) -> dict[str, list[dict[str, Any]]]:
                 f"Catalog section `{family}` must contain exactly 50 entries"
             )
         if any(not isinstance(entry, dict) for entry in entries):
-            raise GenerationError(f"Catalog section `{family}` entries must be mappings")
+            raise GenerationError(
+                f"Catalog section `{family}` entries must be mappings"
+            )
         ids = [entry.get("id") for entry in entries]
         if any(
             not isinstance(identifier, str) or not identifier.startswith(f"{family}_")
@@ -1398,6 +391,19 @@ def load_catalog(path: Path) -> dict[str, list[dict[str, Any]]]:
         if len(ids) != len(set(ids)):
             raise GenerationError(f"Catalog section `{family}` contains duplicate IDs")
         for entry in entries:
+            expected_fields = {
+                "id",
+                "description",
+                "question_template",
+                "overlap_class",
+                "tags",
+                "parameters",
+                "requires",
+            }
+            if set(entry) != expected_fields:
+                raise GenerationError(
+                    f"{entry['id']}: expected fields {sorted(expected_fields)}"
+                )
             template = entry.get("question_template")
             if not isinstance(template, str) or not template.strip():
                 raise GenerationError(
@@ -1422,6 +428,41 @@ def load_catalog(path: Path) -> dict[str, list[dict[str, Any]]]:
                     raise GenerationError(
                         f"{entry['id']}: use simple named placeholders such as {{object}}"
                     )
+            parameters = entry.get("parameters")
+            names = {field for _, field, _, _ in fields if field is not None}
+            if not isinstance(parameters, dict) or set(parameters) != names:
+                raise GenerationError(
+                    f"{entry['id']}: parameters must declare exactly {sorted(names)}"
+                )
+            if any(
+                not isinstance(value, str) or value not in PARAMETER_TYPES
+                for value in parameters.values()
+            ):
+                raise GenerationError(f"{entry['id']}: unknown parameter type")
+            if (
+                "object_class_counted" in parameters.values()
+                and parameters.get("required_count") != "positive_integer"
+            ):
+                raise GenerationError(
+                    f"{entry['id']}: counted nouns require a positive_integer required_count"
+                )
+            requires = entry.get("requires")
+            if not isinstance(requires, list) or any(
+                not isinstance(value, str) or value not in CAPABILITIES
+                for value in requires
+            ):
+                raise GenerationError(
+                    f"{entry['id']}: requires must list known capabilities"
+                )
+            if (
+                not isinstance(entry.get("description"), str)
+                or not entry["description"].strip()
+                or not isinstance(entry.get("tags"), list)
+                or any(not isinstance(tag, str) for tag in entry["tags"])
+            ):
+                raise GenerationError(
+                    f"{entry['id']}: description and tags are required"
+                )
     return catalog
 
 
@@ -1429,9 +470,11 @@ def materialize(
     family: str,
     catalog: list[dict[str, Any]],
     built: dict[str, Question],
+    *,
+    allow_partial: bool = False,
 ) -> list[dict[str, Any]]:
     catalog_ids = {entry["id"] for entry in catalog}
-    if catalog_ids != set(built):
+    if set(built) - catalog_ids or (not allow_partial and catalog_ids != set(built)):
         missing = sorted(catalog_ids - set(built))
         extra = sorted(set(built) - catalog_ids)
         raise GenerationError(
@@ -1441,6 +484,8 @@ def materialize(
     prefix = "QA" if family == "qa" else "PDDL"
     records = []
     for index, entry in enumerate(catalog, 1):
+        if entry["id"] not in built:
+            continue
         item = built[entry["id"]]
         try:
             question_text = entry["question_template"].format_map(item.parameters)
@@ -1451,8 +496,10 @@ def materialize(
         records.append(
             {
                 "uid": f"{prefix}{index:03d}",
-                "name": entry["id"].removeprefix(f"{family}_")
-                .replace("_", " ").capitalize(),
+                "name": entry["id"]
+                .removeprefix(f"{family}_")
+                .replace("_", " ")
+                .capitalize(),
                 "question_type": entry["id"],
                 "overlap_class": entry["overlap_class"],
                 "question": question_text,
@@ -1460,6 +507,11 @@ def materialize(
                 "correctness_comparator": {
                     "comparison_type": comparator,
                     "relation": "equal",
+                    **(
+                        {"unordered_pairs": True}
+                        if entry["id"] in PAIR_QA_FAMILIES
+                        else {}
+                    ),
                 },
                 "tags": list(entry.get("tags", [])),
             }
@@ -1476,7 +528,8 @@ def question_pattern(value: str) -> re.Pattern[str]:
     parts = re.split(r"(\{[A-Za-z_][A-Za-z0-9_.]*\})", normalize_question(value))
     return re.compile(
         "".join(
-            r".+?" if re.fullmatch(r"\{[A-Za-z_][A-Za-z0-9_.]*\}", part)
+            r".+?"
+            if re.fullmatch(r"\{[A-Za-z_][A-Za-z0-9_.]*\}", part)
             else re.escape(part)
             for part in parts
         )
@@ -1512,7 +565,12 @@ def questions_from_files(paths: Iterable[Path]) -> dict[str, Path]:
     def extract(value: Any) -> Iterable[str]:
         if isinstance(value, dict):
             for key, child in value.items():
-                if key in {"question", "questions", "question_variants", "question_template"}:
+                if key in {
+                    "question",
+                    "questions",
+                    "question_variants",
+                    "question_template",
+                }:
                     if isinstance(child, str):
                         yield child
                     elif isinstance(child, list):
@@ -1546,18 +604,18 @@ def validate_questions(
     if catalog is not None:
         candidates.extend(
             entry["question_template"]
-            for family in ("qa", "pddl") for entry in catalog[family]
+            for family in ("qa", "pddl")
+            for entry in catalog[family]
         )
     collisions = [
         question
         for question in candidates
-        if any(
-            pattern.fullmatch(normalize_question(question)) for pattern in patterns
-        )
+        if any(pattern.fullmatch(normalize_question(question)) for pattern in patterns)
     ]
     if collisions:
         raise GenerationError(
-            "Generated questions match denylisted wording or templates: " + repr(collisions)
+            "Generated questions match denylisted wording or templates: "
+            + repr(collisions)
         )
 
 
@@ -1612,7 +670,7 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         default=None,
         help=(
             "Directory for question files and metadata. Defaults to "
-            "data/questions/<scene-id>."
+            "data/questions/<catalog-version>/<scene-id>."
         ),
     )
     parser.add_argument(
@@ -1640,6 +698,29 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         "--list-types",
         action="store_true",
         help="Print the catalog IDs without loading a scene graph",
+    )
+    parser.add_argument(
+        "--pool-size",
+        type=int,
+        default=48,
+        help="Eligible candidates retained per family for diversity selection",
+    )
+    parser.add_argument(
+        "--max-attempts",
+        type=int,
+        default=30000,
+        help="Maximum evaluated assignments per family; exhaustion is reported",
+    )
+    parser.add_argument(
+        "--strict",
+        action="store_true",
+        help="Fail without writing a dataset unless all 100 families are supported",
+    )
+    parser.add_argument(
+        "--smoke-size",
+        type=int,
+        default=3,
+        help="Also write this many supported questions per task as a smoke suite; 0 disables",
     )
     return parser.parse_args(argv)
 
@@ -1671,19 +752,27 @@ def main(argv: Sequence[str] | None = None) -> int:
         if not args.catalog.is_file():
             raise GenerationError(f"Question catalog does not exist: {args.catalog}")
         scene = Scene.load(args.scene_graph)
-        if not scene.objects or not scene.places or not scene.rooms:
-            raise GenerationError(
-                "Scene must contain Objects, Rooms, and at least one 2D or 3D Places layer"
-            )
+        from scripts.question_sampling import Sampler
 
-        qa = materialize(
-            "qa", catalog["qa"], qa_questions(scene, Choices(scene, args.seed))
-        )
-        pddl = materialize(
-            "pddl",
-            catalog["pddl"],
-            pddl_questions(scene, Choices(scene, args.seed + 1)),
-        )
+        if args.smoke_size < 0:
+            raise GenerationError("smoke-size must be nonnegative")
+        sampler = Sampler(scene, args.seed, args.pool_size, args.max_attempts)
+        built = sampler.select(catalog)
+        unavailable = {
+            key: value
+            for key, value in sampler.report["families"].items()
+            if value["status"] != "generated"
+        }
+        if args.strict and unavailable:
+            raise GenerationError(
+                "Unsupported families in strict mode: " + ", ".join(unavailable)
+            )
+        qa = materialize("qa", catalog["qa"], built["qa"], allow_partial=True)
+        pddl = materialize("pddl", catalog["pddl"], built["pddl"], allow_partial=True)
+        if not qa or not pddl:
+            raise GenerationError(
+                "Scene produced no eligible questions for one or both tasks"
+            )
 
         default_examples = [
             ROOT
@@ -1705,10 +794,12 @@ def main(argv: Sequence[str] | None = None) -> int:
             ROOT.parent / "3dsg-cypher-agent" / "configs" / "question_templates"
         )
         avoid_paths.extend(
-            path for path in (
+            path
+            for path in (
                 training_templates / "cypher_qa_3dsg.yaml",
                 training_templates / "cypher_pddl_3dsg.yaml",
-            ) if path.is_file()
+            )
+            if path.is_file()
         )
         avoid_paths = list(dict.fromkeys(avoid_paths))
         validate_questions(qa, pddl, avoid_paths, catalog)
@@ -1724,7 +815,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             raise GenerationError(
                 "Scene ID may contain only letters, digits, '.', '_', and '-'"
             )
-        output_dir = args.output_dir or DEFAULT_QUESTION_ROOT / scene_id
+        catalog_name = args.catalog.stem.removeprefix("question_types_")
+        output_dir = args.output_dir or DEFAULT_QUESTION_ROOT / catalog_name / scene_id
         if output_dir.name != scene_id:
             raise GenerationError(
                 "The output directory name must match the scene ID so question "
@@ -1747,13 +839,19 @@ def main(argv: Sequence[str] | None = None) -> int:
                 "path": display_path(Path(__file__)),
                 "version": GENERATOR_VERSION,
                 "sha256": file_sha256(Path(__file__)),
+                "sampler_path": display_path(
+                    Path(__file__).with_name("question_sampling.py")
+                ),
+                "sampler_sha256": file_sha256(
+                    Path(__file__).with_name("question_sampling.py")
+                ),
                 "spark_dsg_version": package_version("spark-dsg"),
                 "pyyaml_version": package_version("PyYAML"),
             },
             "parameters": {
                 "seed": args.seed,
                 "qa_seed": args.seed,
-                "pddl_seed": args.seed + 1,
+                "pddl_seed": args.seed,
                 "qa_question_count": len(qa),
                 "pddl_question_count": len(pddl),
                 "avoid_question_files": [
@@ -1763,6 +861,15 @@ def main(argv: Sequence[str] | None = None) -> int:
                     }
                     for path in avoid_paths
                 ],
+            },
+            "sampling": sampler.report,
+            "coverage": {
+                family: {
+                    "requested": len(catalog[family]),
+                    "generated": len(built[family]),
+                    "unavailable": len(catalog[family]) - len(built[family]),
+                }
+                for family in ("qa", "pddl")
             },
         }
 
@@ -1791,6 +898,44 @@ def main(argv: Sequence[str] | None = None) -> int:
         print(f"Wrote {len(qa)} QA questions to {qa_path}")
         print(f"Wrote {len(pddl)} PDDL questions to {pddl_path}")
         print(f"Wrote reproduction metadata to {metadata_path}")
+        if args.smoke_size:
+            smoke_qa, smoke_pddl = qa[: args.smoke_size], pddl[: args.smoke_size]
+            smoke_qa_path, smoke_pddl_path = (
+                output_dir / "qa_questions.smoke.yaml",
+                output_dir / "pddl_questions.smoke.yaml",
+            )
+            write_yaml(smoke_qa_path, smoke_qa)
+            write_yaml(smoke_pddl_path, smoke_pddl)
+            write_metadata(
+                output_dir / "metadata.smoke.yaml",
+                {
+                    **shared_metadata,
+                    "parameters": {
+                        **shared_metadata["parameters"],
+                        "qa_question_count": len(smoke_qa),
+                        "pddl_question_count": len(smoke_pddl),
+                    },
+                    "coverage": {
+                        family: {
+                            **shared_metadata["coverage"][family],
+                            "selected_for_smoke": len(records),
+                        }
+                        for family, records in (("qa", smoke_qa), ("pddl", smoke_pddl))
+                    },
+                    "artifacts": {
+                        family: {
+                            "path": display_path(path),
+                            "sha256": file_sha256(path),
+                        }
+                        for family, path in (
+                            ("qa", smoke_qa_path),
+                            ("pddl", smoke_pddl_path),
+                        )
+                    },
+                },
+            )
+        for identifier, details in unavailable.items():
+            print(f"{details['status']}: {identifier}: {details['reason']}")
         return 0
     except (GenerationError, OSError, ValueError, yaml.YAMLError) as error:
         print(f"error: {error}", file=sys.stderr)
@@ -1798,4 +943,6 @@ def main(argv: Sequence[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
+    sys.path.insert(0, str(ROOT))
+    sys.modules.setdefault("scripts.generate_questions", sys.modules[__name__])
     raise SystemExit(main())
