@@ -32,7 +32,7 @@ COPY external/heracles_agents /home/benchmark/workspace/heracles_agents
 COPY configs /home/benchmark/workspace/benchmark/configs
 COPY data /home/benchmark/workspace/benchmark/data
 COPY requirements.txt /home/benchmark/workspace/benchmark/requirements.txt
-COPY scripts/benchmark_manifest.py scripts/benchmark_console.py \
+COPY scripts/benchmark_manifest.py scripts/benchmark_console.py scripts/load_scene_graph.py \
      /home/benchmark/workspace/benchmark/scripts/
 
 RUN pip install --no-cache-dir "${WORKSPACE_DIR}/heracles_agents[all]" \

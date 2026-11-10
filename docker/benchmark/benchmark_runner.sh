@@ -109,7 +109,7 @@ if ! python "${CONSOLE_TOOL}" run \
   --kind scene \
   --log-file "${RUN_LOG}" \
   -- \
-  python "${WORKSPACE_DIR}/heracles/examples/load_scene_graph.py" \
+  python "${BENCHMARK_ROOT}/scripts/load_scene_graph.py" \
     --scene_graph "${SCENE_GRAPH}"; then
 
   record_failure \
